@@ -3,7 +3,7 @@
 RPG anime de cartas coleccionables en desarrollo, pensado primero como Telegram Mini App.
 
 ## Fuente de verdad
-Lee [CEREBRO_Y_OBRERO.md](./CEREBRO_Y_OBRERO.md) antes de modificar lore o reglas. Arquitectura: [docs/ARQUITECTURA.md](./docs/ARQUITECTURA.md). Plan: [ROADMAP.md](./ROADMAP.md).
+Lee [CEREBRO_Y_OBRERO.md](./CEREBRO_Y_OBRERO.md) antes de modificar lore o reglas. Arquitectura: [docs/ARQUITECTURA.md](./docs/ARQUITECTURA.md). Plan: [ROADMAP.md](./ROADMAP.md). Referencias: [docs/REFERENCIAS.md](./docs/REFERENCIAS.md).
 
 ## Estado
 MVP en construcción. Este repo contiene diseño y un esqueleto inicial; aún no significa que esté publicado ni integrado con Telegram.
