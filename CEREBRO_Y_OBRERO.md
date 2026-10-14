@@ -2,6 +2,9 @@
 
 Documento maestro de continuidad. Contiene la visión, lore, sistemas, reglas y decisiones pendientes del juego. La versión completa se irá consolidando aquí.
 
+## Regla visual absoluta: todo es waifu excepto las armas
+**El 100% de lo que aparezca en el juego será una waifu, sin excepciones, excepto las armas.** Esto incluye heroínas, personajes históricos o mitológicos, mobs, monstruos, jefes, criaturas contaminadas, apoyos, equipamiento y Corazones Heroicos cuando representen personajes. No diseñar monstruos comunes como criaturas masculinas, bestias genéricas o enemigos sin identidad de waifu: reinterpretarlos como personajes femeninos/waifus con diseños variados que encajen con su especie, función y lore. Los jefes también siguen esta regla. Las armas son la única categoría que puede ser un objeto sin ser waifu. En los prompts de imagen, describir explícitamente el diseño femenino/waifu y los rasgos visibles; evitar prompts genéricos como "1 monster" sin definir una waifu. La regla afecta al diseño visual, no obliga a que cada carta sea una humana corriente: pueden ser waifus monstruosas, demoníacas, bestiales, espectrales o mitológicas.
+
 ## Visión
 RPG anime de cartas coleccionables, primero como Telegram Mini App, con exploración por capítulos, invocación, combate por turnos, progresión y eventos comunitarios. Inspiraciones de género: Fate/Grand Order, DanMachi, Honkai: Star Rail y WIXOSS; personajes, mundo, textos y arte deben ser originales.
 
@@ -20,13 +23,13 @@ Combate por turnos: duelos 1v1, heroína contra varios enemigos o equipo contra 
 Alma pertenece al jugador; Ánima se gana jugando y durante combate. Valores tentativos, no definitivos: Alma máxima 100, regeneración +4/h, recarga diaria +20, evolución 25, cacería 10, curación 10. A 0 Alma se pueden esperar encuentros gratuitos, pero no iniciar cacerías con coste ni evolucionar. La historia principal nunca se bloquea por falta de Alma. Separar Ánima común y premium.
 
 ## Dark y redención
-Algunas heroínas se descarriaron o no llegaron a sus descendientes y contaminaron el suelo; cazan personas y héroes para obtener Alma o Ánima. No son malvadas por naturaleza: tienen motivaciones e historias y pueden redimirse/reclutarse. Monstruos y perros contaminados son enemigos comunes.
+Algunas heroínas se descarriaron o no llegaron a sus descendientes y contaminaron el suelo; cazan personas y héroes para obtener Alma o Ánima. No son malvadas por naturaleza: tienen motivaciones e historias y pueden redimirse/reclutarse. Monstruos y perros contaminados también deben diseñarse como waifus monstruosas, no como animales genéricos.
 
 ## Equipamiento
-Preparación antes del combate con cuatro slots: 1 arma, 2 equipamientos y 1 apoyo tipo objeto. Rarezas R/S/SR/SSR/UR; bonificaciones universales y de afinidad. Se mejora con materiales, no Alma.
+Preparación antes del combate con cuatro slots: 1 arma, 2 equipamientos y 1 apoyo tipo objeto. Rarezas R/S/SR/SSR/UR; bonificaciones universales y de afinidad. Se mejora con materiales, no Alma. Las armas son la única excepción a la regla visual de waifus; el equipamiento que represente un personaje debe mantener el diseño de waifu.
 
 ## Heroínas de apoyo y Corazones Heroicos
-Heroínas de apoyo: personajes invocables que ocupan dos espacios y aportan habilidades/ataques sin cinemáticas propias completas. Corazones Heroicos: cartas de objetos, recuerdos o escenas con ilustración, estadísticas, pasivas y sinergias. Ejemplos orientativos: Granjera de Bretaña R «Frutos sobrantes» cura 1–5% al inicio de turno; apoyo Hércules «Fuerza sobrehumana» +1–5% ATQ durante turno; Corazón «Los 10 trabajos» da +10% ATQ con Hércules y revive una vez por batalla con 80% de vida máxima. Si vuelve a morir, no revive de nuevo. Cifras pendientes de balance.
+Heroínas de apoyo: personajes invocables que ocupan dos espacios y aportan habilidades/ataques sin cinemáticas propias completas. Corazones Heroicos: cartas de objetos, recuerdos o escenas con ilustración, estadísticas, pasivas y sinergias. Cuando muestren un personaje, debe ser una waifu. Ejemplos orientativos: Granjera de Bretaña R «Frutos sobrantes» cura 1–5% al inicio de turno; apoyo Hércules «Fuerza sobrehumana» +1–5% ATQ durante turno; Corazón «Los 10 trabajos» da +10% ATQ con Hércules y revive una vez por batalla con 80% de vida máxima. Si vuelve a morir, no revive de nuevo. Cifras pendientes de balance.
 
 ## Niveles y Ruptura de Límite
 Nivel máximo 100. XP hasta el límite; materiales para rupturas 10→11, 20→21…90→91. Materiales discutidos: Polvo, Extracto, Jugo, Gema y Corazón de Ánima, más avanzados. Cada ruptura otorga bonus permanente de atributos y mejora pequeña de combate. Animación base común personalizada por heroína/rareza; técnicas nuevas solo en hitos especiales. No cuesta Alma, no cambia forma y no reemplaza el equipamiento.
