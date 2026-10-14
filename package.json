@@ -1,0 +1,30 @@
+{
+  "name": "umbra-card-frontier",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -k \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:api": "tsx watch src/server.ts",
+    "dev:web": "vite --config vite.config.ts",
+    "build": "tsc --noEmit && vite build --config vite.config.ts",
+    "start": "tsx src/server.ts",
+    "bot": "tsx src/bot.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.8.1",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "grammy": "^1.35.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.13.4",
+    "concurrently": "^9.1.2",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3",
+    "vite": "^6.1.0"
+  }
+}
