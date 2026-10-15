@@ -120,13 +120,26 @@ export function openCardStudio(): void {
       Naturaleza: ["green clothes", "green eyes"], Luz: ["white clothes", "golden eyes"],
       Arcano: ["purple clothes", "violet eyes"],
     };
+    const knownCharacters: Record<string, string[]> = {
+      "hercules": ["1 girl", "tall girl", "sixpack", "big smile", "brown hair", "brown eyes", "Olympus clothes", "bronze clothes"],
+      "hércules": ["1 girl", "tall girl", "sixpack", "big smile", "brown hair", "brown eyes", "Olympus clothes", "bronze clothes"],
+      "arturo": ["1 girl", "tall girl", "long blonde hair", "blue eyes", "calm smile", "blue and silver armor", "red cape"],
+      "rey arturo": ["1 girl", "tall girl", "long blonde hair", "blue eyes", "calm smile", "blue and silver armor", "red cape"],
+      "juana de arco": ["1 girl", "medium height", "short blonde hair", "brown eyes", "gentle smile", "white armor", "blue and gold clothes", "banner"],
+      "cleopatra": ["1 girl", "tall girl", "long black hair", "gold eyes", "confident smile", "Egyptian royal clothes", "gold jewelry", "blue and gold dress"],
+      "miyamoto musashi": ["1 girl", "athletic girl", "long dark blue hair", "blue eyes", "confident smile", "red and navy kimono", "two katanas"],
+      "musashi": ["1 girl", "athletic girl", "long dark blue hair", "blue eyes", "confident smile", "red and navy kimono", "two katanas"],
+      "robin hood": ["1 girl", "slim girl", "long green hair", "green eyes", "playful smile", "green hood", "brown leather clothes", "bow and quiver"],
+    };
+    const known = kind === "Personaje" ? knownCharacters[name.toLowerCase()] : undefined;
     let tags: string[];
-    if (kind === "Arma") tags = ["1 weapon", "full object", "distinctive shape", "fantasy design"];
+    if (known) tags = [...known];
+    else if (kind === "Arma") tags = ["1 weapon", "full object", "distinctive shape", "fantasy design"];
     else if (kind === "Monstruo") tags = ["1 monster girl", "full body", "feminine face", "distinctive monster features", "fantasy outfit"];
     else if (kind === "Personaje") tags = ["1 girl", "full body", "feminine face", "distinctive hairstyle", "fantasy clothes"];
     else if (kind === "Equipamiento") tags = ["1 girl", "full body", "wearing fantasy armor", "distinctive outfit", "fantasy setting"];
     else tags = ["1 girl", "full body", "heroic fantasy outfit", "expressive pose", "mythology-inspired scene"];
-    if (kind !== "Arma" && elementTags[element]) tags.push(...elementTags[element]);
+    if (kind !== "Arma" && elementTags[element] && !known) tags.push(...elementTags[element]);
     if (kind === "Monstruo") {
       const lower = name.toLowerCase();
       if (lower.includes("goblin")) tags.splice(3, 1, "goblin ears", "sharp teeth", "green skin");
