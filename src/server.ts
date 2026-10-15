@@ -98,7 +98,9 @@ app.get("/api/battle/active", (req, res) => {
 app.post("/api/battle/start", (req, res) => {
   try {
     const currentPlayer = player(req);
-    const heroineName = typeof req.body?.heroineName === "string" ? req.body.heroineName.slice(0, 80) : "Heroína vinculada";
+    const owned = getInventory(currentPlayer.telegramId);
+    const heroine = owned.length ? getHeroine(owned[0]!.heroineId) : undefined;
+    if (!heroine) return res.status(400).json({ error: "Primero debes vincular una heroína mediante la primera invocación." });
     const progress = getWorldProgress(currentPlayer.telegramId);
     const node = getWorldNode(progress.currentNodeId);
     if (!node || (node.event !== "encounter" && node.event !== "boss")) {
@@ -110,7 +112,7 @@ app.post("/api/battle/start", (req, res) => {
       "entrada-abismo": { name: "Guardiana del Miasma", hp: 150, attack: 18 }
     };
     const encounter = encounters[node.id] ?? { name: "Exploradora hostil del bosque", hp: 90, attack: 13 };
-    const battle = createBattle(heroineName, currentPlayer.alma, currentPlayer.formStage, currentPlayer.anima, encounter.name, encounter.hp, encounter.attack);
+    const battle = createBattle(heroine.name, currentPlayer.alma, currentPlayer.formStage, currentPlayer.anima, encounter.name, encounter.hp, encounter.attack, heroine.attack, heroine.maxHp);
     saveBattleProgress(currentPlayer.telegramId, battle);
     res.json({ battle });
   } catch (error) {
