@@ -71,10 +71,13 @@ function render() {
     <section class="welcome panel"><p class="eyebrow">CRÓNICAS · CAPÍTULO 01</p><h1>Las leyendas<br>despiertan.</h1><p class="muted">Explora ruinas, crea vínculos y rescata epopeyas de eras olvidadas.</p>
       <div class="gender"><button data-gender="Mujer" class="${gender === "Mujer" ? "selected" : ""}">Protagonista mujer</button><button data-gender="Hombre" class="${gender === "Hombre" ? "selected" : ""}">Protagonista hombre</button></div>
       <div class="backview"><div class="halo"></div><div class="figure"><div class="head"></div><div class="body"></div><div class="cape"></div></div><span>VISTA DESDE ATRÁS · ROSTRO OCULTO</span></div>
-      <button class="primary full" id="start">⚔ Entrar en el primer encuentro</button>
+      <button class="primary full" id="summon" ${linkedHeroine ? "disabled" : ""}>${linkedHeroine ? "✦ Primera invocación completada" : "✦ Realizar primera invocación"}</button>
+      <p class="muted summon-note">${escapeHtml(linkedHeroine ? "Vínculo establecido: " + linkedHeroine.name + " · " + linkedHeroine.rarity : summonNote)}</p>
+      ${linkedHeroine ? `<div class="linked-heroine"><span class="rarity-pill">${escapeHtml(linkedHeroine.rarity)}</span><div><b>${escapeHtml(linkedHeroine.name)}</b><small>${escapeHtml(linkedHeroine.heroClass)} · Forma inicial ${escapeHtml(linkedHeroine.stage)}</small><p>${escapeHtml(linkedHeroine.description)}</p></div></div>` : ""}
+      <button class="primary full" id="start" ${linkedHeroine ? "" : "disabled"}>⚔ Entrar en el primer encuentro</button>
     </section>
     ${renderWorld()}
-    <div class="section-title"><div><p class="eyebrow">ARCHIVO DE LEYENDAS</p><h2>Vínculos iniciales</h2></div><span>R · S · SR</span></div>
+    <div class="section-title"><div><p class="eyebrow">ARCHIVO DE LEYENDAS</p><h2>Heroínas conocidas</h2></div><span>R · S · SR</span></div>
     <section class="hero-grid">${heroes.map(h => `<article class="hero-card ${h.color}"><div class="art"><span class="rarity">${h.rarity}</span><span class="symbol">${h.icon}</span><span class="stage">${h.stage}</span></div><h3>${h.name}</h3><p class="muted">${h.role}</p><p>${h.desc}</p></article>`).join("")}</section>
     <section class="panel battle"><p class="eyebrow">ENCUENTRO</p><h2>El camino aguarda</h2><p id="status" class="muted">${escapeHtml(note)}</p><div id="battle-view"></div></section>
     <footer>UMBRA · prototipo jugable en desarrollo · el guardado de expedición y combate depende del servidor.</footer>
@@ -86,7 +89,8 @@ function render() {
   studioButton.onclick = () => openCardStudio();
   root.querySelector("main")?.insertBefore(studioButton, root.querySelector(".expedition"));
   root.querySelectorAll<HTMLButtonElement>("[data-gender]").forEach(button => button.onclick = () => { gender = button.dataset.gender ?? "Mujer"; render(); });
-  root.querySelector<HTMLButtonElement>("#summon")!.onclick = () => void summonFirst();\n  root.querySelector<HTMLButtonElement>("#start")!.onclick = () => void startBattle();
+  root.querySelector<HTMLButtonElement>("#summon")!.onclick = () => void summonFirst();
+  root.querySelector<HTMLButtonElement>("#start")!.onclick = () => void startBattle();
   root.querySelectorAll<HTMLButtonElement>("[data-travel]").forEach(button => button.onclick = () => void travel(button.dataset.travel ?? ""));
   drawBattle();
 }
