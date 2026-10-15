@@ -160,3 +160,33 @@ export function saveWorldProgress(ownerId: string, progress: WorldProgress): voi
       updated_at=CURRENT_TIMESTAMP
   `).run(ownerId, JSON.stringify(progress));
 }
+
+
+export interface InventoryEntry {
+  heroineId: string;
+  copies: number;
+}
+
+export function getInventory(ownerId: string): InventoryEntry[] {
+  return db.prepare(`
+    SELECT heroine_id AS heroineId, copies
+    FROM inventory WHERE telegram_id=? ORDER BY rowid ASC
+  `).all(ownerId) as InventoryEntry[];
+}
+
+export const grantFirstHeroine = db.transaction((
+  ownerId: string,
+  candidateIds: string[],
+  choose: () => string
+): { heroineId: string; created: boolean } => {
+  const existing = db.prepare(`
+    SELECT heroine_id AS heroineId FROM inventory
+    WHERE telegram_id=? ORDER BY rowid ASC LIMIT 1
+  `).get(ownerId) as { heroineId: string } | undefined;
+  if (existing) return { heroineId: existing.heroineId, created: false };
+  if (candidateIds.length === 0) throw new Error("El grupo inicial de heroínas está vacío.");
+  const selected = choose();
+  if (!candidateIds.includes(selected)) throw new Error("La invocación seleccionó una heroína inválida.");
+  db.prepare("INSERT INTO inventory(telegram_id,heroine_id,copies) VALUES(?,?,1)").run(ownerId, selected);
+  return { heroineId: selected, created: true };
+});
