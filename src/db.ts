@@ -1,7 +1,7 @@
 import Database from "better-sqlite3";
 import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import type { BattleState, FormStage } from "./game/types.js";
+import type { BattleState, FormBranch, FormStage } from "./game/types.js";
 import { createWorldProgress, type WorldProgress } from "./game/world.js";
 import { DEFAULT_LOADOUT, type EquipmentLoadout } from "./game/equipment.js";
 
@@ -13,7 +13,8 @@ db.pragma("foreign_keys = ON");
 db.exec(`
   CREATE TABLE IF NOT EXISTS player_progress(
     telegram_id TEXT PRIMARY KEY,
-    form_stage TEXT NOT NULL DEFAULT 'Lily' CHECK(form_stage IN ('Lily','Hero','Epic'))
+    form_stage TEXT NOT NULL DEFAULT 'Lily' CHECK(form_stage IN ('Lily','Hero','Epic')),
+    form_branch TEXT DEFAULT NULL CHECK(form_branch IS NULL OR form_branch IN ('Light','Dark'))
   );
   CREATE TABLE IF NOT EXISTS players(
     telegram_id TEXT PRIMARY KEY,
@@ -53,6 +54,7 @@ db.exec(`
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
   );
 `);
+try { db.exec("ALTER TABLE player_progress ADD COLUMN form_branch TEXT CHECK(form_branch IS NULL OR form_branch IN ('Light','Dark'))"); } catch { /* La columna ya existe en bases creadas con el esquema actual. */ }
 
 export interface PlayerRecord {
   telegramId: string;
@@ -61,6 +63,7 @@ export interface PlayerRecord {
   anima: number;
   createdAt: string;
   formStage: FormStage;
+  formBranch: FormBranch;
 }
 
 export function getOrCreatePlayer(id: string, name: string): PlayerRecord {
@@ -70,7 +73,7 @@ export function getOrCreatePlayer(id: string, name: string): PlayerRecord {
   db.prepare("INSERT OR IGNORE INTO player_loadout(telegram_id,state_json) VALUES(?,?)").run(id, JSON.stringify(DEFAULT_LOADOUT));
   return db.prepare(`
     SELECT p.telegram_id AS telegramId, p.display_name AS displayName, p.alma, p.anima,
-           p.created_at AS createdAt, g.form_stage AS formStage
+           p.created_at AS createdAt, g.form_stage AS formStage, g.form_branch AS formBranch
     FROM players p JOIN player_progress g ON g.telegram_id=p.telegram_id
     WHERE p.telegram_id=?
   `).get(id) as PlayerRecord;
@@ -89,6 +92,10 @@ export function savePlayerFormStage(id: string, stage: FormStage): void {
     INSERT INTO player_progress(telegram_id,form_stage) VALUES(?,?)
     ON CONFLICT(telegram_id) DO UPDATE SET form_stage=excluded.form_stage
   `).run(id, stage);
+}
+
+export function savePlayerFormBranch(id: string, branch: FormBranch): void {
+  db.prepare("UPDATE player_progress SET form_branch=? WHERE telegram_id=?").run(branch, id);
 }
 
 export function saveBattle(ownerId: string, battle: BattleState): void {
@@ -129,20 +136,22 @@ export const saveBattleProgress = db.transaction((
 
   if (resourceBase) {
     const resources = db.prepare(`
-      SELECT p.alma, p.anima, g.form_stage AS formStage
+      SELECT p.alma, p.anima, g.form_stage AS formStage, g.form_branch AS formBranch
       FROM players p JOIN player_progress g ON g.telegram_id=p.telegram_id
       WHERE p.telegram_id=?
-    `).get(ownerId) as { alma: number; anima: number; formStage: FormStage } | undefined;
+    `).get(ownerId) as { alma: number; anima: number; formStage: FormStage; formBranch: FormBranch } | undefined;
     if (!resources) throw new Error("Jugador no encontrado.");
 
     const alma = Math.max(0, Math.min(100, resources.alma + battle.alma - resourceBase.alma));
     const anima = Math.max(0, Math.min(100, resources.anima + battle.player.anima - resourceBase.player.anima));
     const stage = battle.stage !== resourceBase.stage ? battle.stage : resources.formStage;
+    const branch = battle.branch !== resourceBase.branch ? battle.branch : resources.formBranch;
 
     savedBattle = {
       ...battle,
       alma,
       stage,
+      branch,
       player: { ...battle.player, anima }
     };
   }
@@ -154,6 +163,7 @@ export const saveBattleProgress = db.transaction((
   }
   savePlayerResources(ownerId, savedBattle.alma, savedBattle.player.anima);
   savePlayerFormStage(ownerId, savedBattle.stage);
+  savePlayerFormBranch(ownerId, savedBattle.branch);
   return savedBattle;
 });
 
