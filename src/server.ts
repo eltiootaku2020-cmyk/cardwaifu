@@ -2,7 +2,7 @@ import "dotenv/config";
 import express from "express";
 import { resolve } from "node:path";
 import { createBattle, act, type BattleAction } from "./game/combat.js";
-import { getOrCreatePlayer } from "./db.js";
+import { getOrCreatePlayer, savePlayerResources } from "./db.js";
 import { validateTelegramInitData } from "./telegram/auth.js";
 import type { BattleState } from "./game/types.js";
 
@@ -32,7 +32,7 @@ app.post("/api/battle/start", (req, res) => {
   try {
     const currentPlayer = player(req);
     const heroineName = typeof req.body?.heroineName === "string" ? req.body.heroineName.slice(0, 80) : "Heroína vinculada";
-    const battle = createBattle(heroineName);
+    const battle = createBattle(heroineName, currentPlayer.alma, "Lily", currentPlayer.anima);
     battles.set(battle.id, { ownerId: currentPlayer.telegramId, battle });
     res.json({ battle });
   } catch (error) {
@@ -52,6 +52,7 @@ app.post("/api/battle/action", (req, res) => {
     if (!allowed.includes(action)) return res.status(400).json({ error: "Acción inválida." });
     const next = act(entry.battle, action as BattleAction);
     battles.set(id, { ownerId: entry.ownerId, battle: next });
+    savePlayerResources(currentPlayer.telegramId, next.alma, next.player.anima);
     res.json({ battle: next });
   } catch (error) {
     res.status(401).json({ error: error instanceof Error ? error.message : "No autorizado" });
