@@ -37,8 +37,9 @@ export function openCardStudio(): void {
     return element;
   };
   const canvas = get<HTMLCanvasElement>("studio-art-canvas");
-  const ctx = canvas.getContext("2d");
-  if (!ctx) { overlay.remove(); return; }
+  const context = canvas.getContext("2d");
+  if (!context) { overlay.remove(); return; }
+  const ctx = context as CanvasRenderingContext2D;
   let art: HTMLImageElement | null = null;
   let objectUrl = "";
   type GalleryCard = { name: string; data: string; prompt: string };
