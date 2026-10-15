@@ -94,6 +94,13 @@ Heroínas de apoyo y Corazones Heroicos son sistemas distintos:
 - Corazón Heroico: carta de recuerdo/objeto/escena con pasivas y sinergias, no una heroína adicional.
 Los duplicados ofrecen elección entre mejorar una unidad y convertirlos en materiales.
 
+### Progresión del protagonista S y balance comparativo S/SR
+- El protagonista tiene su propia carta de rareza S y puede recibir duplicados de ella. No son varios protagonistas en la historia: las copias se consumen como vínculo/resonancia para mejorar la carta principal.
+- Cada nuevo escalón de ascensión costará progresivamente más; la curva final se decidirá mediante pruebas y no se fijará por intuición. Los duplicados no sustituyen al resto del progreso: también cuentan XP/nivel, Ruptura de Límite con materiales, equipo, cartas de apoyo y mejora de las heroínas vinculadas.
+- El power creep debe quedar integrado de forma gradual: enemigos y regiones posteriores piden mayor inversión, combinaciones y decisiones tácticas, no solo inflación de HP/ATQ. La ruta S es de inversión a largo plazo; debe seguir siendo viable y tener una identidad propia.
+- Se hará una prueba controlada comparando la carta S del protagonista con una carta SR en el mismo encuentro, con equipo y recursos equiparables. Registrar victorias/derrotas, turnos de combate, daño recibido, consumos y número de mejoras necesarias. La ruta SR debe sentirse más accesible y facilitar el avance inicial; la S tiene más exigencia de inversión por su progresión de rango S, sin ser débil por definición.
+- Los umbrales de duplicados, los costes crecientes, las bonificaciones por ascensión y los valores exactos del ensayo son parámetros pendientes de balance. No se marcan como implementados hasta que la colección y la mejora persistente existan en el código.
+
 ## Exploración por nodos
 
 Cada región es un grafo de lugares conectados, no una lista de mazmorras aisladas. Un nodo tiene tipo, peligro, posibles eventos, coste de viaje y conexiones. El jugador decide entre:
