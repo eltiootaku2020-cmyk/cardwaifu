@@ -144,6 +144,20 @@ Los nodos pueden incluir sendero, aldea, puesto de vigilancia, ruina, cueva, nid
 - Las pruebas automáticas son una herramienta interna para detectar regresiones, no una tarea que el usuario tenga que ejecutar manualmente.
 - La integración real exige URL HTTPS desplegada, BOT_TOKEN privado y configuración en BotFather; no se debe afirmar que está online hasta que exista despliegue y validación real.
 
+## Presentación visual y efectos de combate
+
+La capa visual del combate sigue una dirección de fantasía oscura y arcana: fondos profundos, bruma, anillos rúnicos y destellos cian/violeta, con acentos dorados para Light y rosa/carmesí para Dark. El contraste debe mantener legibles las barras, el texto y los números en pantalla pequeña.
+
+- **Invocación:** la primera carta elegida recibe una revelación breve con sello arcano y brillo ligado a su rareza. La ceremonia solo aparece si el servidor confirma que se creó un vínculo nuevo; restaurar una partida no vuelve a gastar ni a revelar la invocación.
+- **Heroína y enemiga:** cada una se presenta en un panel de combate con silueta, emblema, HP y datos de combate. La apariencia visual del enemigo cambia por familia (goblin, criatura contaminada, miasma o amenaza mayor). Las siluetas CSS son marcadores temporales originales y pueden reemplazarse por el arte que aporte el proyecto.
+- **Escenario:** la niebla, los árboles, los anillos de luz y la paleta cambian según el tipo de nodo explorado, para relacionar el encuentro con bosque, campamento, ruinas, aldea o mazmorra.
+- **Números de daño:** se calculan comparando los HP recibidos del estado actualizado por el servidor con el estado anterior de esa misma batalla. El daño y la curación muestran cifras flotantes; no se calculan como una segunda simulación en el cliente.
+- **Ataques y poderes:** cada acción tiene una respuesta visual propia: avance y retroceso para ataques, destello para habilidades, pulso defensivo, desplazamiento de evasión, carga de Ánima y despertares diferenciados de Light/Dark.
+- **Cámara e impacto:** el escenario recibe un movimiento breve al confirmarse daño y aparecen partículas en el panel afectado. La derrota enemiga cambia su presentación, sin modificar por sí misma reglas, estadísticas ni recompensas.
+- **Accesibilidad y dispositivos:** los efectos se adaptan a móvil y respetan la preferencia del sistema para reducir movimiento. La animación no debe ocultar los registros de combate ni sustituir la confirmación del servidor.
+
+La integración visual no incluye todavía ilustraciones finales ni cinemáticas dibujadas cuadro a cuadro; deja una base funcional para conectarlas cuando estén preparados los recursos artísticos originales.
+
 ## Referencias consultadas
 
 - Telegram Mini Apps: https://core.telegram.org/bots/webapps — aplicación web alojada, integración y datos de lanzamiento.
