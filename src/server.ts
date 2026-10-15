@@ -53,6 +53,7 @@ app.post("/api/battle/action", (req, res) => {
     const next = act(entry.battle, action as BattleAction);
     battles.set(id, { ownerId: entry.ownerId, battle: next });
     savePlayerResources(currentPlayer.telegramId, next.alma, next.player.anima);
+    savePlayerFormStage(currentPlayer.telegramId, next.stage);
     res.json({ battle: next });
   } catch (error) {
     res.status(401).json({ error: error instanceof Error ? error.message : "No autorizado" });
