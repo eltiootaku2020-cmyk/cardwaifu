@@ -115,7 +115,8 @@ export function getLatestActiveBattle(ownerId: string): BattleState | undefined 
 export const saveBattleProgress = db.transaction((
   ownerId: string,
   battle: BattleState,
-  resourceBase?: BattleState
+  resourceBase?: BattleState,
+  victoryRewards?: { xp: number; coins: number; materials: number }
 ): BattleState => {
   let savedBattle = battle;
 
@@ -140,6 +141,10 @@ export const saveBattleProgress = db.transaction((
   }
 
   saveBattle(ownerId, savedBattle);
+  if (resourceBase?.status === "active" && savedBattle.status === "won" && victoryRewards) {
+    db.prepare("UPDATE player_rewards SET xp=xp+?, coins=coins+?, materials=materials+? WHERE telegram_id=?")
+      .run(Math.max(0, victoryRewards.xp), Math.max(0, victoryRewards.coins), Math.max(0, victoryRewards.materials), ownerId);
+  }
   savePlayerResources(ownerId, savedBattle.alma, savedBattle.player.anima);
   savePlayerFormStage(ownerId, savedBattle.stage);
   return savedBattle;
