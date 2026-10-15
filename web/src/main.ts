@@ -151,7 +151,7 @@ function drawBattle() {
       </div>
     </div>
     ${action && actionLabels[action] ? `<div class="power-banner active" data-power="${escapeHtml(action)}">${escapeHtml(actionLabels[action])}</div>` : ""}
-    <div class="actions">${actions.map(actionName => `<button data-action="${actionName}" ${current.status !== "active" || ((actionName === "evolve-light" || actionName === "evolve-dark") && (current.stage === "Epic" || current.evolved || (actionName === "evolve-dark" && !current.darkAvailable) || (current.branch !== null && current.branch !== (actionName === "evolve-dark" ? "Dark" : "Light")))) ? "disabled" : ""}>${labels[actionName]}</button>`).join("")}</div>
+    <div class="actions">${actions.map(actionName => `<button data-action="${actionName}" ${current.status !== "active" || (actionName === "skill" && current.player.anima < 20) || ((actionName === "evolve-light" || actionName === "evolve-dark") && (current.stage === "Epic" || current.evolved || (actionName === "evolve-dark" && !current.darkAvailable) || (current.branch !== null && current.branch !== (actionName === "evolve-dark" ? "Dark" : "Light")))) ? "disabled" : ""}>${labels[actionName]}</button>`).join("")}</div>
     <div class="log">${current.log.slice(-4).map(line => "<p>" + escapeHtml(line) + "</p>").join("")}</div>
   </div>`;
   el.querySelectorAll<HTMLButtonElement>("[data-action]").forEach(button => button.onclick = () => void act(button.dataset.action ?? ""));
