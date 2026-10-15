@@ -137,7 +137,7 @@ function drawBattle() {
   const bar = (value: number, max: number) => Math.max(0, value / max * 100);
   const actions = ["attack", "skill", "defend", "evade", "charge", "evolve-light", "evolve-dark"] as const;
   const labels: Record<typeof actions[number], string> = { attack: "⚔ Atacar", skill: "✧ Habilidad", defend: "🛡 Defender", evade: "💨 Evadir", charge: "⚡ Cargar", "evolve-light": "✦ Evolucionar Light", "evolve-dark": "☾ Evolucionar Dark" };
-  el.innerHTML = `<div class="battle-scene biome-${escapeHtml(biome)}" data-biome="${escapeHtml(biome)}" data-battle-id="${escapeHtml(current.id)}" data-action="${escapeHtml(action)}" data-battle-status="${current.status}">
+  el.innerHTML = `<div class="battle-scene biome-${escapeHtml(biome)}" data-biome="${escapeHtml(biome)}" data-battle-id="${escapeHtml(current.id)}" data-turn="${current.turn}" data-action="${escapeHtml(action)}" data-battle-status="${current.status}">
     <div class="scene-backdrop" aria-hidden="true"><span class="scene-tree tree-a"></span><span class="scene-tree tree-b"></span><span class="scene-fog fog-one"></span><span class="scene-fog fog-two"></span><span class="scene-location">${escapeHtml(locationName)}</span></div>
     <div class="battle-hud"><span>PROTOCOLO DE COMBATE · TURNO <b>${current.turn}</b></span><span>ÁNIMA <b>${current.player.anima}</b> · ALMA <b>${current.alma}</b></span></div>
     <div class="fight-grid">
