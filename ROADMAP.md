@@ -11,6 +11,7 @@
 - [ ] Selección de protagonista y cámara desde atrás, rostro oculto.
 - [x] Primera invocación aleatoria única por cuenta y vínculo persistente en SQLite.
 - [ ] Colección completa, vista de todas las cartas, duplicados y mejora de unidades.
+- [ ] Protagonista S con duplicados y coste de ascensión progresivo; comparar en pruebas de juego una ruta S frente a una carta SR con condiciones equivalentes.
 - [ ] Colección persistente y rarezas R/S/SR/SSR/UR.
 - [ ] Combate por turnos resuelto en servidor con enemigos/patrones, estados y recompensas.
 - [ ] Alma y Ánima separados y sin condiciones de carrera en acciones simultáneas.
