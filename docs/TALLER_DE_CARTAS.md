@@ -9,7 +9,7 @@ Crear cartas originales de monstruos/mobs, personajes, armas, equipamiento y Cor
 - Cada carta tendrá un prompt corto, editable y separado por comas en inglés. Describir rasgos visibles: cuerpo/pose, cabello, ojos, ropa, accesorios, especie y nombre. Evitar etiquetas de relleno como “masterpiece”, “best quality”, “elemental woman” o “super fire power”.
 - El tipo Arma es la única categoría que genera un objeto sin waifu. Equipamiento y Corazones Heroicos deben ilustrar una waifu o una escena protagonizada por waifus, según el concepto de la carta.
 - Ejemplo Hércules: `1 girl, tall girl, sixpack, big smile, brown hair, brown eyes, Olympus clothes, bronze clothes, Hercules`.
-- El editor incluye plantillas cortas para las heroínas iniciales y rasgos de especie para algunos mobs. La galería es temporal en el prototipo; persistencia real y un catálogo completo de prompts siguen pendientes.
+- El editor incluye plantillas cortas para las heroínas iniciales y rasgos de especie para algunos mobs. La galería del Taller de cartas se guarda localmente en el navegador (localStorage), admite exportar/eliminar cartas y limita la colección a 12 elementos para reducir el riesgo de agotar la cuota. Esta persistencia es solo del dispositivo/navegador; la sincronización entre dispositivos y el catálogo completo de prompts siguen pendientes.
 
 ## Flujo de creación
 1. Crear o conseguir una ilustración original; preferir PNG RGBA transparente.
