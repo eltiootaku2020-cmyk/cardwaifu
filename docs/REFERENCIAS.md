@@ -40,3 +40,12 @@ Recursos consultados para orientar la arquitectura del MVP. Son referencias de i
 
 ## Decisión del proyecto
 Para el MVP de UMBRA se prioriza TypeScript + Vite + Express + grammY + SQLite. Godot queda como opción futura si el juego necesita una capa de acción o animación que justifique ese motor. La documentación oficial de Telegram es la fuente principal para autenticación y comportamiento de Mini Apps.
+
+
+## Diseño de juego y sistemas
+- [Telegram Mini Apps — documentación oficial](https://core.telegram.org/bots/webapps) — requisitos y límites de integración.
+- [Telegram Mini Apps — Device Storage](https://docs.telegram-mini-apps.com/packages/tma-js-sdk/features/device-storage) — diferencia entre almacenamiento local, seguro y cloud.
+- [Game Developer — 12 ways to improve turn-based RPG combat systems](https://www.gamedeveloper.com/design/12-ways-to-improve-turn-based-rpg-combat-systems) — claridad táctica, decisiones y roles.
+- [Procedural Generation: Design Exploration](https://github.com/koalabuttz/roguelike/blob/master/docs/design/procgen-exploration.md) — referencia conceptual para estructura de mapas y exploración.
+
+Estas fuentes orientan decisiones y arquitectura; no autorizan copiar arte, personajes, textos ni código. UMBRA mantiene su propio mundo, implementación y contenido.
