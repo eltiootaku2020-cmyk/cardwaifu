@@ -53,9 +53,10 @@ Regla de vestiduras: una misma epopeya comparte símbolos y lenguaje visual entr
 - Añadido mapa inicial del Bosque Oscuro como grafo de rutas conectadas; ubicación e historial de visitas se guardan en SQLite.
 - Añadidos puntos de encuentro ligados a la ubicación actual, con enemigos y atributos por arquetipo.
 - Añadido equipo inicial con cuatro espacios (arma, equipamiento, accesorio y apoyo), selección guardada y bonificaciones aplicadas al combate.
+- Añadidas elecciones explícitas de evolución Light/Dark, bonificaciones distintas y persistencia de rama para que Hero Light conduzca a Epic Light y Hero Dark a Epic Dark.
 - Añadidas recompensas de victoria (XP, monedas y materiales) con actualización atómica y sin duplicar la recompensa al repetir una acción sobre una batalla ya finalizada.
 - La interfaz muestra el nivel/XP y permite invocar, equipar, recorrer rutas y combatir. El taller de cartas sigue siendo una herramienta de administración separada.
-- Build, typecheck y pruebas automatizadas pasan en GitHub Actions para el commit de interfaz/equipamiento. Aún no se ha desplegado ni probado dentro de un bot Telegram real.
+- Build, typecheck y pruebas automatizadas pasan en GitHub Actions para la implementación de interfaz, equipo, recompensas y ramas Light/Dark. Aún no se ha desplegado ni probado dentro de un bot Telegram real.
 
 ## Pendiente
 Fórmula de daño, estados, economía definitiva, probabilidades/pity, recetas de ruptura, equipo/slots, catálogo inicial de personajes, capítulos y jefes, despliegue, moderación y privacidad.
