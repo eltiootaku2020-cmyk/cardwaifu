@@ -1,11 +1,11 @@
 import { randomInt, randomUUID } from "node:crypto";
-import type { BattleState } from "./types.js";
+import type { BattleState, FormStage } from "./types.js";
 
 export type BattleAction = "attack" | "skill" | "defend" | "evade" | "charge" | "evolve";
 
-export function createBattle(heroName = "Heroína vinculada"): BattleState {
+export function createBattle(heroName = "Heroína vinculada", alma = 100, stage: FormStage = "Lily"): BattleState {
   return {
-    id: randomUUID(), turn: 0, alma: 100,
+    id: randomUUID(), turn: 0, alma: Math.max(0, Math.min(100, Math.floor(alma))), stage,
     player: { name: heroName, hp: 100, maxHp: 100, attack: 24, anima: 0 },
     enemy: { name: "Sabuesa contaminada", hp: 82, maxHp: 82, attack: 12, anima: 0 },
     status: "active", evolved: false,
