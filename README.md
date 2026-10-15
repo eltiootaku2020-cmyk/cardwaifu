@@ -6,7 +6,7 @@ RPG anime de cartas coleccionables en desarrollo, pensado primero como Telegram 
 Lee [CEREBRO_Y_OBRERO.md](./CEREBRO_Y_OBRERO.md) antes de modificar lore o reglas. Arquitectura: [docs/ARQUITECTURA.md](./docs/ARQUITECTURA.md). Plan: [ROADMAP.md](./ROADMAP.md). Referencias: [docs/REFERENCIAS.md](./docs/REFERENCIAS.md).
 
 ## Estado
-MVP en construcción. Este repo contiene diseño y un esqueleto inicial; aún no significa que esté publicado ni integrado con Telegram.
+MVP jugable en construcción. Ya incluye combate por turnos en servidor, primera invocación persistente, mapa de rutas del Bosque Oscuro, equipo de cuatro espacios, recompensas básicas y taller de cartas. La integración/despliegue real de Telegram todavía no está completada ni validada.
 
 ## Requisitos
 Node.js 20+ y npm. Copia `.env.example` a `.env`, ejecuta `npm install` y `npm run dev`. Para bot: `npm run bot` con `BOT_TOKEN` configurado.
