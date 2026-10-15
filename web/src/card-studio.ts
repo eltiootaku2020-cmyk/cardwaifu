@@ -189,7 +189,7 @@ export function openCardStudio(): void {
     draw(); gallery.unshift({ name: get<HTMLInputElement>("studio-art-name").value || "Carta sin nombre", data: canvas.toDataURL("image/png"), prompt: get<HTMLTextAreaElement>("studio-art-prompt").value }); renderGallery();
   };
   const close = () => { if (objectUrl) URL.revokeObjectURL(objectUrl); overlay.remove(); };
-  get<HTMLButtonElement>("studioClose").onclick = close;
+  get<HTMLButtonElement>("studio-close").onclick = close;
   overlay.addEventListener("click", event => { if (event.target === overlay) close(); });
   draw();
 }
