@@ -3,8 +3,8 @@
 ## Base
 - [x] Consolidar lore y sistemas en CEREBRO_Y_OBRERO.md.
 - [x] Definir Mini App + API + bot + SQLite.
-- [ ] Instalar dependencias y verificar build.
-- [ ] Añadir pruebas automáticas.
+- [x] Instalar dependencias y verificar build (GitHub Actions, run #11).
+- [x] Añadir pruebas automáticas iniciales para combate (GitHub Actions, run #11).
 
 ## MVP jugable
 - [ ] Selección de protagonista y cámara desde atrás, rostro oculto.
