@@ -79,3 +79,15 @@ test("Epic cannot evolve beyond the final form", () => {
   assert.equal(next.stage, "Epic");
   assert.ok(next.log.some((line) => line.includes("ya alcanzó la forma Epic")));
 });
+
+
+test("encounter archetype controls enemy and linked heroine base stats", () => {
+  const battle = createBattle("Tiny, la exploradora", 100, "Lily", 0, "Goblin cazadora", 96, 14, 22, 120);
+  assert.equal(battle.player.name, "Tiny, la exploradora");
+  assert.equal(battle.player.attack, 22);
+  assert.equal(battle.player.maxHp, 120);
+  assert.equal(battle.enemy.name, "Goblin cazadora");
+  assert.equal(battle.enemy.maxHp, 96);
+  assert.equal(battle.enemy.attack, 14);
+  assert.ok(battle.log[0]?.includes("Goblin cazadora"));
+});
