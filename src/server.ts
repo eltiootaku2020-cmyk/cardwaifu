@@ -44,13 +44,13 @@ app.post("/api/battle/action", (req, res) => {
   try {
     const currentPlayer = player(req);
     const id = typeof req.body?.battleId === "string" ? req.body.battleId : "";
-    const action = typeof req.body?.action === "string" ? req.body.action as BattleAction : "";
-    const allowed: BattleAction[] = ["attack", "skill", "defend", "evade", "charge", "evolve"];
+    const action: string = typeof req.body?.action === "string" ? req.body.action : "";
+    const allowed: string[] = ["attack", "skill", "defend", "evade", "charge", "evolve"];
     const entry = battles.get(id);
     if (!entry) return res.status(404).json({ error: "Combate no encontrado." });
     if (entry.ownerId !== currentPlayer.telegramId) return res.status(403).json({ error: "Este combate pertenece a otro jugador." });
     if (!allowed.includes(action)) return res.status(400).json({ error: "Acción inválida." });
-    const next = act(entry.battle, action);
+    const next = act(entry.battle, action as BattleAction);
     battles.set(id, { ownerId: entry.ownerId, battle: next });
     res.json({ battle: next });
   } catch (error) {
