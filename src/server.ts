@@ -3,7 +3,7 @@ import { randomInt } from "node:crypto";
 import express from "express";
 import { resolve } from "node:path";
 import { createBattle, act, type BattleAction } from "./game/combat.js";
-import { getOrCreatePlayer, getBattle, getLatestActiveBattle, saveBattleProgress, getWorldProgress, saveWorldProgress, getInventory, grantFirstHeroine, savePlayerFormStage } from "./db.js";
+import { getOrCreatePlayer, getBattle, getLatestActiveBattle, saveBattleProgress, getWorldProgress, saveWorldProgress, getInventory, grantFirstHeroine, savePlayerFormStage, getPlayerRewards } from "./db.js";
 import { getAvailableDestinations, getWorldNode, travelTo } from "./game/world.js";
 import { getFirstSummonPool, getHeroine } from "./game/catalog.js";
 import { validateTelegramInitData } from "./telegram/auth.js";
@@ -26,7 +26,7 @@ function player(req: express.Request) {
 app.get("/api/health", (_req, res) => res.json({ ok: true, game: "UMBRA: Card Frontier", mode: "prototype" }));
 
 app.get("/api/me", (req, res) => {
-  try { res.json({ player: player(req) }); }
+  try { const currentPlayer = player(req); res.json({ player: currentPlayer, rewards: getPlayerRewards(currentPlayer.telegramId) }); }
   catch (error) { res.status(401).json({ error: error instanceof Error ? error.message : "No autorizado" }); }
 });
 
@@ -141,8 +141,13 @@ app.post("/api/battle/action", (req, res) => {
       }
     };
     const next = act(resourceBase, action as BattleAction);
-    const savedBattle = saveBattleProgress(currentPlayer.telegramId, next, resourceBase);
-    res.json({ battle: savedBattle });
+    const node = getWorldNode(getWorldProgress(currentPlayer.telegramId).currentNodeId);
+    const victoryRewards = node?.kind === "dungeon"
+      ? { xp: 60, coins: 20, materials: 3 }
+      : { xp: 25, coins: 8, materials: 1 };
+    const rewardGranted = resourceBase.status === "active" && next.status === "won";
+    const savedBattle = saveBattleProgress(currentPlayer.telegramId, next, resourceBase, victoryRewards);
+    res.json({ battle: savedBattle, rewards: getPlayerRewards(currentPlayer.telegramId), rewardGranted });
   } catch (error) {
     res.status(500).json({ error: error instanceof Error ? error.message : "No se pudo guardar el combate." });
   }
