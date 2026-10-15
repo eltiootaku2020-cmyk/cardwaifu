@@ -20,6 +20,9 @@ export function openCardStudio(): void {
           <div class="studio-stat-row"><label>Ataque<input id="studio-art-atk" type="number" min="0" max="9999" value="28"></label><label>Vida / poder<input id="studio-art-hp" type="number" min="0" max="9999" value="120"></label></div>
           <label>Escala del arte<input id="studio-art-scale" type="range" min="55" max="135" value="100"></label>
           <label>Marco original<select id="studio-art-frame"><option value="arcane">Arcana · violeta</option><option value="flame">Llama · carmesí</option><option value="frost">Escarcha · azul</option><option value="nature">Raíz · verde</option><option value="gold">Reliquia · dorada</option></select></label>
+          <label>Prompt para generar la imagen<textarea id="studio-art-prompt" rows="5" placeholder="1 girl, tall girl, brown hair, bronze clothes, Hercules"></textarea></label>
+          <div class="studio-buttons"><button type="button" class="secondary" id="studio-art-prompt-refresh">↻ Generar prompt</button><button type="button" class="secondary" id="studio-art-prompt-copy">Copiar prompt</button></div>
+          <p class="muted studio-note">Prompt corto en inglés, separado por comas. Todo lo que represente un ser será una waifu; las armas son la única excepción. Sin etiquetas de calidad ni relleno.</p>
           <div class="studio-buttons"><button type="button" class="primary" id="studio-art-save">＋ Guardar carta</button><button type="button" class="secondary" id="studio-art-export">↓ Exportar PNG</button></div>
           <p class="muted studio-note">El editor crea marcos propios por código. Para que el personaje quede bien integrado, usa PNG con canal alfa y ajusta la escala.</p>
         </div>
@@ -38,7 +41,7 @@ export function openCardStudio(): void {
   if (!ctx) { overlay.remove(); return; }
   let art: HTMLImageElement | null = null;
   let objectUrl = "";
-  const gallery: Array<{ name: string; data: string }> = [];
+  const gallery: Array<{ name: string; data: string; prompt: string }> = [];
   const themes: Record<string, [string, string, string]> = {
     arcane: ["#161c45", "#7f4ed0", "#b58cff"],
     flame: ["#35152c", "#c63d52", "#ffad71"],
@@ -95,16 +98,69 @@ export function openCardStudio(): void {
       const card = document.createElement("article"); card.className = "studio-thumb";
       const image = document.createElement("img"); image.src = item.data; image.alt = item.name;
       const title = document.createElement("p"); title.textContent = item.name;
-      const button = document.createElement("button"); button.className = "secondary"; button.textContent = "Exportar";
+      const prompt = document.createElement("p"); prompt.className = "muted studio-note"; prompt.textContent = item.prompt; prompt.style.overflowWrap = "anywhere";
+      const copyPrompt = document.createElement("button"); copyPrompt.className = "secondary"; copyPrompt.textContent = "Copiar prompt";
+      copyPrompt.onclick = () => copyText(gallery[index].prompt);
+      const button = document.createElement("button"); button.className = "secondary"; button.textContent = "Exportar PNG";
       button.onclick = () => exportPng(gallery[index].data, gallery[index].name);
-      card.append(image, title, button); galleryRoot.append(card);
+      card.append(image, title, prompt, copyPrompt, button); galleryRoot.append(card);
     });
     get<HTMLSpanElement>("studio-art-count").textContent = gallery.length + (gallery.length === 1 ? " carta" : " cartas");
   }
 
+  let promptEdited = false;
+  function makePrompt(): string {
+    const name = get<HTMLInputElement>("studio-art-name").value.trim();
+    const kind = get<HTMLSelectElement>("studio-art-kind").value;
+    const element = get<HTMLSelectElement>("studio-art-element").value;
+    const frame = get<HTMLSelectElement>("studio-art-frame").value;
+    const elementTags: Record<string, string[]> = {
+      Fuego: ["red clothes", "orange eyes"], Hielo: ["blue clothes", "blue eyes"],
+      Rayo: ["purple clothes", "yellow eyes"], Oscuridad: ["black clothes", "red eyes"],
+      Naturaleza: ["green clothes", "green eyes"], Luz: ["white clothes", "golden eyes"],
+      Arcano: ["purple clothes", "violet eyes"],
+    };
+    let tags: string[];
+    if (kind === "Arma") tags = ["1 weapon", "full object", "distinctive shape", "fantasy design"];
+    else if (kind === "Monstruo") tags = ["1 monster girl", "full body", "feminine face", "distinctive monster features", "fantasy outfit"];
+    else if (kind === "Personaje") tags = ["1 girl", "full body", "feminine face", "distinctive hairstyle", "fantasy clothes"];
+    else if (kind === "Equipamiento") tags = ["1 girl", "full body", "wearing fantasy armor", "distinctive outfit", "fantasy setting"];
+    else tags = ["1 girl", "full body", "heroic fantasy outfit", "expressive pose", "mythology-inspired scene"];
+    if (kind !== "Arma" && elementTags[element]) tags.push(...elementTags[element]);
+    if (kind === "Monstruo") {
+      const lower = name.toLowerCase();
+      if (lower.includes("goblin")) tags.splice(3, 1, "goblin ears", "sharp teeth", "green skin");
+      else if (lower.includes("perro") || lower.includes("hound")) tags.splice(3, 1, "wolf ears", "tail", "sharp claws");
+      else if (lower.includes("drag")) tags.splice(3, 1, "dragon horns", "scales", "long tail");
+      else if (lower.includes("araña") || lower.includes("spider")) tags.splice(3, 1, "spider legs", "silk details", "red eyes");
+      else if (lower.includes("espectro") || lower.includes("ghost")) tags.splice(3, 1, "ghostly hair", "floating body", "glowing eyes");
+    }
+    if (frame === "gold" && (kind === "Arma" || kind === "Equipamiento")) tags.push("gold details");
+    if (name) tags.push(name);
+    return [...new Set(tags)].join(", ");
+  }
+  function refreshPrompt(force = false): void {
+    if (promptEdited && !force) return;
+    get<HTMLTextAreaElement>("studio-art-prompt").value = makePrompt();
+    promptEdited = false;
+  }
+  async function copyText(value: string): Promise<void> {
+    const field = get<HTMLTextAreaElement>("studio-art-prompt");
+    try {
+      if (navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(value);
+      else { field.value = value; field.focus(); field.select(); if (!document.execCommand("copy")) throw new Error("copy failed"); }
+    } catch { field.value = value; field.focus(); field.select(); window.alert("No se pudo copiar automáticamente. El prompt quedó seleccionado para copiarlo manualmente."); }
+  }
+  get<HTMLTextAreaElement>("studio-art-prompt").addEventListener("input", () => { promptEdited = true; });
+  get<HTMLButtonElement>("studio-art-prompt-refresh").onclick = () => refreshPrompt(true);
+  get<HTMLButtonElement>("studio-art-prompt-copy").onclick = () => { void copyText(get<HTMLTextAreaElement>("studio-art-prompt").value); };
+  ["studio-art-name", "studio-art-kind", "studio-art-element", "studio-art-frame"].forEach(id => {
+    get<HTMLElement>(id).addEventListener("input", () => refreshPrompt());
+  });
   ["studio-art-name", "studio-art-kind", "studio-art-rarity", "studio-art-element", "studio-art-atk", "studio-art-hp", "studio-art-scale", "studio-art-frame"].forEach(id => {
     get<HTMLElement>(id).addEventListener("input", draw);
   });
+  refreshPrompt(true);
   get<HTMLInputElement>("studio-art-file").onchange = event => {
     const file = (event.currentTarget as HTMLInputElement).files?.[0];
     if (!file) return;
@@ -117,7 +173,7 @@ export function openCardStudio(): void {
   };
   get<HTMLButtonElement>("studio-art-export").onclick = () => { draw(); exportPng(); };
   get<HTMLButtonElement>("studio-art-save").onclick = () => {
-    draw(); gallery.unshift({ name: get<HTMLInputElement>("studio-art-name").value || "Carta sin nombre", data: canvas.toDataURL("image/png") }); renderGallery();
+    draw(); gallery.unshift({ name: get<HTMLInputElement>("studio-art-name").value || "Carta sin nombre", data: canvas.toDataURL("image/png"), prompt: get<HTMLTextAreaElement>("studio-art-prompt").value }); renderGallery();
   };
   const close = () => { if (objectUrl) URL.revokeObjectURL(objectUrl); overlay.remove(); };
   get<HTMLButtonElement>("studioClose").onclick = close;
