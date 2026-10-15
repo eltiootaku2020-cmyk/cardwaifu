@@ -176,6 +176,17 @@ export function openCardStudio(): void {
       else if (lower.includes("drag")) tags.splice(3, 1, "dragon horns", "scales", "long tail");
       else if (lower.includes("araña") || lower.includes("spider")) tags.splice(3, 1, "spider legs", "silk details", "red eyes");
       else if (lower.includes("espectro") || lower.includes("ghost")) tags.splice(3, 1, "ghostly hair", "floating body", "glowing eyes");
+      else if (lower.includes("slime") || lower.includes("gelatina")) tags.splice(3, 1, "translucent slime hair", "glossy skin", "liquid ribbons");
+      else if (lower.includes("arpía") || lower.includes("harpy")) tags.splice(3, 1, "feathered wings", "bird talons", "feathered ears");
+      else if (lower.includes("vampira") || lower.includes("vampire")) tags.splice(3, 1, "long fangs", "pale skin", "bat wings");
+      else if (lower.includes("súcubo") || lower.includes("succubus")) tags.splice(3, 1, "curved horns", "demon tail", "bat wings");
+      else if (lower.includes("gólem") || lower.includes("golem")) tags.splice(3, 1, "stone skin", "crystal joints", "glowing cracks");
+      else if (lower.includes("lobo") || lower.includes("wolf")) tags.splice(3, 1, "wolf ears", "fluffy tail", "sharp claws");
+      else if (lower.includes("serpiente") || lower.includes("snake")) tags.splice(3, 1, "snake tail", "scale patterns", "forked tongue");
+      else if (lower.includes("sirena") || lower.includes("mermaid")) tags.splice(3, 1, "fish tail", "fin ears", "pearl ornaments");
+      else if (lower.includes("esqueleto") || lower.includes("skeleton")) tags.splice(3, 1, "bone horns", "glowing eye sockets", "rib armor");
+      else if (lower.includes("murciélago") || lower.includes("bat girl")) tags.splice(3, 1, "bat ears", "leathery wings", "small fangs");
+      else if (lower.includes("mimic")) tags.splice(3, 1, "living treasure chest shell", "sharp teeth", "long tongue");
     }
     if (frame === "gold" && (kind === "Arma" || kind === "Equipamiento")) tags.push("gold details");
     if (name) tags.push(name);
