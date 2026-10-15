@@ -18,7 +18,7 @@ test("player resources and form stage persist in SQLite with battle state", () =
   const player = getOrCreatePlayer("player-test-1", "Prueba");
   const battle = createBattle("Vínculo · Lily", player.alma, player.formStage, player.anima);
   battle.player.anima = 60;
-  const evolved = act(battle, "evolve");
+  const evolved = act(battle, "evolve-light");
 
   saveBattleProgress(player.telegramId, evolved);
 
@@ -86,7 +86,7 @@ test("evolution in one battle synchronizes alma and form for another battle", ()
     stage: player.formStage,
     player: { ...first.player, anima: 60 }
   };
-  const evolved = act(baseA, "evolve");
+  const evolved = act(baseA, "evolve-light");
   const savedEvolution = saveBattleProgress(player.telegramId, evolved, baseA);
   assert.equal(savedEvolution.alma, 75);
   assert.equal(savedEvolution.stage, "Hero");
