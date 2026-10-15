@@ -58,9 +58,19 @@ app.post("/api/battle/action", (req, res) => {
     if (!entry) return res.status(404).json({ error: "Combate no encontrado." });
     if (entry.ownerId !== currentPlayer.telegramId) return res.status(403).json({ error: "Este combate pertenece a otro jugador." });
     if (!allowed.includes(action as BattleAction)) return res.status(400).json({ error: "Acción inválida." });
-    const next = act(entry.battle, action as BattleAction);
-    saveBattleProgress(currentPlayer.telegramId, next);
-    res.json({ battle: next });
+    const resourceBase = {
+      ...entry.battle,
+      alma: currentPlayer.alma,
+      stage: currentPlayer.formStage,
+      player: {
+        ...entry.battle.player,
+        anima: currentPlayer.anima,
+        name: entry.battle.player.name.replace(/ · (Lily|Hero|Epic)$/, "") + " · " + currentPlayer.formStage
+      }
+    };
+    const next = act(resourceBase, action as BattleAction);
+    const savedBattle = saveBattleProgress(currentPlayer.telegramId, next, resourceBase);
+    res.json({ battle: savedBattle });
   } catch (error) {
     res.status(500).json({ error: error instanceof Error ? error.message : "No se pudo guardar el combate." });
   }
