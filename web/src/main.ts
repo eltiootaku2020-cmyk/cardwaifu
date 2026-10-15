@@ -1,4 +1,6 @@
 import "./style.css";
+import "./battle-vfx.css";
+import { installBattleVfx } from "./battle-vfx.js";
 import { openCardStudio } from "./card-studio.js";
 
 declare global {
@@ -27,12 +29,15 @@ type WorldView = {
   current: WorldNode; destinations: WorldNode[];
 };
 const root = document.querySelector<HTMLDivElement>("#app")!;
+installBattleVfx(root);
 const tg = window.Telegram?.WebApp;
 tg?.ready();
 tg?.expand();
 let battle: Battle | null = null;
 let world: WorldView | null = null;
 let linkedHeroine: HeroineCard | null = null;
+let lastBattleAction: string | null = null;
+let summonReveal = false;
 let summonNote = "Tu primera carta elegirá una heroína consciente.";
 let resources = { alma: 100, anima: 0 };
 let rewards: PlayerRewards = { xp: 0, coins: 0, materials: 0, level: 1, xpIntoLevel: 0, xpForNextLevel: 100 };
@@ -91,12 +96,12 @@ function renderLoadout(): string {
 function render() {
   root.innerHTML = `<header class="top"><div class="brand"><span class="logo">✦</span><div><b>UMBRA</b><small>CARD FRONTIER</small></div></div><span class="resource">◈ Alma <b>${battle?.alma ?? resources.alma}</b> · Ánima <b>${battle?.player.anima ?? resources.anima}</b> · Nv. <b>${rewards.level}</b> · XP <b>${rewards.xp}</b></span></header>
   <main>
-    <section class="welcome panel"><p class="eyebrow">CRÓNICAS · CAPÍTULO 01</p><h1>Las leyendas<br>despiertan.</h1><p class="muted">Explora ruinas, crea vínculos y rescata epopeyas de eras olvidadas.</p>
+    <section class="welcome panel ${summonReveal ? "gacha-reveal" : ""}">${summonReveal ? `<div class="summon-ceremony" aria-live="polite"><span class="summon-sigil">✦</span><strong>LA CARTA HA ELEGIDO</strong><small>VÍNCULO ESTABLECIDO</small></div>` : ""}<p class="eyebrow">CRÓNICAS · CAPÍTULO 01</p><h1>Las leyendas<br>despiertan.</h1><p class="muted">Explora ruinas, crea vínculos y rescata epopeyas de eras olvidadas.</p>
       <div class="gender"><button data-gender="Mujer" class="${gender === "Mujer" ? "selected" : ""}">Protagonista mujer</button><button data-gender="Hombre" class="${gender === "Hombre" ? "selected" : ""}">Protagonista hombre</button></div>
       <div class="backview"><div class="halo"></div><div class="figure"><div class="head"></div><div class="body"></div><div class="cape"></div></div><span>VISTA DESDE ATRÁS · ROSTRO OCULTO</span></div>
       <button class="primary full" id="summon" ${linkedHeroine ? "disabled" : ""}>${linkedHeroine ? "✦ Primera invocación completada" : "✦ Realizar primera invocación"}</button>
       <p class="muted summon-note">${escapeHtml(linkedHeroine ? "Vínculo establecido: " + linkedHeroine.name + " · " + linkedHeroine.rarity : summonNote)}</p>
-      ${linkedHeroine ? `<div class="linked-heroine"><span class="rarity-pill">${escapeHtml(linkedHeroine.rarity)}</span><div><b>${escapeHtml(linkedHeroine.name)}</b><small>${escapeHtml(linkedHeroine.heroClass)} · Forma inicial ${escapeHtml(linkedHeroine.stage)}</small><p>${escapeHtml(linkedHeroine.description)}</p></div></div>` : ""}
+      ${linkedHeroine ? `<div class="linked-heroine ${summonReveal ? "reveal-card" : ""}" data-rarity="${escapeHtml(linkedHeroine.rarity)}"><span class="rarity-pill">${escapeHtml(linkedHeroine.rarity)}</span><div><b>${escapeHtml(linkedHeroine.name)}</b><small>${escapeHtml(linkedHeroine.heroClass)} · Forma inicial ${escapeHtml(linkedHeroine.stage)}</small><p>${escapeHtml(linkedHeroine.description)}</p></div></div>` : ""}
       <button class="primary full" id="start" ${linkedHeroine && world && (world.current.event === "encounter" || world.current.event === "boss") ? "" : "disabled"}>⚔ ${world && world.current.event === "boss" ? "Enfrentar amenaza mayor" : "Combatir en esta zona"}</button>
     </section>
     ${renderWorld()}
@@ -126,7 +131,32 @@ function drawBattle() {
   const bar = (value: number, max: number) => Math.max(0, value / max * 100);
   const actions = ["attack", "skill", "defend", "evade", "charge", "evolve-light", "evolve-dark"] as const;
   const labels: Record<typeof actions[number], string> = { attack: "⚔ Atacar", skill: "✧ Habilidad", defend: "🛡 Defender", evade: "💨 Evadir", charge: "⚡ Cargar", "evolve-light": "✦ Evolucionar Light", "evolve-dark": "☾ Evolucionar Dark" };
-  el.innerHTML = `<div class="fight-grid"><div><b>✦ ${escapeHtml(current.player.name)}</b><div class="hp"><i style="width:${bar(current.player.hp, current.player.maxHp)}%"></i></div><small>${current.player.hp}/${current.player.maxHp} HP · ${current.player.anima} Ánima · Forma ${current.stage}${current.branch ? " " + current.branch : ""}</small></div><div><b>☠ ${escapeHtml(current.enemy.name)}</b><div class="hp enemy"><i style="width:${bar(current.enemy.hp, current.enemy.maxHp)}%"></i></div><small>${current.enemy.hp}/${current.enemy.maxHp} HP</small></div></div><div class="actions">${actions.map(action => `<button data-action="${action}" ${current.status !== "active" || ((action === "evolve-light" || action === "evolve-dark") && (current.stage === "Epic" || current.evolved || (action === "evolve-dark" && !current.darkAvailable) || (current.branch !== null && current.branch !== (action === "evolve-dark" ? "Dark" : "Light")))) ? "disabled" : ""}>${labels[action]}</button>`).join("")}</div><div class="log">${current.log.slice(-4).map(line => "<p>" + escapeHtml(line) + "</p>").join("")}</div>`;
+  const enemyName = current.enemy.name.toLowerCase();
+  const enemyArchetype = enemyName.includes("goblin") ? "goblin" : enemyName.includes("miasma") ? "miasma" : enemyName.includes("sabuesa") || enemyName.includes("lobo") ? "beast" : current.enemy.maxHp >= 140 ? "boss" : "forest";
+  const biome = world?.current.kind ?? "path";
+  const locationName = world?.current.name ?? "Bosque Oscuro";
+  const action = lastBattleAction ?? "";
+  const actionLabels: Record<string, string> = { attack: "CORTE COORDINADO", skill: "TÉCNICA HEROICA", defend: "GUARDIA", evade: "EVASIÓN", charge: "ACUMULANDO ÁNIMA", "evolve-light": "MANIFESTACIÓN · LIGHT", "evolve-dark": "MANIFESTACIÓN · DARK" };
+  const bar = (value: number, max: number) => Math.max(0, value / max * 100);
+  const actions = ["attack", "skill", "defend", "evade", "charge", "evolve-light", "evolve-dark"] as const;
+  const labels: Record<typeof actions[number], string> = { attack: "⚔ Atacar", skill: "✧ Habilidad", defend: "🛡 Defender", evade: "💨 Evadir", charge: "⚡ Cargar", "evolve-light": "✦ Evolucionar Light", "evolve-dark": "☾ Evolucionar Dark" };
+  el.innerHTML = `<div class="battle-scene biome-${escapeHtml(biome)}" data-biome="${escapeHtml(biome)}" data-battle-id="${escapeHtml(current.id)}" data-action="${escapeHtml(action)}" data-battle-status="${current.status}">
+    <div class="scene-backdrop" aria-hidden="true"><span class="scene-tree tree-a"></span><span class="scene-tree tree-b"></span><span class="scene-fog fog-one"></span><span class="scene-fog fog-two"></span><span class="scene-location">${escapeHtml(locationName)}</span></div>
+    <div class="battle-hud"><span>PROTOCOLO DE COMBATE · TURNO <b>${current.turn}</b></span><span>ÁNIMA <b>${current.player.anima}</b> · ALMA <b>${current.alma}</b></span></div>
+    <div class="fight-grid">
+      <div class="combatant-panel player-panel" data-combatant="player" data-hp="${current.player.hp}" data-max-hp="${current.player.maxHp}">
+        <div class="unit-portrait heroine-portrait" aria-hidden="true"><span class="portrait-silhouette"><i></i></span><span class="portrait-mark">${current.branch === "Dark" ? "☾" : current.stage === "Lily" ? "⌁" : "✦"}</span></div>
+        <div class="unit-info"><b>✦ ${escapeHtml(current.player.name)}</b><div class="hp"><i style="width:${bar(current.player.hp, current.player.maxHp)}%"></i></div><small>${current.player.hp}/${current.player.maxHp} HP · ATQ ${current.player.attack}</small><div class="combat-status">PORTADORA · ${current.stage.toUpperCase()}${current.branch ? " · " + current.branch.toUpperCase() : ""}</div></div>
+      </div>
+      <div class="combatant-panel enemy-panel" data-enemy="${enemyArchetype}" data-threat="${current.enemy.maxHp >= 140 ? "boss" : "standard"}" data-combatant="enemy" data-hp="${current.enemy.hp}" data-max-hp="${current.enemy.maxHp}">
+        <div class="unit-portrait enemy-portrait" aria-hidden="true"><span class="portrait-silhouette"><i></i></span><span class="portrait-mark">${enemyArchetype === "goblin" ? "⌁" : enemyArchetype === "miasma" ? "☾" : enemyArchetype === "beast" ? "♧" : "◈"}</span></div>
+        <div class="unit-info"><b>☠ ${escapeHtml(current.enemy.name)}</b><div class="hp enemy"><i style="width:${bar(current.enemy.hp, current.enemy.maxHp)}%"></i></div><small>${current.enemy.hp}/${current.enemy.maxHp} HP</small><div class="combat-status">${current.enemy.maxHp >= 140 ? "AMENAZA MAYOR" : "OBJETIVO HOSTIL"}</div></div>
+      </div>
+    </div>
+    ${action && actionLabels[action] ? `<div class="power-banner active" data-power="${escapeHtml(action)}">${escapeHtml(actionLabels[action])}</div>` : ""}
+    <div class="actions">${actions.map(actionName => `<button data-action="${actionName}" ${current.status !== "active" || ((actionName === "evolve-light" || actionName === "evolve-dark") && (current.stage === "Epic" || current.evolved || (actionName === "evolve-dark" && !current.darkAvailable) || (current.branch !== null && current.branch !== (actionName === "evolve-dark" ? "Dark" : "Light")))) ? "disabled" : ""}>${labels[actionName]}</button>`).join("")}</div>
+    <div class="log">${current.log.slice(-4).map(line => "<p>" + escapeHtml(line) + "</p>").join("")}</div>
+  </div>`;
   el.querySelectorAll<HTMLButtonElement>("[data-action]").forEach(button => button.onclick = () => void act(button.dataset.action ?? ""));
 }
 async function startBattle() {
@@ -151,6 +181,8 @@ async function act(action: string) {
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "No se pudo resolver la acción.");
     battle = data.battle as Battle;
+    lastBattleAction = action;
+    window.setTimeout(() => { if (lastBattleAction === action) lastBattleAction = null; }, 1100);
     resources = { alma: battle!.alma, anima: battle!.player.anima };
     if (data.rewards) rewards = data.rewards as PlayerRewards;
     note = data.rewardGranted ? "¡Victoria! Recompensas: +" + (data.rewards?.xp ?? 0) + " XP, +" + (data.rewards?.coins ?? 0) + " monedas y +" + (data.rewards?.materials ?? 0) + " materiales." : "Acción validada por el servidor.";
@@ -160,6 +192,7 @@ async function act(action: string) {
   render();
 }
 async function summonFirst() {
+  summonReveal = false;
   summonNote = "La carta está buscando a su portadora…";
   render();
   try {
@@ -167,11 +200,13 @@ async function summonFirst() {
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "No se pudo realizar la invocación.");
     linkedHeroine = data.heroine as HeroineCard;
+    summonReveal = Boolean(data.created);
     summonNote = data.created ? "La carta te ha elegido. El vínculo queda guardado." : "Tu vínculo anterior ha sido restaurado; no se ha gastado otra invocación.";
   } catch (error) {
     summonNote = error instanceof Error ? error.message : "No se pudo completar la invocación.";
   }
   render();
+  if (summonReveal) window.setTimeout(() => { summonReveal = false; }, 2700);
 }
 async function loadCollection() {
   try {
