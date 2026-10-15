@@ -7,9 +7,9 @@ export function createBattle(heroName = "Heroína vinculada"): BattleState {
   return {
     id: randomUUID(), turn: 0, alma: 100,
     player: { name: heroName, hp: 100, maxHp: 100, attack: 24, anima: 0 },
-    enemy: { name: "Perro contaminado", hp: 82, maxHp: 82, attack: 12, anima: 0 },
+    enemy: { name: "Sabuesa contaminada", hp: 82, maxHp: 82, attack: 12, anima: 0 },
     status: "active", evolved: false,
-    log: ["Una criatura contaminada bloquea el camino."]
+    log: ["Una sabuesa contaminada bloquea el camino."]
   };
 }
 
