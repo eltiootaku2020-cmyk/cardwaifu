@@ -22,10 +22,11 @@ test("attack deals damage and generates anima", () => {
 test("skill deals damage, heals, and generates anima", () => {
   const battle = createBattle();
   battle.player.hp = 80;
+  battle.player.anima = 20;
   const next = act(battle, "skill");
   assert.ok(next.enemy.hp < battle.enemy.hp);
-  assert.equal(next.player.anima, 18);
-  assert.ok(next.log.some((line) => line.includes("+8 HP")));
+  assert.equal(next.player.anima, 4);
+  assert.ok(next.log.some((line) => line.includes("+5 HP")));
   assert.ok(next.player.hp <= next.player.maxHp);
 });
 
@@ -114,4 +115,30 @@ test("a heroine without Dark access cannot choose the Dark branch", () => {
   assert.equal(result.stage, "Lily");
   assert.equal(result.branch, null);
   assert.ok(result.log.some(line => line.includes("no puede manifestar la rama Dark")));
+});
+
+
+test("skill requires anima and cannot be repeated for free", () => {
+  const battle = createBattle();
+  const next = act(battle, "skill");
+  assert.equal(next.enemy.hp, battle.enemy.hp);
+  assert.equal(next.player.anima, 0);
+  assert.ok(next.log.some(line => line.includes("Necesitas 20 Ánima")));
+});
+
+test("enemy intent telegraphs a heavy attack and defense mitigates it", () => {
+  const battle = createBattle("Portadora", 100, "Lily", 0, "Goblin guardiana", 180, 12, 24, 100);
+  battle.enemy.intent = "heavy-attack";
+  const next = act(battle, "defend");
+  assert.ok(next.log.some(line => line.includes("golpe cargado")));
+  assert.ok(next.player.hp >= 88);
+  assert.equal(next.enemy.intent, "quick-attack");
+});
+
+test("charging builds anima while exposing the player to the announced attack", () => {
+  const battle = createBattle();
+  const next = act(battle, "charge");
+  assert.equal(next.player.anima, 25);
+  assert.ok(next.player.hp < battle.player.hp);
+  assert.equal(next.enemy.intent, "quick-attack");
 });
