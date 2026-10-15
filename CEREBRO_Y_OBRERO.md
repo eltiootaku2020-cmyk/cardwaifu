@@ -40,6 +40,12 @@ Capítulos, cacerías, jefes, eventos y misiones. PvP y cooperación contra jefe
 ## Arquitectura preferida
 Mini App TypeScript/Vite, API Express, bot grammY y SQLite inicial. Mantener reglas de combate, recursos, inventario y permisos en servidor. Validar Telegram WebApp initData con HMAC en servidor; no confiar en initDataUnsafe. Secretos en .env. Godot no es necesario para el MVP de cartas por turnos.
 
+## Bucle jugable y exploración
+
+La especificación ampliada está en [docs/DISENO_JUGABLE_Y_SISTEMAS.md](./docs/DISENO_JUGABLE_Y_SISTEMAS.md). El ciclo principal es ciudad → preparación → rutas conectadas → evento/combate → recompensas → regreso o continuación. La región inicial se representa como un grafo de lugares; cada destino requiere conexión desde la ubicación actual. El servidor guarda la ubicación y el historial de lugares visitados en SQLite. El mapa inicial de implementación incluye Aldea Bruma, Sendero del Musgo, Puesto de Vigilia, Manantial de Luna, Ruinas del Camino Viejo, Refugio del Barranco y Umbral del Abismo Menor. Los encuentros y eventos todavía deben conectarse con resolución de combate/recompensas antes de considerar la expedición un sistema completo.
+
+Regla de vestiduras: una misma epopeya comparte símbolos y lenguaje visual entre portadoras; cada portadora combina la vestidura con su cuerpo, personalidad y ropa cotidiana. La ropa puede fusionarse con la epopeya durante el combate. La mayoría de atuendos son cosméticos; variantes jugables y vestiduras con habilidades deben diferenciarse. Los detalles pendientes no se canonizan automáticamente por aparecer en la especificación ampliada.
+
 ## Pendiente
 Fórmula de daño, estados, economía definitiva, probabilidades/pity, recetas de ruptura, equipo/slots, catálogo inicial de personajes, capítulos y jefes, despliegue, moderación y privacidad.
 
