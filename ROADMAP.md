@@ -14,7 +14,7 @@
 - [ ] Colección persistente y rarezas R/S/SR/SSR/UR.
 - [ ] Combate por turnos resuelto en servidor con enemigos/patrones, estados y recompensas.
 - [ ] Alma y Ánima separados y sin condiciones de carrera en acciones simultáneas.
-- [ ] Formas Lily → Hero → Epic, ramas Light/Dark y una evolución por batalla.
+- [x] Formas Lily → Hero → Epic, ramas Light/Dark, elección explícita y persistencia entre combates; una evolución por batalla.
 - [ ] Capítulo 1, enemigos comunes y jefe.
 - [x] Región inicial con rutas conectadas y progreso de viaje guardado en SQLite.
 - [x] Encuentros ligados a lugares peligrosos y arquetipos de enemigos definidos en servidor.
