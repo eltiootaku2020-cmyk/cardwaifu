@@ -13,6 +13,7 @@ type Battle = {
   enemy: { name: string; hp: number; maxHp: number };
   status: string; evolved?: boolean; log: string[];
 };
+type PlayerRewards = { xp: number; coins: number; materials: number; level: number; xpIntoLevel: number; xpForNextLevel: number };
 type WorldNode = {
   id: string; name: string; kind: string; danger: number; levelRange: string;
   description: string; event: string; connections: string[];
@@ -31,6 +32,7 @@ let world: WorldView | null = null;
 let linkedHeroine: HeroineCard | null = null;
 let summonNote = "Tu primera carta elegirá una heroína consciente.";
 let resources = { alma: 100, anima: 0 };
+let rewards: PlayerRewards = { xp: 0, coins: 0, materials: 0, level: 1, xpIntoLevel: 0, xpForNextLevel: 100 };
 let gender = "Mujer";
 let note = "Elige tu vínculo y entra en el primer encuentro.";
 let worldNote = "Cargando rutas de la expedición…";
@@ -66,7 +68,7 @@ function renderWorld(): string {
   </section>`;
 }
 function render() {
-  root.innerHTML = `<header class="top"><div class="brand"><span class="logo">✦</span><div><b>UMBRA</b><small>CARD FRONTIER</small></div></div><span class="resource">◈ Alma <b>${battle?.alma ?? resources.alma}</b> · Ánima <b>${battle?.player.anima ?? resources.anima}</b></span></header>
+  root.innerHTML = `<header class="top"><div class="brand"><span class="logo">✦</span><div><b>UMBRA</b><small>CARD FRONTIER</small></div></div><span class="resource">◈ Alma <b>${battle?.alma ?? resources.alma}</b> · Ánima <b>${battle?.player.anima ?? resources.anima}</b> · Nv. <b>${rewards.level}</b> · XP <b>${rewards.xp}</b></span></header>
   <main>
     <section class="welcome panel"><p class="eyebrow">CRÓNICAS · CAPÍTULO 01</p><h1>Las leyendas<br>despiertan.</h1><p class="muted">Explora ruinas, crea vínculos y rescata epopeyas de eras olvidadas.</p>
       <div class="gender"><button data-gender="Mujer" class="${gender === "Mujer" ? "selected" : ""}">Protagonista mujer</button><button data-gender="Hombre" class="${gender === "Hombre" ? "selected" : ""}">Protagonista hombre</button></div>
@@ -205,5 +207,5 @@ void loadWorld();
 void restoreActiveBattle();
 void fetch("/api/me", { headers: headers() }).then(async response => {
   const data = await response.json();
-  if (response.ok && data.player) { resources = { alma: data.player.alma, anima: data.player.anima }; render(); }
+  if (response.ok && data.player) { resources = { alma: data.player.alma, anima: data.player.anima }; if (data.rewards) rewards = data.rewards as PlayerRewards; render(); }
 }).catch(() => {});
