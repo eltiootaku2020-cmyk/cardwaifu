@@ -150,7 +150,7 @@ app.post("/api/battle/action", (req, res) => {
     const currentPlayer = player(req);
     const id = typeof req.body?.battleId === "string" ? req.body.battleId : "";
     const action: string = typeof req.body?.action === "string" ? req.body.action : "";
-    const allowed: BattleAction[] = ["attack", "skill", "defend", "evade", "charge", "evolve"];
+    const allowed: BattleAction[] = ["attack", "skill", "defend", "evade", "charge", "evolve", "evolve-light", "evolve-dark"];
     const entry = getBattle(id);
     if (!entry) return res.status(404).json({ error: "Combate no encontrado." });
     if (entry.ownerId !== currentPlayer.telegramId) return res.status(403).json({ error: "Este combate pertenece a otro jugador." });
@@ -162,7 +162,7 @@ app.post("/api/battle/action", (req, res) => {
       player: {
         ...entry.battle.player,
         anima: currentPlayer.anima,
-        name: entry.battle.player.name.replace(/ · (Lily|Hero|Epic)$/, "") + " · " + currentPlayer.formStage
+        name: entry.battle.player.name.replace(/ · (Lily|Hero|Epic)(?: (Light|Dark))?$/, "") + " · " + currentPlayer.formStage + (currentPlayer.formBranch ? " " + currentPlayer.formBranch : "")
       }
     };
     const next = act(resourceBase, action as BattleAction);
