@@ -57,6 +57,23 @@ La historia principal no debe quedar bloqueada por Alma. La falta de Alma impide
 - La rama Light prioriza aguante: +8 ATQ y +20 vida máxima en el prototipo actual. La rama Dark prioriza daño: +13 ATQ y +10 vida máxima. Son valores iniciales de balance, no números sagrados. Una heroína sin acceso Dark no puede elegir esa rama; no se puede cambiar de rama durante la evolución normal.
 - El daño debe ser predecible en lo esencial; el azar aporta variación acotada. La preparación y las decisiones deben superar a la suerte en la mayoría de encuentros.
 
+### Principios de dificultad justa
+
+El análisis de investigación y el plan de pruebas están en [docs/ANALISIS_DIFICULTAD_JUSTA.md](./ANALISIS_DIFICULTAD_JUSTA.md). Se aplican estas reglas al diseño de encuentros:
+
+- Cada enemiga peligrosa expone una intención legible, un objetivo o zona probable y una forma razonable de responder. La información debe proceder del estado del servidor.
+- Las acciones base han de tener usos distintos; si una habilidad es mejor en daño, curación y generación de Ánima a la vez sin coste, no existe una decisión real. Reequilibrar antes de subir las estadísticas enemigas.
+- Aumentar la dificultad mediante roles y combinaciones —apoyo, cazadora, guardiana, amenaza cargada, corrupción— antes que mediante esponjas de HP. Introducir una mecánica nueva cada vez y luego combinar las ya aprendidas.
+- Alternar tensión y alivio en la curva: encuentros de aprendizaje, enfrentamientos normales, combinaciones tácticas, descansos/recompensas, élites opcionales y jefes. Los valores orientativos de turnos y tasas de victoria son hipótesis para playtest, no balance final.
+- La derrota no elimina cartas ni materiales raros, no borra descubrimientos y no consume Alma al reintentar encuentros obligatorios de historia. Después de derrotas repetidas, ofrecer pistas y preparar mejor al jugador; no ajustar enemigos a escondidas.
+- El RNG debe crear variedad, no invalidar decisiones. Cuando falla la suerte, el jugador debe conservar alguna forma de progreso garantizado en botín, materiales, fragmentos o aprendizaje.
+
+### Prueba de progresión del protagonista S frente a una carta SR
+
+La S del protagonista podrá recibir duplicados y tendrá costes de ascensión crecientes, mostrados antes de confirmar y ganables también mediante juego. No debe necesitar duplicados para completar la historia principal. La SR debe ser más sencilla de desarrollar usando recursos comunes, sin convertir la carta S en una mala inversión por ser cara.
+
+La comparación se hará en encuentros y condiciones equivalentes, midiendo victoria/derrota, turnos, daño recibido, recursos usados, mejoras necesarias y comprensión del patrón enemigo. Se probarán tanto inversión equivalente como tiempo/recursos equivalentes. Si la S base no resulta viable o la SR borra todo valor táctico de la S, se ajustan costes, función y mejoras antes de aumentar el HP de los enemigos. Los costes y metas concretas permanecen pendientes de los resultados.
+
 ### Estados de combate sugeridos
 - Veneno: daño al final del turno durante varios turnos.
 - Quemadura: daño periódico, con interacción contra enemigos vegetales o aceitosos.
