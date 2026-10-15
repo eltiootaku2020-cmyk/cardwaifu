@@ -58,3 +58,24 @@ test("a finished battle cannot be played again", () => {
   battle.status = "won";
   assert.equal(act(battle, "attack"), battle);
 });
+
+test("Lily evolves to Hero and a Hero can reach Epic in a later battle", () => {
+  const lily = createBattle("Vínculo · Lily", 100, "Lily");
+  lily.player.anima = 60;
+  const hero = act(lily, "evolve");
+  assert.equal(hero.stage, "Hero");
+  assert.equal(hero.alma, 75);
+  assert.equal(hero.player.anima, 0);
+
+  const nextBattle = createBattle("Vínculo · Hero", hero.alma, hero.stage, 60);
+  const epic = act(nextBattle, "evolve");
+  assert.equal(epic.stage, "Epic");
+  assert.equal(epic.alma, 50);
+});
+
+test("Epic cannot evolve beyond the final form", () => {
+  const epic = createBattle("Vínculo · Epic", 100, "Epic", 80);
+  const next = act(epic, "evolve");
+  assert.equal(next.stage, "Epic");
+  assert.ok(next.log.some((line) => line.includes("ya alcanzó la forma Epic")));
+});
