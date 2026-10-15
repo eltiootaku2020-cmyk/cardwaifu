@@ -46,6 +46,17 @@ La especificación ampliada está en [docs/DISENO_JUGABLE_Y_SISTEMAS.md](./docs/
 
 Regla de vestiduras: una misma epopeya comparte símbolos y lenguaje visual entre portadoras; cada portadora combina la vestidura con su cuerpo, personalidad y ropa cotidiana. La ropa puede fusionarse con la epopeya durante el combate. La mayoría de atuendos son cosméticos; variantes jugables y vestiduras con habilidades deben diferenciarse. Los detalles pendientes no se canonizan automáticamente por aparecer en la especificación ampliada.
 
+## Estado de implementación (código, no despliegue)
+
+- Añadido catálogo inicial de heroínas con presentación femenina y grupo de primera invocación separado de Tiny para preservar su revelación narrativa.
+- Añadida primera invocación aleatoria única por cuenta y persistencia de la heroína vinculada en SQLite; el servidor decide el resultado.
+- Añadido mapa inicial del Bosque Oscuro como grafo de rutas conectadas; ubicación e historial de visitas se guardan en SQLite.
+- Añadidos puntos de encuentro ligados a la ubicación actual, con enemigos y atributos por arquetipo.
+- Añadido equipo inicial con cuatro espacios (arma, equipamiento, accesorio y apoyo), selección guardada y bonificaciones aplicadas al combate.
+- Añadidas recompensas de victoria (XP, monedas y materiales) con actualización atómica y sin duplicar la recompensa al repetir una acción sobre una batalla ya finalizada.
+- La interfaz muestra el nivel/XP y permite invocar, equipar, recorrer rutas y combatir. El taller de cartas sigue siendo una herramienta de administración separada.
+- Build, typecheck y pruebas automatizadas pasan en GitHub Actions para el commit de interfaz/equipamiento. Aún no se ha desplegado ni probado dentro de un bot Telegram real.
+
 ## Pendiente
 Fórmula de daño, estados, economía definitiva, probabilidades/pity, recetas de ruptura, equipo/slots, catálogo inicial de personajes, capítulos y jefes, despliegue, moderación y privacidad.
 
