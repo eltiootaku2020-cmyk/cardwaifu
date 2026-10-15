@@ -128,9 +128,6 @@ function drawBattle() {
   const current = battle;
   if (!el) return;
   if (!current) { el.innerHTML = ""; return; }
-  const bar = (value: number, max: number) => Math.max(0, value / max * 100);
-  const actions = ["attack", "skill", "defend", "evade", "charge", "evolve-light", "evolve-dark"] as const;
-  const labels: Record<typeof actions[number], string> = { attack: "⚔ Atacar", skill: "✧ Habilidad", defend: "🛡 Defender", evade: "💨 Evadir", charge: "⚡ Cargar", "evolve-light": "✦ Evolucionar Light", "evolve-dark": "☾ Evolucionar Dark" };
   const enemyName = current.enemy.name.toLowerCase();
   const enemyArchetype = enemyName.includes("goblin") ? "goblin" : enemyName.includes("miasma") ? "miasma" : enemyName.includes("sabuesa") || enemyName.includes("lobo") ? "beast" : current.enemy.maxHp >= 140 ? "boss" : "forest";
   const biome = world?.current.kind ?? "path";
