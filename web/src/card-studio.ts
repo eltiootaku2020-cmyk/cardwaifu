@@ -41,7 +41,31 @@ export function openCardStudio(): void {
   if (!ctx) { overlay.remove(); return; }
   let art: HTMLImageElement | null = null;
   let objectUrl = "";
-  const gallery: Array<{ name: string; data: string; prompt: string }> = [];
+  type GalleryCard = { name: string; data: string; prompt: string };
+  const gallery: GalleryCard[] = [];
+  const galleryStorageKey = "umbra-card-studio-gallery-v1";
+  const galleryLimit = 12;
+  try {
+    const stored: unknown = JSON.parse(localStorage.getItem(galleryStorageKey) ?? "[]");
+    if (Array.isArray(stored)) {
+      stored.slice(0, galleryLimit).forEach((item: unknown) => {
+        if (item && typeof item === "object" && "name" in item && "data" in item && "prompt" in item &&
+            typeof item.name === "string" && typeof item.data === "string" &&
+            item.data.startsWith("data:image/png;base64,") && typeof item.prompt === "string") {
+          gallery.push({ name: item.name.slice(0, 100), data: item.data, prompt: item.prompt.slice(0, 4000) });
+        }
+      });
+    }
+  } catch { /* El taller sigue funcionando si el almacenamiento está deshabilitado. */ }
+  function persistGallery(): boolean {
+    try {
+      localStorage.setItem(galleryStorageKey, JSON.stringify(gallery));
+      return true;
+    } catch {
+      window.alert("No se pudo guardar la galería en este navegador. Exporta tus cartas como PNG para conservarlas.");
+      return false;
+    }
+  }
   const themes: Record<string, [string, string, string]> = {
     arcane: ["#161c45", "#7f4ed0", "#b58cff"],
     flame: ["#35152c", "#c63d52", "#ffad71"],
@@ -101,9 +125,13 @@ export function openCardStudio(): void {
       const prompt = document.createElement("p"); prompt.className = "muted studio-note"; prompt.textContent = item.prompt; prompt.style.overflowWrap = "anywhere";
       const copyPrompt = document.createElement("button"); copyPrompt.className = "secondary"; copyPrompt.textContent = "Copiar prompt";
       copyPrompt.onclick = () => copyText(gallery[index].prompt);
+      const actions = document.createElement("div"); actions.className = "studio-buttons";
       const button = document.createElement("button"); button.className = "secondary"; button.textContent = "Exportar PNG";
       button.onclick = () => exportPng(gallery[index].data, gallery[index].name);
-      card.append(image, title, prompt, copyPrompt, button); galleryRoot.append(card);
+      const remove = document.createElement("button"); remove.className = "secondary"; remove.textContent = "Eliminar";
+      remove.onclick = () => { gallery.splice(index, 1); persistGallery(); renderGallery(); };
+      actions.append(button, remove);
+      card.append(image, title, prompt, copyPrompt, actions); galleryRoot.append(card);
     });
     get<HTMLSpanElement>("studio-art-count").textContent = gallery.length + (gallery.length === 1 ? " carta" : " cartas");
   }
@@ -186,10 +214,15 @@ export function openCardStudio(): void {
   };
   get<HTMLButtonElement>("studio-art-export").onclick = () => { draw(); exportPng(); };
   get<HTMLButtonElement>("studio-art-save").onclick = () => {
-    draw(); gallery.unshift({ name: get<HTMLInputElement>("studio-art-name").value || "Carta sin nombre", data: canvas.toDataURL("image/png"), prompt: get<HTMLTextAreaElement>("studio-art-prompt").value }); renderGallery();
+    draw();
+    gallery.unshift({ name: get<HTMLInputElement>("studio-art-name").value || "Carta sin nombre", data: canvas.toDataURL("image/png"), prompt: get<HTMLTextAreaElement>("studio-art-prompt").value });
+    if (gallery.length > galleryLimit) gallery.length = galleryLimit;
+    persistGallery();
+    renderGallery();
   };
   const close = () => { if (objectUrl) URL.revokeObjectURL(objectUrl); overlay.remove(); };
   get<HTMLButtonElement>("studio-close").onclick = close;
   overlay.addEventListener("click", event => { if (event.target === overlay) close(); });
+  renderGallery();
   draw();
 }
