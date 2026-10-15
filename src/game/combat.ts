@@ -1,15 +1,25 @@
 import { randomInt, randomUUID } from "node:crypto";
-import type { BattleState, FormBranch, FormStage } from "./types.js";
+import type { BattleState, EnemyIntent, FormBranch, FormStage } from "./types.js";
 
 export type BattleAction = "attack" | "skill" | "defend" | "evade" | "charge" | "evolve-light" | "evolve-dark";
+
+function nextIntent(turn: number): EnemyIntent {
+  return turn > 0 && turn % 3 === 0 ? "heavy-attack" : "quick-attack";
+}
+
+function intentLabel(intent: EnemyIntent | undefined): string {
+  if (intent === "heavy-attack") return "prepara un golpe cargado";
+  if (intent === "guard") return "se protege";
+  return "prepara un ataque rápido";
+}
 
 export function createBattle(heroName = "Heroína vinculada", alma = 100, stage: FormStage = "Lily", anima = 0, enemyName = "Sabuesa contaminada", enemyHp = 82, enemyAttack = 12, heroAttack = 24, heroMaxHp = 100, darkAvailable = true, branch: FormBranch = null): BattleState {
   return {
     id: randomUUID(), turn: 0, alma: Math.max(0, Math.min(100, Math.floor(alma))), stage, branch, darkAvailable,
     player: { name: heroName, hp: Math.max(1, heroMaxHp), maxHp: Math.max(1, heroMaxHp), attack: Math.max(1, heroAttack), anima: Math.max(0, Math.min(100, Math.floor(anima))) },
-    enemy: { name: enemyName, hp: Math.max(1, enemyHp), maxHp: Math.max(1, enemyHp), attack: Math.max(1, enemyAttack), anima: 0 },
+    enemy: { name: enemyName, hp: Math.max(1, enemyHp), maxHp: Math.max(1, enemyHp), attack: Math.max(1, enemyAttack), anima: 0, intent: "quick-attack" },
     status: "active", evolved: false,
-    log: [enemyName + " bloquea el camino."]
+    log: [enemyName + " bloquea el camino.", enemyName + " " + intentLabel("quick-attack") + "."]
   };
 }
 
@@ -19,6 +29,7 @@ export function act(battle: BattleState, action: BattleAction): BattleState {
   b.turn += 1;
   let guard = 0;
   let evading = false;
+  let interrupted = false;
 
   switch (action) {
     case "attack": {
@@ -29,22 +40,32 @@ export function act(battle: BattleState, action: BattleAction): BattleState {
       break;
     }
     case "skill": {
-      const damage = b.player.attack + 16 + randomInt(0, 8);
+      if (b.player.anima < 20) {
+        b.log.push("Necesitas 20 Ánima para usar la habilidad. Ataca o carga para reunir energía.");
+        break;
+      }
+      b.player.anima -= 20;
+      const damage = b.player.attack + 12 + randomInt(0, 7);
       b.enemy.hp = Math.max(0, b.enemy.hp - damage);
-      b.player.hp = Math.min(b.player.maxHp, b.player.hp + 8);
-      b.player.anima = Math.min(100, b.player.anima + 18);
-      b.log.push("Habilidad: " + damage + " de daño, +8 HP y +18 Ánima.");
+      const healed = Math.min(5, b.player.maxHp - b.player.hp);
+      b.player.hp += healed;
+      b.player.anima = Math.min(100, b.player.anima + 4);
+      b.log.push("Habilidad: " + damage + " de daño, +" + healed + " HP; coste neto 16 Ánima.");
+      if (b.enemy.intent === "heavy-attack" && damage >= 30) {
+        interrupted = true;
+        b.log.push("¡Interrupción! La técnica rompe el golpe cargado.");
+      }
       break;
     }
     case "defend":
-      guard = 8;
+      guard = b.enemy.intent === "heavy-attack" ? 18 : 8;
       b.player.anima = Math.min(100, b.player.anima + 8);
-      b.log.push("Defensa preparada.");
+      b.log.push(b.enemy.intent === "heavy-attack" ? "Guardia firme: preparada para el golpe cargado." : "Defensa preparada.");
       break;
     case "evade":
-      evading = true;
+      evading = b.enemy.intent !== "guard";
       b.player.anima = Math.min(100, b.player.anima + 6);
-      b.log.push("Evasión preparada.");
+      b.log.push(evading ? "Evasión preparada contra el ataque anunciado." : "La enemiga se protege; la evasión no obtiene ventaja.");
       break;
     case "charge":
       b.player.anima = Math.min(100, b.player.anima + 25);
@@ -90,12 +111,24 @@ export function act(battle: BattleState, action: BattleAction): BattleState {
     return b;
   }
 
-  const incoming = evading ? 0 : Math.max(1, b.enemy.attack + randomInt(0, 5) - guard);
-  b.player.hp = Math.max(0, b.player.hp - incoming);
-  b.log.push(incoming === 0 ? "Evasión perfecta." : "La criatura contraataca: " + incoming + " de daño.");
+  if (interrupted) {
+    b.log.push("La enemiga queda expuesta; no puede atacar este turno.");
+  } else if (b.enemy.intent === "guard") {
+    b.log.push("La enemiga mantiene su guardia y reduce el daño recibido en su próximo turno.");
+  } else {
+    const heavy = b.enemy.intent === "heavy-attack";
+    const incoming = evading ? 0 : Math.max(1, b.enemy.attack + (heavy ? 12 : randomInt(0, 5)) - guard);
+    b.player.hp = Math.max(0, b.player.hp - incoming);
+    b.log.push(incoming === 0 ? "Evasión perfecta: evitaste el ataque anunciado." : (heavy ? "Golpe cargado" : "La criatura contraataca") + ": " + incoming + " de daño.");
+  }
+
   if (b.player.hp <= 0) {
     b.status = "lost";
     b.log.push("Derrota: reagrúpate y vuelve a intentarlo.");
+    return b;
   }
+
+  b.enemy.intent = nextIntent(b.turn);
+  b.log.push(b.enemy.name + " " + intentLabel(b.enemy.intent) + ".");
   return b;
 }
