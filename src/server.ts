@@ -3,7 +3,7 @@ import { randomInt } from "node:crypto";
 import express from "express";
 import { resolve } from "node:path";
 import { createBattle, act, type BattleAction } from "./game/combat.js";
-import { getOrCreatePlayer, getBattle, getLatestActiveBattle, saveBattleProgress, getWorldProgress, saveWorldProgress, getInventory, grantFirstHeroine } from "./db.js";
+import { getOrCreatePlayer, getBattle, getLatestActiveBattle, saveBattleProgress, getWorldProgress, saveWorldProgress, getInventory, grantFirstHeroine, savePlayerFormStage } from "./db.js";
 import { getAvailableDestinations, getWorldNode, travelTo } from "./game/world.js";
 import { getFirstSummonPool, getHeroine } from "./game/catalog.js";
 import { validateTelegramInitData } from "./telegram/auth.js";
@@ -98,7 +98,18 @@ app.post("/api/battle/start", (req, res) => {
   try {
     const currentPlayer = player(req);
     const heroineName = typeof req.body?.heroineName === "string" ? req.body.heroineName.slice(0, 80) : "Heroína vinculada";
-    const battle = createBattle(heroineName, currentPlayer.alma, currentPlayer.formStage, currentPlayer.anima);
+    const progress = getWorldProgress(currentPlayer.telegramId);
+    const node = getWorldNode(progress.currentNodeId);
+    if (!node || (node.event !== "encounter" && node.event !== "boss")) {
+      return res.status(400).json({ error: "No hay una amenaza activa aquí. Explora una ruta marcada como posible encuentro o amenaza mayor." });
+    }
+    const encounters: Record<string, { name: string; hp: number; attack: number }> = {
+      "sendero-musgo": { name: "Sabuesa contaminada", hp: 82, attack: 12 },
+      "nido-goblin": { name: "Goblin cazadora", hp: 96, attack: 14 },
+      "entrada-abismo": { name: "Guardiana del Miasma", hp: 150, attack: 18 }
+    };
+    const encounter = encounters[node.id] ?? { name: "Exploradora hostil del bosque", hp: 90, attack: 13 };
+    const battle = createBattle(heroineName, currentPlayer.alma, currentPlayer.formStage, currentPlayer.anima, encounter.name, encounter.hp, encounter.attack);
     saveBattleProgress(currentPlayer.telegramId, battle);
     res.json({ battle });
   } catch (error) {
