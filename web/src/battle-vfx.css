@@ -469,12 +469,13 @@
   .battle-scene .actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .scene-backdrop::before, .scene-fog, .camera-impact, .taking-hit, .recovering,
-  .summon-ceremony, .summon-sigil, .reveal-card, .gacha-reveal, .power-banner.active,
+  .scene-backdrop::before, .scene-fog, .camera-impact, .taking-hit, .recovering, .impact-burst, .impact-burst i,
+  .summon-ceremony, .summon-sigil, .reveal-card, .reveal-card::after, .gacha-reveal, .gacha-reveal::before, .power-banner.active,
   .battle-scene[data-action] .unit-portrait, .battle-scene[data-action] .enemy-panel,
   .battle-scene[data-action] .player-panel, .battle-scene[data-battle-status="won"] .enemy-panel {
     animation-duration: .01ms !important;
     animation-iteration-count: 1 !important;
   }
-  .combat-float { animation-duration: .01ms !important; opacity: 0; }
+  .combat-float { animation: combat-number-static 900ms linear both !important; }
+  @keyframes combat-number-static { 0%, 82% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, 0); } }
 }
