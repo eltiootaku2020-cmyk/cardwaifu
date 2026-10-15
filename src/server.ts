@@ -2,14 +2,12 @@ import "dotenv/config";
 import express from "express";
 import { resolve } from "node:path";
 import { createBattle, act, type BattleAction } from "./game/combat.js";
-import { getOrCreatePlayer, savePlayerResources, savePlayerFormStage } from "./db.js";
+import { getOrCreatePlayer, getBattle, getLatestActiveBattle, saveBattleProgress } from "./db.js";
 import { validateTelegramInitData } from "./telegram/auth.js";
-import type { BattleState } from "./game/types.js";
 
 const app = express();
 app.use(express.json({ limit: "32kb" }));
 const port = Number(process.env.PORT ?? 3000);
-const battles = new Map<string, { ownerId: string; battle: BattleState }>();
 
 function player(req: express.Request) {
   const data = req.header("x-telegram-init-data") ?? "";
@@ -23,9 +21,19 @@ function player(req: express.Request) {
 }
 
 app.get("/api/health", (_req, res) => res.json({ ok: true, game: "UMBRA: Card Frontier", mode: "prototype" }));
+
 app.get("/api/me", (req, res) => {
   try { res.json({ player: player(req) }); }
   catch (error) { res.status(401).json({ error: error instanceof Error ? error.message : "No autorizado" }); }
+});
+
+app.get("/api/battle/active", (req, res) => {
+  try {
+    const currentPlayer = player(req);
+    res.json({ battle: getLatestActiveBattle(currentPlayer.telegramId) ?? null });
+  } catch (error) {
+    res.status(401).json({ error: error instanceof Error ? error.message : "No autorizado" });
+  }
 });
 
 app.post("/api/battle/start", (req, res) => {
@@ -33,10 +41,10 @@ app.post("/api/battle/start", (req, res) => {
     const currentPlayer = player(req);
     const heroineName = typeof req.body?.heroineName === "string" ? req.body.heroineName.slice(0, 80) : "Heroína vinculada";
     const battle = createBattle(heroineName, currentPlayer.alma, currentPlayer.formStage, currentPlayer.anima);
-    battles.set(battle.id, { ownerId: currentPlayer.telegramId, battle });
+    saveBattleProgress(currentPlayer.telegramId, battle);
     res.json({ battle });
   } catch (error) {
-    res.status(401).json({ error: error instanceof Error ? error.message : "No autorizado" });
+    res.status(500).json({ error: error instanceof Error ? error.message : "No se pudo iniciar el combate." });
   }
 });
 
@@ -45,18 +53,16 @@ app.post("/api/battle/action", (req, res) => {
     const currentPlayer = player(req);
     const id = typeof req.body?.battleId === "string" ? req.body.battleId : "";
     const action: string = typeof req.body?.action === "string" ? req.body.action : "";
-    const allowed: string[] = ["attack", "skill", "defend", "evade", "charge", "evolve"];
-    const entry = battles.get(id);
+    const allowed: BattleAction[] = ["attack", "skill", "defend", "evade", "charge", "evolve"];
+    const entry = getBattle(id);
     if (!entry) return res.status(404).json({ error: "Combate no encontrado." });
     if (entry.ownerId !== currentPlayer.telegramId) return res.status(403).json({ error: "Este combate pertenece a otro jugador." });
-    if (!allowed.includes(action)) return res.status(400).json({ error: "Acción inválida." });
+    if (!allowed.includes(action as BattleAction)) return res.status(400).json({ error: "Acción inválida." });
     const next = act(entry.battle, action as BattleAction);
-    battles.set(id, { ownerId: entry.ownerId, battle: next });
-    savePlayerResources(currentPlayer.telegramId, next.alma, next.player.anima);
-    savePlayerFormStage(currentPlayer.telegramId, next.stage);
+    saveBattleProgress(currentPlayer.telegramId, next);
     res.json({ battle: next });
   } catch (error) {
-    res.status(401).json({ error: error instanceof Error ? error.message : "No autorizado" });
+    res.status(500).json({ error: error instanceof Error ? error.message : "No se pudo guardar el combate." });
   }
 });
 
