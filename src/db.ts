@@ -99,8 +99,35 @@ export function getLatestActiveBattle(ownerId: string): BattleState | undefined 
   return row ? JSON.parse(row.stateJson) as BattleState : undefined;
 }
 
-export const saveBattleProgress = db.transaction((ownerId: string, battle: BattleState): void => {
-  saveBattle(ownerId, battle);
-  savePlayerResources(ownerId, battle.alma, battle.player.anima);
-  savePlayerFormStage(ownerId, battle.stage);
+export const saveBattleProgress = db.transaction((
+  ownerId: string,
+  battle: BattleState,
+  resourceBase?: BattleState
+): BattleState => {
+  let savedBattle = battle;
+
+  if (resourceBase) {
+    const resources = db.prepare(`
+      SELECT p.alma, p.anima, g.form_stage AS formStage
+      FROM players p JOIN player_progress g ON g.telegram_id=p.telegram_id
+      WHERE p.telegram_id=?
+    `).get(ownerId) as { alma: number; anima: number; formStage: FormStage } | undefined;
+    if (!resources) throw new Error("Jugador no encontrado.");
+
+    const alma = Math.max(0, Math.min(100, resources.alma + battle.alma - resourceBase.alma));
+    const anima = Math.max(0, Math.min(100, resources.anima + battle.player.anima - resourceBase.player.anima));
+    const stage = battle.stage !== resourceBase.stage ? battle.stage : resources.formStage;
+
+    savedBattle = {
+      ...battle,
+      alma,
+      stage,
+      player: { ...battle.player, anima }
+    };
+  }
+
+  saveBattle(ownerId, savedBattle);
+  savePlayerResources(ownerId, savedBattle.alma, savedBattle.player.anima);
+  savePlayerFormStage(ownerId, savedBattle.stage);
+  return savedBattle;
 });
