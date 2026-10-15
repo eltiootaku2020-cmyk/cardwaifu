@@ -10,7 +10,8 @@
     "build": "tsc --noEmit && vite build --config vite.config.ts",
     "start": "tsx src/server.ts",
     "bot": "tsx src/bot.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test src/game/*.test.ts"
   },
   "dependencies": {
     "better-sqlite3": "^11.8.1",
