@@ -29,6 +29,20 @@ Combate por turnos: duelos 1v1, heroína contra varios enemigos o equipo contra 
 
 Alma pertenece al jugador; Ánima se gana jugando y durante combate. Valores tentativos, no definitivos: Alma máxima 100, regeneración +4/h, recarga diaria +20, evolución 25, cacería 10, curación 10. A 0 Alma se pueden esperar encuentros gratuitos, pero no iniciar cacerías con coste ni evolucionar. La historia principal nunca se bloquea por falta de Alma. Separar Ánima común y premium.
 
+## Principios de dificultad justa y progresión
+
+Referencia de investigación: [docs/ANALISIS_DIFICULTAD_JUSTA.md](./docs/ANALISIS_DIFICULTAD_JUSTA.md).
+
+UMBRA debe ser difícil por decisiones, patrones legibles, preparación y sinergias; no por repetir encuentros inflados de HP ni por castigos que obliguen a farmear. Las enemigas con ataques peligrosos mostrarán una intención comprensible y una oportunidad de respuesta. Cada acción de combate debe tener contextos en que compense usarla; las pruebas deben detectar si una habilidad domina a las demás.
+
+La curva de dificultad comenzará suave, subirá incorporando una mecánica por vez, combinará mecánicas ya aprendidas y alternará picos con descanso, refugios, descubrimientos o recompensas. La derrota no borra cartas, duplicados, materiales raros ni avances narrativos; las peleas obligatorias de historia no cobran Alma por reintentar. Tras derrotas repetidas se debe ofrecer información útil, no modificar secretamente las estadísticas del enemigo.
+
+La aleatoriedad genera variedad, pero las decisiones deben poder compensarla. Se evitarán fallos aleatorios que anulen una acción completa sin contrajuego, golpes letales sin aviso y gacha donde un mal resultado no deje ningún progreso útil.
+
+El protagonista tendrá una carta S con duplicados y costes de ascensión crecientes, visibles y obtenibles también jugando. La carta debe ser viable para completar la historia principal sin duplicados obligatorios; las copias amplían el techo o las opciones tácticas. La prueba S frente a una carta SR debe comprobar que la SR es más sencilla de mejorar con recursos comunes, mientras que la S mantiene valor y una progresión de largo plazo. No se debe ocultar el precio ni manipular probabilidades bajo el concepto de «power creep oculto»: la escalada buscada es gradual en el desafío y la inversión, no una trampa de diseño.
+
+**Hallazgo de balance a revisar:** en el combate prototipo actual, Habilidad hace mucho más daño que Ataque, cura hasta 8 HP y produce más Ánima sin coste ni enfriamiento. Antes de escalar estadísticas, hay que equilibrar las acciones y añadir intenciones/patrones enemigos. Todo criterio numérico de dificultad seguirá como hipótesis hasta ser probado.
+
 ## Dark y redención
 Algunas heroínas se descarriaron o no llegaron a sus descendientes y contaminaron el suelo; cazan personas y héroes para obtener Alma o Ánima. No son malvadas por naturaleza: tienen motivaciones e historias y pueden redimirse/reclutarse. Monstruos y perros contaminados también deben diseñarse como waifus monstruosas, no como animales genéricos.
 
