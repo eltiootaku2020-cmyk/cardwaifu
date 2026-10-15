@@ -135,7 +135,9 @@ app.post("/api/battle/start", (req, res) => {
       "entrada-abismo": { name: "Guardiana del Miasma", hp: 150, attack: 18 }
     };
     const encounter = encounters[node.id] ?? { name: "Exploradora hostil del bosque", hp: 90, attack: 13 };
-    const loadout = getPlayerLoadout(currentPlayer.telegramId);\n    const gearBonuses = getEquipmentBonuses(loadout);\n    const battle = createBattle(heroine.name, currentPlayer.alma, currentPlayer.formStage, currentPlayer.anima, encounter.name, encounter.hp, encounter.attack, heroine.attack + gearBonuses.attackBonus, heroine.maxHp + gearBonuses.hpBonus);
+    const loadout = getPlayerLoadout(currentPlayer.telegramId);
+    const gearBonuses = getEquipmentBonuses(loadout);
+    const battle = createBattle(heroine.name, currentPlayer.alma, currentPlayer.formStage, currentPlayer.anima, encounter.name, encounter.hp, encounter.attack, heroine.attack + gearBonuses.attackBonus, heroine.maxHp + gearBonuses.hpBonus);
     saveBattleProgress(currentPlayer.telegramId, battle);
     res.json({ battle });
   } catch (error) {
