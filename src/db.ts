@@ -2,6 +2,7 @@ import Database from "better-sqlite3";
 import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import type { BattleState, FormStage } from "./game/types.js";
+import { createWorldProgress, type WorldProgress } from "./game/world.js";
 
 const filename = resolve(process.env.DATABASE_PATH ?? "./data/umbra.sqlite");
 mkdirSync(dirname(filename), { recursive: true });
@@ -34,6 +35,11 @@ db.exec(`
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
   );
   CREATE INDEX IF NOT EXISTS battles_player_updated ON battles(telegram_id, updated_at DESC);
+  CREATE TABLE IF NOT EXISTS world_progress(
+    telegram_id TEXT PRIMARY KEY REFERENCES players(telegram_id) ON DELETE CASCADE,
+    state_json TEXT NOT NULL,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  );
 `);
 
 export interface PlayerRecord {
@@ -131,3 +137,26 @@ export const saveBattleProgress = db.transaction((
   savePlayerFormStage(ownerId, savedBattle.stage);
   return savedBattle;
 });
+
+
+export function getWorldProgress(ownerId: string): WorldProgress {
+  const row = db.prepare("SELECT state_json AS stateJson FROM world_progress WHERE telegram_id=?")
+    .get(ownerId) as { stateJson: string } | undefined;
+  if (row) return JSON.parse(row.stateJson) as WorldProgress;
+  const initial = createWorldProgress();
+  db.prepare("INSERT OR IGNORE INTO world_progress(telegram_id,state_json) VALUES(?,?)")
+    .run(ownerId, JSON.stringify(initial));
+  const stored = db.prepare("SELECT state_json AS stateJson FROM world_progress WHERE telegram_id=?")
+    .get(ownerId) as { stateJson: string };
+  return JSON.parse(stored.stateJson) as WorldProgress;
+}
+
+export function saveWorldProgress(ownerId: string, progress: WorldProgress): void {
+  db.prepare(`
+    INSERT INTO world_progress(telegram_id,state_json,updated_at)
+    VALUES(?,?,CURRENT_TIMESTAMP)
+    ON CONFLICT(telegram_id) DO UPDATE SET
+      state_json=excluded.state_json,
+      updated_at=CURRENT_TIMESTAMP
+  `).run(ownerId, JSON.stringify(progress));
+}
