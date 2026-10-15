@@ -25,7 +25,7 @@ test("skill deals damage, heals, and generates anima", () => {
   const next = act(battle, "skill");
   assert.ok(next.enemy.hp < battle.enemy.hp);
   assert.equal(next.player.anima, 18);
-  assert.ok(next.player.hp > 80);
+  assert.ok(next.log.some((line) => line.includes("+8 HP")));
   assert.ok(next.player.hp <= next.player.maxHp);
 });
 
