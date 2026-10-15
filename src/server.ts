@@ -2,7 +2,8 @@ import "dotenv/config";
 import express from "express";
 import { resolve } from "node:path";
 import { createBattle, act, type BattleAction } from "./game/combat.js";
-import { getOrCreatePlayer, getBattle, getLatestActiveBattle, saveBattleProgress } from "./db.js";
+import { getOrCreatePlayer, getBattle, getLatestActiveBattle, saveBattleProgress, getWorldProgress, saveWorldProgress } from "./db.js";
+import { getAvailableDestinations, getWorldNode, travelTo } from "./game/world.js";
 import { validateTelegramInitData } from "./telegram/auth.js";
 
 const app = express();
@@ -25,6 +26,31 @@ app.get("/api/health", (_req, res) => res.json({ ok: true, game: "UMBRA: Card Fr
 app.get("/api/me", (req, res) => {
   try { res.json({ player: player(req) }); }
   catch (error) { res.status(401).json({ error: error instanceof Error ? error.message : "No autorizado" }); }
+});
+
+app.get("/api/world", (req, res) => {
+  try {
+    const currentPlayer = player(req);
+    const progress = getWorldProgress(currentPlayer.telegramId);
+    const current = getWorldNode(progress.currentNodeId);
+    if (!current) throw new Error("La ruta guardada no es válida.");
+    res.json({ progress, current, destinations: getAvailableDestinations(progress) });
+  } catch (error) {
+    res.status(401).json({ error: error instanceof Error ? error.message : "No se pudo cargar la expedición." });
+  }
+});
+
+app.post("/api/world/travel", (req, res) => {
+  try {
+    const currentPlayer = player(req);
+    const destinationId = typeof req.body?.destinationId === "string" ? req.body.destinationId : "";
+    const progress = getWorldProgress(currentPlayer.telegramId);
+    const result = travelTo(progress, destinationId);
+    saveWorldProgress(currentPlayer.telegramId, result.progress);
+    res.json({ ...result, destinations: getAvailableDestinations(result.progress) });
+  } catch (error) {
+    res.status(400).json({ error: error instanceof Error ? error.message : "No se pudo recorrer esa ruta." });
+  }
 });
 
 app.get("/api/battle/active", (req, res) => {
