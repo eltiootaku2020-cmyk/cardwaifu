@@ -9,17 +9,21 @@
 
 ## MVP jugable
 - [ ] Selección de protagonista y cámara desde atrás, rostro oculto.
-- [x] Primera invocación aleatoria única por cuenta y vínculo persistente en SQLite.\n- [ ] Colección completa, vista de todas las cartas, duplicados y mejora de unidades.
+- [x] Primera invocación aleatoria única por cuenta y vínculo persistente en SQLite.
+- [ ] Colección completa, vista de todas las cartas, duplicados y mejora de unidades.
 - [ ] Colección persistente y rarezas R/S/SR/SSR/UR.
 - [ ] Combate por turnos resuelto en servidor con enemigos/patrones, estados y recompensas.
 - [ ] Alma y Ánima separados y sin condiciones de carrera en acciones simultáneas.
 - [ ] Formas Lily → Hero → Epic, ramas Light/Dark y una evolución por batalla.
 - [ ] Capítulo 1, enemigos comunes y jefe.
-- [x] Región inicial con rutas conectadas y progreso de viaje guardado en SQLite.\n- [x] Encuentros ligados a lugares peligrosos y arquetipos de enemigos definidos en servidor.
-- [ ] Vincular eventos del mapa con misiones completas, recompensas de exploración y regreso a la ciudad.\n- [x] Recompensas básicas de victoria: XP, monedas y materiales guardados sin duplicación.
+- [x] Región inicial con rutas conectadas y progreso de viaje guardado en SQLite.
+- [x] Encuentros ligados a lugares peligrosos y arquetipos de enemigos definidos en servidor.
+- [ ] Vincular eventos del mapa con misiones completas, recompensas de exploración y regreso a la ciudad.
+- [x] Recompensas básicas de victoria: XP, monedas y materiales guardados sin duplicación.
 
 ## Progresión
-- [x] Equipamiento inicial: arma, equipo defensivo, accesorio y apoyo objeto, persistidos y con bonificaciones aplicadas al combate.\n- [ ] Inventario de botín, desbloqueo de equipo y ranuras avanzadas.
+- [x] Equipamiento inicial: arma, equipo defensivo, accesorio y apoyo objeto, persistidos y con bonificaciones aplicadas al combate.
+- [ ] Inventario de botín, desbloqueo de equipo y ranuras avanzadas.
 - [ ] Heroínas de apoyo y Corazones Heroicos.
 - [ ] Nivel 100, Ruptura de Límite y materiales.
 - [ ] Dark, redención, cacerías, eventos y duplicados.
