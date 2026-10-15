@@ -1,5 +1,5 @@
 import "./style.css";
-import { openCardStudio } from "./card-studio";
+import { openCardStudio } from "./card-studio.js";
 declare global { interface Window { Telegram?: { WebApp?: { initData:string; ready():void; expand():void } } } }
 type Battle={id:string;turn:number;alma:number;player:{name:string;hp:number;maxHp:number;anima:number};enemy:{name:string;hp:number;maxHp:number};status:string;evolved?:boolean;log:string[]};
 const root=document.querySelector<HTMLDivElement>("#app")!;const tg=window.Telegram?.WebApp;tg?.ready();tg?.expand();let battle:Battle|null=null;let gender="Mujer";let note="Elige tu vínculo y entra en el primer encuentro.";
