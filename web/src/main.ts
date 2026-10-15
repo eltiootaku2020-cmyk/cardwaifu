@@ -142,7 +142,7 @@ function drawBattle() {
     <div class="battle-hud"><span>PROTOCOLO DE COMBATE · TURNO <b>${current.turn}</b></span><span>ÁNIMA <b>${current.player.anima}</b> · ALMA <b>${current.alma}</b></span></div>
     <div class="fight-grid">
       <div class="combatant-panel player-panel" data-combatant="player" data-hp="${current.player.hp}" data-max-hp="${current.player.maxHp}">
-        <div class="unit-portrait heroine-portrait" aria-hidden="true"><span class="portrait-silhouette"><i></i></span><span class="portrait-mark">${current.branch === "Dark" ? "☾" : current.stage === "Lily" ? "⌁" : "✦"}</span></div>
+        <div class="unit-portrait player-portrait heroine-portrait" aria-hidden="true"><span class="portrait-silhouette"><i></i></span><span class="portrait-mark">${current.branch === "Dark" ? "☾" : current.stage === "Lily" ? "⌁" : "✦"}</span></div>
         <div class="unit-info"><b>✦ ${escapeHtml(current.player.name)}</b><div class="hp"><i style="width:${bar(current.player.hp, current.player.maxHp)}%"></i></div><small>${current.player.hp}/${current.player.maxHp} HP · ATQ ${current.player.attack}</small><div class="combat-status">PORTADORA · ${current.stage.toUpperCase()}${current.branch ? " · " + current.branch.toUpperCase() : ""}</div></div>
       </div>
       <div class="combatant-panel enemy-panel" data-enemy="${enemyArchetype}" data-threat="${current.enemy.maxHp >= 140 ? "boss" : "standard"}" data-combatant="enemy" data-hp="${current.enemy.hp}" data-max-hp="${current.enemy.maxHp}">
