@@ -12,7 +12,7 @@ type Stage = "Lily" | "Hero" | "Epic";
 type Battle = {
   id: string; turn: number; alma: number; stage: Stage; branch: "Light" | "Dark" | null; darkAvailable: boolean;
   player: { name: string; hp: number; maxHp: number; anima: number };
-  enemy: { name: string; hp: number; maxHp: number };
+  enemy: { name: string; hp: number; maxHp: number; intent?: "quick-attack" | "heavy-attack" | "guard" };
   status: string; evolved?: boolean; log: string[];
 };
 type EquipmentSlot = "weapon" | "armor" | "accessory" | "support";
@@ -147,7 +147,7 @@ function drawBattle() {
       </div>
       <div class="combatant-panel enemy-panel" data-enemy="${enemyArchetype}" data-threat="${current.enemy.maxHp >= 140 ? "boss" : "standard"}" data-combatant="enemy" data-hp="${current.enemy.hp}" data-max-hp="${current.enemy.maxHp}">
         <div class="unit-portrait enemy-portrait" aria-hidden="true"><span class="portrait-silhouette"><i></i></span><span class="portrait-mark">${enemyArchetype === "goblin" ? "⌁" : enemyArchetype === "miasma" ? "☾" : enemyArchetype === "beast" ? "♧" : "◈"}</span></div>
-        <div class="unit-info"><b>☠ ${escapeHtml(current.enemy.name)}</b><div class="hp enemy"><i style="width:${bar(current.enemy.hp, current.enemy.maxHp)}%"></i></div><small>${current.enemy.hp}/${current.enemy.maxHp} HP</small><div class="combat-status">${current.enemy.maxHp >= 140 ? "AMENAZA MAYOR" : "OBJETIVO HOSTIL"}</div></div>
+        <div class="unit-info"><b>☠ ${escapeHtml(current.enemy.name)}</b><div class="hp enemy"><i style="width:${bar(current.enemy.hp, current.enemy.maxHp)}%"></i></div><small>${current.enemy.hp}/${current.enemy.maxHp} HP</small><div class="combat-status">${current.enemy.maxHp >= 140 ? "AMENAZA MAYOR" : "OBJETIVO HOSTIL"}</div><div class="enemy-intent" role="status">${current.enemy.intent === "heavy-attack" ? "⚠ PREPARA GOLPE CARGADO · Defender o evadir" : current.enemy.intent === "guard" ? "🛡 EN GUARDIA · Busca una apertura" : "⚔ PREPARA ATAQUE RÁPIDO · Puedes responder"}</div></div>
       </div>
     </div>
     ${action && actionLabels[action] ? `<div class="power-banner active" data-power="${escapeHtml(action)}">${escapeHtml(actionLabels[action])}</div>` : ""}
