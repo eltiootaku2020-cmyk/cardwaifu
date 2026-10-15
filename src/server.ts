@@ -32,7 +32,7 @@ app.post("/api/battle/start", (req, res) => {
   try {
     const currentPlayer = player(req);
     const heroineName = typeof req.body?.heroineName === "string" ? req.body.heroineName.slice(0, 80) : "Heroína vinculada";
-    const battle = createBattle(heroineName, currentPlayer.alma, "Lily", currentPlayer.anima);
+    const battle = createBattle(heroineName, currentPlayer.alma, currentPlayer.formStage, currentPlayer.anima);
     battles.set(battle.id, { ownerId: currentPlayer.telegramId, battle });
     res.json({ battle });
   } catch (error) {
