@@ -134,7 +134,34 @@ async function act(action: string) {
   }
   render();
 }
-async function summonFirst() {\n  summonNote = "La carta está buscando a su portadora…";\n  render();\n  try {\n    const response = await fetch("/api/summon/first", { method: "POST", headers: headers(), body: JSON.stringify({}) });\n    const data = await response.json();\n    if (!response.ok) throw new Error(data.error || "No se pudo realizar la invocación.");\n    linkedHeroine = data.heroine as HeroineCard;\n    summonNote = data.created ? "La carta te ha elegido. El vínculo queda guardado." : "Tu vínculo anterior ha sido restaurado; no se ha gastado otra invocación.";\n  } catch (error) {\n    summonNote = error instanceof Error ? error.message : "No se pudo completar la invocación.";\n  }\n  render();\n}\nasync function loadCollection() {\n  try {\n    const response = await fetch("/api/collection", { headers: headers() });\n    const data = await response.json();\n    if (!response.ok) throw new Error(data.error || "No se pudo cargar la colección.");\n    const first = (data.collection as Array<{ heroine: HeroineCard | null }>).find(entry => entry.heroine)?.heroine;\n    if (first) linkedHeroine = first;\n    if (linkedHeroine) summonNote = "Vínculo restaurado desde tu colección.";\n  } catch (error) {\n    summonNote = error instanceof Error ? error.message : "La colección necesita conexión con el servidor.";\n  }\n  render();\n}\nasync function loadWorld() {
+async function summonFirst() {
+  summonNote = "La carta está buscando a su portadora…";
+  render();
+  try {
+    const response = await fetch("/api/summon/first", { method: "POST", headers: headers(), body: JSON.stringify({}) });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "No se pudo realizar la invocación.");
+    linkedHeroine = data.heroine as HeroineCard;
+    summonNote = data.created ? "La carta te ha elegido. El vínculo queda guardado." : "Tu vínculo anterior ha sido restaurado; no se ha gastado otra invocación.";
+  } catch (error) {
+    summonNote = error instanceof Error ? error.message : "No se pudo completar la invocación.";
+  }
+  render();
+}
+async function loadCollection() {
+  try {
+    const response = await fetch("/api/collection", { headers: headers() });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "No se pudo cargar la colección.");
+    const first = (data.collection as Array<{ heroine: HeroineCard | null }>).find(entry => entry.heroine)?.heroine;
+    if (first) linkedHeroine = first;
+    if (linkedHeroine) summonNote = "Vínculo restaurado desde tu colección.";
+  } catch (error) {
+    summonNote = error instanceof Error ? error.message : "La colección necesita conexión con el servidor.";
+  }
+  render();
+}
+async function loadWorld() {
   try {
     const response = await fetch("/api/world", { headers: headers() });
     const data = await response.json();
