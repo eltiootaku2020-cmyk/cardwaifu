@@ -2,7 +2,7 @@ import "dotenv/config";
 import express from "express";
 import { resolve } from "node:path";
 import { createBattle, act, type BattleAction } from "./game/combat.js";
-import { getOrCreatePlayer, savePlayerResources } from "./db.js";
+import { getOrCreatePlayer, savePlayerResources, savePlayerFormStage } from "./db.js";
 import { validateTelegramInitData } from "./telegram/auth.js";
 import type { BattleState } from "./game/types.js";
 
