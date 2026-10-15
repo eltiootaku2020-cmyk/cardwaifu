@@ -13,6 +13,9 @@ type Battle = {
   enemy: { name: string; hp: number; maxHp: number };
   status: string; evolved?: boolean; log: string[];
 };
+type EquipmentSlot = "weapon" | "armor" | "accessory" | "support";
+type EquipmentItem = { id: string; name: string; slot: EquipmentSlot; rarity: string; attackBonus: number; hpBonus: number; description: string };
+type EquipmentLoadout = { weapon: string; armor: string; accessory: string; support: string };
 type PlayerRewards = { xp: number; coins: number; materials: number; level: number; xpIntoLevel: number; xpForNextLevel: number };
 type WorldNode = {
   id: string; name: string; kind: string; danger: number; levelRange: string;
@@ -32,7 +35,7 @@ let world: WorldView | null = null;
 let linkedHeroine: HeroineCard | null = null;
 let summonNote = "Tu primera carta elegirá una heroína consciente.";
 let resources = { alma: 100, anima: 0 };
-let rewards: PlayerRewards = { xp: 0, coins: 0, materials: 0, level: 1, xpIntoLevel: 0, xpForNextLevel: 100 };
+let rewards: PlayerRewards = { xp: 0, coins: 0, materials: 0, level: 1, xpIntoLevel: 0, xpForNextLevel: 100 };\nlet equipment: EquipmentItem[] = [];\nlet loadout: EquipmentLoadout = { weapon: "wooden-bow", armor: "forest-cloak", accessory: "amber-charm", support: "healing-herbs" };\nlet loadoutNote = "Preparando el equipo inicial…";
 let gender = "Mujer";
 let note = "Elige tu vínculo y entra en el primer encuentro.";
 let worldNote = "Cargando rutas de la expedición…";
@@ -67,6 +70,21 @@ function renderWorld(): string {
     <p class="muted expedition-note">${escapeHtml(worldNote)} El viaje se guarda en el servidor para que puedas retomarlo después.</p>
   </section>`;
 }
+function renderLoadout(): string {
+  if (equipment.length === 0) return `<section class="panel loadout"><p class="eyebrow">EQUIPAMIENTO</p><h2>Preparación de expedición</h2><p class="muted">${escapeHtml(loadoutNote)}</p></section>`;
+  const labels: Record<EquipmentSlot, string> = { weapon: "Arma", armor: "Equipamiento", accessory: "Accesorio", support: "Apoyo" };
+  const options = (slot: EquipmentSlot) => equipment.filter(item => item.slot === slot).map(item => `<option value="${item.id}" ${loadout[slot] === item.id ? "selected" : ""}>${escapeHtml(item.name)} · ${item.rarity}</option>`).join("");
+  const attack = Object.values(loadout).map(id => equipment.find(item => item.id === id)?.attackBonus ?? 0).reduce((a, b) => a + b, 0);
+  const hp = Object.values(loadout).map(id => equipment.find(item => item.id === id)?.hpBonus ?? 0).reduce((a, b) => a + b, 0);
+  return `<section class="panel loadout"><div class="section-title"><div><p class="eyebrow">PREPARACIÓN DE EXPEDICIÓN</p><h2>Equipo y accesorios</h2></div><span>4 espacios</span></div>
+    <div class="loadout-grid">${(["weapon", "armor", "accessory", "support"] as EquipmentSlot[]).map(slot => {
+      const item = equipment.find(entry => entry.id === loadout[slot]);
+      return `<label class="gear-slot"><span>${labels[slot]}</span><select data-equipment-slot="${slot}">${options(slot)}</select><small>${escapeHtml(item?.description ?? "")}</small></label>`;
+    }).join("")}</div>
+    <div class="gear-bonuses"><span>Bonificación de ataque <b>+${attack}</b></span><span>Vida máxima <b>+${hp}</b></span></div>
+    <p class="muted loadout-note">${escapeHtml(loadoutNote)} El equipo se aplica a los atributos de combate.</p>
+  </section>`;
+}
 function render() {
   root.innerHTML = `<header class="top"><div class="brand"><span class="logo">✦</span><div><b>UMBRA</b><small>CARD FRONTIER</small></div></div><span class="resource">◈ Alma <b>${battle?.alma ?? resources.alma}</b> · Ánima <b>${battle?.player.anima ?? resources.anima}</b> · Nv. <b>${rewards.level}</b> · XP <b>${rewards.xp}</b></span></header>
   <main>
@@ -93,7 +111,7 @@ function render() {
   root.querySelectorAll<HTMLButtonElement>("[data-gender]").forEach(button => button.onclick = () => { gender = button.dataset.gender ?? "Mujer"; render(); });
   root.querySelector<HTMLButtonElement>("#summon")!.onclick = () => void summonFirst();
   root.querySelector<HTMLButtonElement>("#start")!.onclick = () => void startBattle();
-  root.querySelectorAll<HTMLButtonElement>("[data-travel]").forEach(button => button.onclick = () => void travel(button.dataset.travel ?? ""));
+  root.querySelectorAll<HTMLButtonElement>("[data-travel]").forEach(button => button.onclick = () => void travel(button.dataset.travel ?? ""));\n  root.querySelectorAll<HTMLSelectElement>("[data-equipment-slot]").forEach(select => select.onchange = () => void saveLoadout(select.dataset.equipmentSlot as EquipmentSlot, select.value));
   drawBattle();
 }
 function drawBattle() {
@@ -161,6 +179,37 @@ async function loadCollection() {
     if (linkedHeroine) summonNote = "Vínculo restaurado desde tu colección.";
   } catch (error) {
     summonNote = error instanceof Error ? error.message : "La colección necesita conexión con el servidor.";
+  }
+  render();
+}
+async function loadLoadout() {
+  try {
+    const response = await fetch("/api/loadout", { headers: headers() });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "No se pudo cargar el equipamiento.");
+    equipment = data.equipment as EquipmentItem[];
+    loadout = data.loadout as EquipmentLoadout;
+    loadoutNote = "Equipo guardado y listo.";
+  } catch (error) {
+    loadoutNote = error instanceof Error ? error.message : "El equipamiento necesita conexión con el servidor.";
+  }
+  render();
+}
+async function saveLoadout(slot: EquipmentSlot, itemId: string) {
+  const previous = { ...loadout };
+  loadout = { ...loadout, [slot]: itemId };
+  loadoutNote = "Guardando equipo…";
+  render();
+  try {
+    const response = await fetch("/api/loadout", { method: "POST", headers: headers(), body: JSON.stringify({ loadout }) });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "No se pudo guardar el equipo.");
+    equipment = data.equipment as EquipmentItem[];
+    loadout = data.loadout as EquipmentLoadout;
+    loadoutNote = "Equipo guardado. Las bonificaciones se aplicarán en el próximo combate.";
+  } catch (error) {
+    loadout = previous;
+    loadoutNote = error instanceof Error ? error.message : "No se pudo guardar el equipo.";
   }
   render();
 }
