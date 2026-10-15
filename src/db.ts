@@ -35,6 +35,12 @@ db.exec(`
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
   );
   CREATE INDEX IF NOT EXISTS battles_player_updated ON battles(telegram_id, updated_at DESC);
+  CREATE TABLE IF NOT EXISTS player_rewards(
+    telegram_id TEXT PRIMARY KEY REFERENCES players(telegram_id) ON DELETE CASCADE,
+    xp INTEGER NOT NULL DEFAULT 0 CHECK(xp >= 0),
+    coins INTEGER NOT NULL DEFAULT 0 CHECK(coins >= 0),
+    materials INTEGER NOT NULL DEFAULT 0 CHECK(materials >= 0)
+  );
   CREATE TABLE IF NOT EXISTS world_progress(
     telegram_id TEXT PRIMARY KEY REFERENCES players(telegram_id) ON DELETE CASCADE,
     state_json TEXT NOT NULL,
@@ -54,6 +60,7 @@ export interface PlayerRecord {
 export function getOrCreatePlayer(id: string, name: string): PlayerRecord {
   db.prepare("INSERT OR IGNORE INTO players(telegram_id,display_name) VALUES(?,?)").run(id, name);
   db.prepare("INSERT OR IGNORE INTO player_progress(telegram_id) VALUES(?)").run(id);
+  db.prepare("INSERT OR IGNORE INTO player_rewards(telegram_id) VALUES(?)").run(id);
   return db.prepare(`
     SELECT p.telegram_id AS telegramId, p.display_name AS displayName, p.alma, p.anima,
            p.created_at AS createdAt, g.form_stage AS formStage
@@ -190,3 +197,28 @@ export const grantFirstHeroine = db.transaction((
   db.prepare("INSERT INTO inventory(telegram_id,heroine_id,copies) VALUES(?,?,1)").run(ownerId, selected);
   return { heroineId: selected, created: true };
 });
+
+
+export interface PlayerRewards {
+  xp: number;
+  coins: number;
+  materials: number;
+  level: number;
+  xpIntoLevel: number;
+  xpForNextLevel: number;
+}
+
+export function getPlayerRewards(ownerId: string): PlayerRewards {
+  const row = db.prepare("SELECT xp, coins, materials FROM player_rewards WHERE telegram_id=?")
+    .get(ownerId) as { xp: number; coins: number; materials: number } | undefined;
+  const xp = row?.xp ?? 0;
+  const level = Math.floor(xp / 100) + 1;
+  return {
+    xp,
+    coins: row?.coins ?? 0,
+    materials: row?.materials ?? 0,
+    level,
+    xpIntoLevel: xp % 100,
+    xpForNextLevel: 100
+  };
+}
