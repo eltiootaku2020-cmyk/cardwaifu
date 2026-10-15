@@ -3,6 +3,7 @@ import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import type { BattleState, FormStage } from "./game/types.js";
 import { createWorldProgress, type WorldProgress } from "./game/world.js";
+import { DEFAULT_LOADOUT, type EquipmentLoadout } from "./game/equipment.js";
 
 const filename = resolve(process.env.DATABASE_PATH ?? "./data/umbra.sqlite");
 mkdirSync(dirname(filename), { recursive: true });
@@ -35,6 +36,11 @@ db.exec(`
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
   );
   CREATE INDEX IF NOT EXISTS battles_player_updated ON battles(telegram_id, updated_at DESC);
+  CREATE TABLE IF NOT EXISTS player_loadout(
+    telegram_id TEXT PRIMARY KEY REFERENCES players(telegram_id) ON DELETE CASCADE,
+    state_json TEXT NOT NULL,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  );
   CREATE TABLE IF NOT EXISTS player_rewards(
     telegram_id TEXT PRIMARY KEY REFERENCES players(telegram_id) ON DELETE CASCADE,
     xp INTEGER NOT NULL DEFAULT 0 CHECK(xp >= 0),
@@ -61,6 +67,7 @@ export function getOrCreatePlayer(id: string, name: string): PlayerRecord {
   db.prepare("INSERT OR IGNORE INTO players(telegram_id,display_name) VALUES(?,?)").run(id, name);
   db.prepare("INSERT OR IGNORE INTO player_progress(telegram_id) VALUES(?)").run(id);
   db.prepare("INSERT OR IGNORE INTO player_rewards(telegram_id) VALUES(?)").run(id);
+  db.prepare("INSERT OR IGNORE INTO player_loadout(telegram_id,state_json) VALUES(?,?)").run(id, JSON.stringify(DEFAULT_LOADOUT));
   return db.prepare(`
     SELECT p.telegram_id AS telegramId, p.display_name AS displayName, p.alma, p.anima,
            p.created_at AS createdAt, g.form_stage AS formStage
@@ -226,4 +233,24 @@ export function getPlayerRewards(ownerId: string): PlayerRewards {
     xpIntoLevel: xp % 100,
     xpForNextLevel: 100
   };
+}
+
+
+export function getPlayerLoadout(ownerId: string): EquipmentLoadout {
+  const row = db.prepare("SELECT state_json AS stateJson FROM player_loadout WHERE telegram_id=?")
+    .get(ownerId) as { stateJson: string } | undefined;
+  if (row) return JSON.parse(row.stateJson) as EquipmentLoadout;
+  db.prepare("INSERT OR IGNORE INTO player_loadout(telegram_id,state_json) VALUES(?,?)")
+    .run(ownerId, JSON.stringify(DEFAULT_LOADOUT));
+  return { ...DEFAULT_LOADOUT };
+}
+
+export function savePlayerLoadout(ownerId: string, loadout: EquipmentLoadout): void {
+  db.prepare(`
+    INSERT INTO player_loadout(telegram_id,state_json,updated_at)
+    VALUES(?,?,CURRENT_TIMESTAMP)
+    ON CONFLICT(telegram_id) DO UPDATE SET
+      state_json=excluded.state_json,
+      updated_at=CURRENT_TIMESTAMP
+  `).run(ownerId, JSON.stringify(loadout));
 }
