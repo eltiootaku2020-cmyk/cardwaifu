@@ -43,3 +43,74 @@ test("active battle lookup excludes completed battles", () => {
 test("battle lookup does not return a missing identifier", () => {
   assert.equal(getBattle("missing-battle-id"), undefined);
 });
+
+test("simultaneous battles accumulate anima instead of overwriting shared resources", () => {
+  const player = getOrCreatePlayer("player-concurrent-anima", "Combate simultáneo");
+  const first = createBattle("Vínculo A", player.alma, player.formStage, player.anima);
+  const second = createBattle("Vínculo B", player.alma, player.formStage, player.anima);
+  saveBattleProgress(player.telegramId, first);
+  saveBattleProgress(player.telegramId, second);
+
+  const baseA = {
+    ...first,
+    alma: player.alma,
+    stage: player.formStage,
+    player: { ...first.player, anima: player.anima }
+  };
+  const nextA = act(baseA, "charge");
+  saveBattleProgress(player.telegramId, nextA, baseA);
+
+  const afterA = getOrCreatePlayer(player.telegramId, player.displayName);
+  const baseB = {
+    ...second,
+    alma: afterA.alma,
+    stage: afterA.formStage,
+    player: { ...second.player, anima: afterA.anima }
+  };
+  const nextB = act(baseB, "charge");
+  saveBattleProgress(player.telegramId, nextB, baseB);
+
+  assert.equal(getOrCreatePlayer(player.telegramId, player.displayName).anima, 50);
+});
+
+test("evolution in one battle synchronizes alma and form for another battle", () => {
+  const player = getOrCreatePlayer("player-concurrent-evolution", "Evolución compartida");
+  const first = createBattle("Vínculo A", player.alma, player.formStage, 60);
+  const second = createBattle("Vínculo B", player.alma, player.formStage, 60);
+  saveBattleProgress(player.telegramId, first);
+  saveBattleProgress(player.telegramId, second);
+
+  const baseA = {
+    ...first,
+    alma: player.alma,
+    stage: player.formStage,
+    player: { ...first.player, anima: 60 }
+  };
+  const evolved = act(baseA, "evolve");
+  const savedEvolution = saveBattleProgress(player.telegramId, evolved, baseA);
+  assert.equal(savedEvolution.alma, 75);
+  assert.equal(savedEvolution.stage, "Hero");
+  assert.equal(savedEvolution.player.anima, 0);
+
+  const current = getOrCreatePlayer(player.telegramId, player.displayName);
+  const baseB = {
+    ...second,
+    alma: current.alma,
+    stage: current.formStage,
+    player: {
+      ...second.player,
+      anima: current.anima,
+      name: second.player.name.replace(/ · (Lily|Hero|Epic)$/, "") + " · " + current.formStage
+    }
+  };
+  const nextB = act(baseB, "attack");
+  const savedB = saveBattleProgress(player.telegramId, nextB, baseB);
+
+  assert.equal(savedB.alma, 75);
+  assert.equal(savedB.stage, "Hero");
+  assert.equal(savedB.player.anima, 12);
+  const synchronizedPlayer = getOrCreatePlayer(player.telegramId, player.displayName);
+  assert.equal(synchronizedPlayer.alma, 75);
+  assert.equal(synchronizedPlayer.anima, 12);
+  assert.equal(synchronizedPlayer.formStage, "Hero");
+});
