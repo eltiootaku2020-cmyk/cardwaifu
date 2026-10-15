@@ -3,11 +3,11 @@ import type { BattleState, FormStage } from "./types.js";
 
 export type BattleAction = "attack" | "skill" | "defend" | "evade" | "charge" | "evolve";
 
-export function createBattle(heroName = "Heroína vinculada", alma = 100, stage: FormStage = "Lily", anima = 0): BattleState {
+export function createBattle(heroName = "Heroína vinculada", alma = 100, stage: FormStage = "Lily", anima = 0, enemyName = "Sabuesa contaminada", enemyHp = 82, enemyAttack = 12): BattleState {
   return {
     id: randomUUID(), turn: 0, alma: Math.max(0, Math.min(100, Math.floor(alma))), stage,
     player: { name: heroName, hp: 100, maxHp: 100, attack: 24, anima: Math.max(0, Math.min(100, Math.floor(anima))) },
-    enemy: { name: "Sabuesa contaminada", hp: 82, maxHp: 82, attack: 12, anima: 0 },
+    enemy: { name: enemyName, hp: Math.max(1, enemyHp), maxHp: Math.max(1, enemyHp), attack: Math.max(1, enemyAttack), anima: 0 },
     status: "active", evolved: false,
     log: ["Una sabuesa contaminada bloquea el camino."]
   };
