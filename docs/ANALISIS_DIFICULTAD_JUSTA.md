@@ -1,7 +1,7 @@
 # UMBRA: dificultad justa — investigación y plan de balance
 
 **Fecha:** 15 de octubre de 2026  
-**Estado:** análisis de diseño; todavía no implementa los cambios descritos.  
+**Estado:** análisis de diseño con primera implementación parcial en `src/game/combat.ts`; el balance sigue siendo provisional y requiere simulaciones y pruebas de juego.  
 **Objetivo:** hacer UMBRA exigente, táctico y rejugable sin convertirlo en una rutina pesada, una pared de estadísticas o una obligación de conseguir duplicados.
 
 ## Conclusión ejecutiva
@@ -202,3 +202,16 @@ No recopilar datos personales que no hagan falta. Para las pruebas tempranas, ob
 - [RPGdesign: Solutions for known problems in combat](https://www.reddit.com/r/RPGdesign/comments/1hhgz7j), ideas comunitarias para evitar que la opción de mayor daño al primer turno resuelva todos los encuentros y para añadir roles enemigos distintos.
 
 Las discusiones comunitarias son opiniones y propuestas, no estudios controlados; se usan para generar hipótesis que después deben probarse. Las demás fuentes tampoco sustituyen el playtest de UMBRA: sirven para fundamentar qué medir, qué evitar y cómo estructurar el primer balance.
+
+
+## 10. Primera implementación técnica (15 de octubre de 2026)
+
+Se aplicó una primera pasada conservadora sobre el combate del prototipo:
+
+- La habilidad ya no es gratuita: requiere 20 Ánima, consume 20 y devuelve 4, para un coste neto de 16; inflige ATQ + 12–18 y cura hasta 5 HP. Si falta Ánima, no ejecuta el efecto.
+- El ataque normal conserva su generación estable de 12 Ánima.
+- La enemiga guarda una intención en el estado de combate del servidor. El estado inicial anuncia ataque rápido; cada tercer turno de combate prepara un golpe cargado. La interfaz presenta una advertencia textual antes de que el jugador elija su respuesta.
+- Defender reduce más daño contra el golpe cargado; evadir evita el ataque anunciado; una habilidad con potencia suficiente puede interrumpir el golpe cargado.
+- Se añadieron pruebas automáticas para coste de habilidad, intención enemiga, defensa y carga. Deben pasar en CI antes de considerar validada la integración completa.
+
+**Limitaciones actuales:** el patrón aún es compartido y básico, no existe todavía un sistema completo de arquetipos ni una simulación estadística de miles de combates. La intención de guardia está tipada para extensiones, pero no se selecciona todavía como patrón autónomo. La dificultad no debe escalarse hasta verificar build, pruebas, distribución de turnos, resultados y comportamiento de la interfaz. Los números son una primera hipótesis ajustable, no un balance final.
