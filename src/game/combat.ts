@@ -53,18 +53,22 @@ export function act(battle: BattleState, action: BattleAction): BattleState {
     case "evolve":
       if (b.evolved) {
         b.log.push("Ya evolucionaste en esta batalla.");
+      } else if (b.stage === "Epic") {
+        b.log.push("Esta heroína ya alcanzó la forma Epic.");
       } else if (b.player.anima < 60) {
         b.log.push("Necesitas 60 Ánima para activar la evolución.");
       } else if (b.alma < 25) {
         b.log.push("Necesitas 25 Alma del protagonista para evolucionar.");
       } else {
         b.evolved = true;
+        b.stage = b.stage === "Lily" ? "Hero" : "Epic";
+        b.player.name = b.player.name.replace(/ · (Lily|Hero|Epic)$/, "") + " · " + b.stage;
         b.player.anima -= 60;
         b.alma -= 25;
         b.player.attack += 10;
         b.player.maxHp += 15;
         b.player.hp = Math.min(b.player.maxHp, b.player.hp + 15);
-        b.log.push("¡Evolución activada! -60 Ánima, -25 Alma, +10 ATQ y +15 vida máxima.");
+        b.log.push("¡Evolución a " + b.stage + "! -60 Ánima, -25 Alma, +10 ATQ y +15 vida máxima.");
       }
       break;
   }
