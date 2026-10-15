@@ -44,8 +44,8 @@ test("evolution spends alma and can happen only once per battle", () => {
   const evolved = act(battle, "evolve-light");
   assert.equal(evolved.evolved, true);
   assert.equal(evolved.alma, 0);
-  assert.equal(evolved.player.attack, battle.player.attack + 10);
-  assert.equal(evolved.player.maxHp, battle.player.maxHp + 15);
+  assert.equal(evolved.player.attack, battle.player.attack + 8);
+  assert.equal(evolved.player.maxHp, battle.player.maxHp + 20);
 
   const attackAfterEvolution = evolved.player.attack;
   const secondAttempt = act(evolved, "evolve-light");
