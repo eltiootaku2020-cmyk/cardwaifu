@@ -35,7 +35,10 @@ let world: WorldView | null = null;
 let linkedHeroine: HeroineCard | null = null;
 let summonNote = "Tu primera carta elegirá una heroína consciente.";
 let resources = { alma: 100, anima: 0 };
-let rewards: PlayerRewards = { xp: 0, coins: 0, materials: 0, level: 1, xpIntoLevel: 0, xpForNextLevel: 100 };\nlet equipment: EquipmentItem[] = [];\nlet loadout: EquipmentLoadout = { weapon: "wooden-bow", armor: "forest-cloak", accessory: "amber-charm", support: "healing-herbs" };\nlet loadoutNote = "Preparando el equipo inicial…";
+let rewards: PlayerRewards = { xp: 0, coins: 0, materials: 0, level: 1, xpIntoLevel: 0, xpForNextLevel: 100 };
+let equipment: EquipmentItem[] = [];
+let loadout: EquipmentLoadout = { weapon: "wooden-bow", armor: "forest-cloak", accessory: "amber-charm", support: "healing-herbs" };
+let loadoutNote = "Preparando el equipo inicial…";
 let gender = "Mujer";
 let note = "Elige tu vínculo y entra en el primer encuentro.";
 let worldNote = "Cargando rutas de la expedición…";
@@ -111,7 +114,8 @@ function render() {
   root.querySelectorAll<HTMLButtonElement>("[data-gender]").forEach(button => button.onclick = () => { gender = button.dataset.gender ?? "Mujer"; render(); });
   root.querySelector<HTMLButtonElement>("#summon")!.onclick = () => void summonFirst();
   root.querySelector<HTMLButtonElement>("#start")!.onclick = () => void startBattle();
-  root.querySelectorAll<HTMLButtonElement>("[data-travel]").forEach(button => button.onclick = () => void travel(button.dataset.travel ?? ""));\n  root.querySelectorAll<HTMLSelectElement>("[data-equipment-slot]").forEach(select => select.onchange = () => void saveLoadout(select.dataset.equipmentSlot as EquipmentSlot, select.value));
+  root.querySelectorAll<HTMLButtonElement>("[data-travel]").forEach(button => button.onclick = () => void travel(button.dataset.travel ?? ""));
+  root.querySelectorAll<HTMLSelectElement>("[data-equipment-slot]").forEach(select => select.onchange = () => void saveLoadout(select.dataset.equipmentSlot as EquipmentSlot, select.value));
   drawBattle();
 }
 function drawBattle() {
