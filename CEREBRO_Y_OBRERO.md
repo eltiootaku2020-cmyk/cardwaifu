@@ -17,6 +17,13 @@ Formas exactas: Lily → Hero → Epic. No hay forma posterior a Epic. Lily no t
 ## Rarezas y colección
 Rarezas R, S, SR, SSR y UR. La invocación es importante, pero la mayoría de personajes deben poder conseguirse jugando. Las limitadas pueden volver en eventos o conseguirse a largo plazo. Ante duplicados, elegir entre mejorar la unidad o recibir materiales. El Ánima común no se usa en gacha. El Ánima premium puede gastarse en progreso o gacha y obtenerse mediante pago y pequeñas cantidades de historia/eventos; mostrar advertencia antes de gastarla en algo obtenible jugando.
 
+### Protagonista de rango S, duplicados y escalada de poder
+El protagonista jugable también tendrá una carta propia de rareza **S** y podrá obtener duplicados de esa carta. Los duplicados alimentan una ruta de mejora/ascensión del protagonista, pero el coste de avanzar crece progresivamente porque es una unidad S; no se debe asumir que conseguir una copia basta para maximizarlo. La progresión combinará duplicados con otras mejoras: experiencia y niveles, Rupturas de Límite y sus materiales, cartas de equipo, apoyos y mejoras de las heroínas vinculadas. Los costes exactos, umbrales y bonificaciones quedan pendientes de balance; no fijar números de copias sin pruebas.
+
+El “power creep oculto” debe sentirse como una escalada gradual de los desafíos y de la inversión necesaria para seguir potenciando el mazo, no como saltos arbitrarios de estadísticas ni como un requisito de pago. Las nuevas regiones exigirán decisiones, sinergias y mejora del conjunto de cartas; el protagonista S conservará una función propia y nunca debe volverse inútil por ser caro de mejorar.
+
+La comparación de balance obligatoria incluirá una prueba equivalente con una carta SR: usando una región, equipo, recursos y nivel de inversión comparables, se medirá cuántos turnos, recursos y mejoras exige el avance con la carta S del protagonista frente a la SR. La partida con SR debe demostrar una ruta de progreso más sencilla/accesible, mientras la S representa una progresión más exigente y de largo plazo. La diferencia debe venir de la curva de inversión y la estrategia, no de que la S sea deliberadamente débil. Esta comparación aún es un requisito de diseño, no una prueba ya ejecutada.
+
 ## Combate y recursos
 Combate por turnos: duelos 1v1, heroína contra varios enemigos o equipo contra grupo/jefe según misión. Acciones base: atacar, habilidad, defender, evadir, cargar y definitiva. El Ánima se acumula durante el combate. Al alcanzar el umbral, se puede evolucionar gastando Alma del protagonista, como máximo una vez por batalla.
 
