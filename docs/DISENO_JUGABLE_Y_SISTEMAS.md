@@ -53,7 +53,7 @@ La historia principal no debe quedar bloqueada por Alma. La falta de Alma impide
 - Defender: reduce el próximo daño y puede proteger a una aliada.
 - Evadir: evita un ataque anunciado, pero falla contra ataques de área o que rastrean.
 - Cargar: gana Ánima, sacrificando presión ofensiva durante ese turno.
-- Evolucionar: requiere un umbral de Ánima y Alma; solo una evolución por batalla. Se puede evolucionar Lily→Hero o Hero→Epic en batallas diferentes. Epic es la forma final.
+- Evolucionar: requiere 60 Ánima y 25 Alma; solo una evolución por batalla. La acción exige elegir Light o Dark cuando la portadora puede usar ambas ramas. Lily→Hero fija la rama; Hero→Epic conserva esa misma rama en otra batalla. Epic es la forma final.\n- La rama Light prioriza aguante: +8 ATQ y +20 vida máxima en el prototipo actual. La rama Dark prioriza daño: +13 ATQ y +10 vida máxima. Son valores iniciales de balance, no números sagrados. Una heroína sin acceso Dark no puede elegir esa rama; no se puede cambiar de rama durante la evolución normal.
 - El daño debe ser predecible en lo esencial; el azar aporta variación acotada. La preparación y las decisiones deben superar a la suerte en la mayoría de encuentros.
 
 ### Estados de combate sugeridos
