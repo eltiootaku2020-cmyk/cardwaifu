@@ -1,9 +1,11 @@
 import "dotenv/config";
+import { randomInt } from "node:crypto";
 import express from "express";
 import { resolve } from "node:path";
 import { createBattle, act, type BattleAction } from "./game/combat.js";
-import { getOrCreatePlayer, getBattle, getLatestActiveBattle, saveBattleProgress, getWorldProgress, saveWorldProgress } from "./db.js";
+import { getOrCreatePlayer, getBattle, getLatestActiveBattle, saveBattleProgress, getWorldProgress, saveWorldProgress, getInventory, grantFirstHeroine } from "./db.js";
 import { getAvailableDestinations, getWorldNode, travelTo } from "./game/world.js";
+import { getFirstSummonPool, getHeroine } from "./game/catalog.js";
 import { validateTelegramInitData } from "./telegram/auth.js";
 
 const app = express();
@@ -26,6 +28,36 @@ app.get("/api/health", (_req, res) => res.json({ ok: true, game: "UMBRA: Card Fr
 app.get("/api/me", (req, res) => {
   try { res.json({ player: player(req) }); }
   catch (error) { res.status(401).json({ error: error instanceof Error ? error.message : "No autorizado" }); }
+});
+
+app.get("/api/collection", (req, res) => {
+  try {
+    const currentPlayer = player(req);
+    const collection = getInventory(currentPlayer.telegramId).map(entry => ({
+      ...entry,
+      heroine: getHeroine(entry.heroineId) ?? null
+    }));
+    res.json({ collection });
+  } catch (error) {
+    res.status(401).json({ error: error instanceof Error ? error.message : "No se pudo cargar la colección." });
+  }
+});
+
+app.post("/api/summon/first", (req, res) => {
+  try {
+    const currentPlayer = player(req);
+    const pool = getFirstSummonPool();
+    const result = grantFirstHeroine(
+      currentPlayer.telegramId,
+      pool.map(heroine => heroine.id),
+      () => pool[randomInt(0, pool.length)]!.id
+    );
+    const heroine = getHeroine(result.heroineId);
+    if (!heroine) throw new Error("La heroína vinculada no existe en el catálogo.");
+    res.json({ heroine, created: result.created, collection: getInventory(currentPlayer.telegramId) });
+  } catch (error) {
+    res.status(500).json({ error: error instanceof Error ? error.message : "No se pudo completar la primera invocación." });
+  }
 });
 
 app.get("/api/world", (req, res) => {
