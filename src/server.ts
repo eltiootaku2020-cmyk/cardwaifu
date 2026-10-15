@@ -54,6 +54,7 @@ app.post("/api/summon/first", (req, res) => {
     );
     const heroine = getHeroine(result.heroineId);
     if (!heroine) throw new Error("La heroína vinculada no existe en el catálogo.");
+    if (result.created) savePlayerFormStage(currentPlayer.telegramId, heroine.stage);
     res.json({ heroine, created: result.created, collection: getInventory(currentPlayer.telegramId) });
   } catch (error) {
     res.status(500).json({ error: error instanceof Error ? error.message : "No se pudo completar la primera invocación." });
