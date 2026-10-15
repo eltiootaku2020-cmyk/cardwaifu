@@ -3,6 +3,14 @@
 ## Objetivo
 Crear cartas originales de monstruos/mobs, personajes, armas, equipamiento y Corazones Heroicos a partir de una imagen con transparencia. El editor debe funcionar sin servicios externos para la composición, para mantenerlo ligero y facilitar el uso en PC modestas.
 
+## Regla visual y prompts obligatorios
+- Regla absoluta de UMBRA: el 100% de los seres que aparecen en el juego son waifus; las armas son la única excepción. Incluye personajes históricos/mitológicos, mobs, monstruos, jefes y criaturas Dark.
+- Una waifu monstruosa puede conservar rasgos claros de su especie (orejas de goblin, escamas de dragón, patas de araña, cola, cuernos, colmillos), pero el diseño debe leerse como un personaje femenino con identidad propia, no como un monstruo genérico.
+- Cada carta tendrá un prompt corto, editable y separado por comas en inglés. Describir rasgos visibles: cuerpo/pose, cabello, ojos, ropa, accesorios, especie y nombre. Evitar etiquetas de relleno como “masterpiece”, “best quality”, “elemental woman” o “super fire power”.
+- El tipo Arma es la única categoría que genera un objeto sin waifu. Equipamiento y Corazones Heroicos deben ilustrar una waifu o una escena protagonizada por waifus, según el concepto de la carta.
+- Ejemplo Hércules: `1 girl, tall girl, sixpack, big smile, brown hair, brown eyes, Olympus clothes, bronze clothes, Hercules`.
+- El editor incluye plantillas cortas para las heroínas iniciales y rasgos de especie para algunos mobs. La galería es temporal en el prototipo; persistencia real y un catálogo completo de prompts siguen pendientes.
+
 ## Flujo de creación
 1. Crear o conseguir una ilustración original; preferir PNG RGBA transparente.
 2. Cargarla en el editor.
