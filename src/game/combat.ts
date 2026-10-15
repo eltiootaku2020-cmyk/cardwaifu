@@ -61,11 +61,10 @@ export function act(battle: BattleState, action: BattleAction): BattleState {
         b.evolved = true;
         b.player.anima -= 60;
         b.alma -= 25;
-        b.player.stage = b.player.stage === "Hero" ? "Epic" : "Hero";
         b.player.attack += 10;
         b.player.maxHp += 15;
         b.player.hp = Math.min(b.player.maxHp, b.player.hp + 15);
-        b.log.push("¡Evolución a " + b.player.stage + "! -60 Ánima, -25 Alma, +10 ATQ y +15 vida máxima.");
+        b.log.push("¡Evolución activada! -60 Ánima, -25 Alma, +10 ATQ y +15 vida máxima.");
       }
       break;
   }
