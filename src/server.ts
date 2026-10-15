@@ -3,9 +3,10 @@ import { randomInt } from "node:crypto";
 import express from "express";
 import { resolve } from "node:path";
 import { createBattle, act, type BattleAction } from "./game/combat.js";
-import { getOrCreatePlayer, getBattle, getLatestActiveBattle, saveBattleProgress, getWorldProgress, saveWorldProgress, getInventory, grantFirstHeroine, savePlayerFormStage, getPlayerRewards } from "./db.js";
+import { getOrCreatePlayer, getBattle, getLatestActiveBattle, saveBattleProgress, getWorldProgress, saveWorldProgress, getInventory, grantFirstHeroine, savePlayerFormStage, getPlayerRewards, getPlayerLoadout, savePlayerLoadout } from "./db.js";
 import { getAvailableDestinations, getWorldNode, travelTo } from "./game/world.js";
 import { getFirstSummonPool, getHeroine } from "./game/catalog.js";
+import { EQUIPMENT, getEquipmentBonuses, isValidLoadout } from "./game/equipment.js";
 import { validateTelegramInitData } from "./telegram/auth.js";
 
 const app = express();
@@ -28,6 +29,28 @@ app.get("/api/health", (_req, res) => res.json({ ok: true, game: "UMBRA: Card Fr
 app.get("/api/me", (req, res) => {
   try { const currentPlayer = player(req); res.json({ player: currentPlayer, rewards: getPlayerRewards(currentPlayer.telegramId) }); }
   catch (error) { res.status(401).json({ error: error instanceof Error ? error.message : "No autorizado" }); }
+});
+
+app.get("/api/loadout", (req, res) => {
+  try {
+    const currentPlayer = player(req);
+    const loadout = getPlayerLoadout(currentPlayer.telegramId);
+    res.json({ loadout, equipment: EQUIPMENT, bonuses: getEquipmentBonuses(loadout) });
+  } catch (error) {
+    res.status(401).json({ error: error instanceof Error ? error.message : "No se pudo cargar el equipamiento." });
+  }
+});
+
+app.post("/api/loadout", (req, res) => {
+  try {
+    const currentPlayer = player(req);
+    const loadout = req.body?.loadout;
+    if (!isValidLoadout(loadout)) return res.status(400).json({ error: "El equipamiento no coincide con los cuatro espacios permitidos." });
+    savePlayerLoadout(currentPlayer.telegramId, loadout);
+    res.json({ loadout, equipment: EQUIPMENT, bonuses: getEquipmentBonuses(loadout) });
+  } catch (error) {
+    res.status(400).json({ error: error instanceof Error ? error.message : "No se pudo guardar el equipamiento." });
+  }
 });
 
 app.get("/api/collection", (req, res) => {
@@ -112,7 +135,7 @@ app.post("/api/battle/start", (req, res) => {
       "entrada-abismo": { name: "Guardiana del Miasma", hp: 150, attack: 18 }
     };
     const encounter = encounters[node.id] ?? { name: "Exploradora hostil del bosque", hp: 90, attack: 13 };
-    const battle = createBattle(heroine.name, currentPlayer.alma, currentPlayer.formStage, currentPlayer.anima, encounter.name, encounter.hp, encounter.attack, heroine.attack, heroine.maxHp);
+    const loadout = getPlayerLoadout(currentPlayer.telegramId);\n    const gearBonuses = getEquipmentBonuses(loadout);\n    const battle = createBattle(heroine.name, currentPlayer.alma, currentPlayer.formStage, currentPlayer.anima, encounter.name, encounter.hp, encounter.attack, heroine.attack + gearBonuses.attackBonus, heroine.maxHp + gearBonuses.hpBonus);
     saveBattleProgress(currentPlayer.telegramId, battle);
     res.json({ battle });
   } catch (error) {
