@@ -8,7 +8,7 @@ declare global {
 }
 type Stage = "Lily" | "Hero" | "Epic";
 type Battle = {
-  id: string; turn: number; alma: number; stage: Stage;
+  id: string; turn: number; alma: number; stage: Stage; branch: "Light" | "Dark" | null; darkAvailable: boolean;
   player: { name: string; hp: number; maxHp: number; anima: number };
   enemy: { name: string; hp: number; maxHp: number };
   status: string; evolved?: boolean; log: string[];
