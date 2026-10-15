@@ -130,7 +130,8 @@ async function act(action: string) {
     if (!response.ok) throw new Error(data.error || "No se pudo resolver la acción.");
     battle = data.battle as Battle;
     resources = { alma: battle!.alma, anima: battle!.player.anima };
-    note = "Acción validada por el servidor.";
+    if (data.rewards) rewards = data.rewards as PlayerRewards;
+    note = data.rewardGranted ? "¡Victoria! Recompensas: +" + (data.rewards?.xp ?? 0) + " XP, +" + (data.rewards?.coins ?? 0) + " monedas y +" + (data.rewards?.materials ?? 0) + " materiales." : "Acción validada por el servidor.";
   } catch (error) {
     note = error instanceof Error ? error.message : "Error de combate";
   }
