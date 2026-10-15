@@ -9,7 +9,7 @@ export function createBattle(heroName = "Heroína vinculada", alma = 100, stage:
     player: { name: heroName, hp: Math.max(1, heroMaxHp), maxHp: Math.max(1, heroMaxHp), attack: Math.max(1, heroAttack), anima: Math.max(0, Math.min(100, Math.floor(anima))) },
     enemy: { name: enemyName, hp: Math.max(1, enemyHp), maxHp: Math.max(1, enemyHp), attack: Math.max(1, enemyAttack), anima: 0 },
     status: "active", evolved: false,
-    log: ["Una sabuesa contaminada bloquea el camino."]
+    log: [enemyName + " bloquea el camino."]
   };
 }
 
