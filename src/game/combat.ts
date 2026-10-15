@@ -1,7 +1,7 @@
 import { randomInt, randomUUID } from "node:crypto";
 import type { BattleState, FormBranch, FormStage } from "./types.js";
 
-export type BattleAction = "attack" | "skill" | "defend" | "evade" | "charge" | "evolve" | "evolve-light" | "evolve-dark";
+export type BattleAction = "attack" | "skill" | "defend" | "evade" | "charge" | "evolve-light" | "evolve-dark";
 
 export function createBattle(heroName = "Heroína vinculada", alma = 100, stage: FormStage = "Lily", anima = 0, enemyName = "Sabuesa contaminada", enemyHp = 82, enemyAttack = 12, heroAttack = 24, heroMaxHp = 100, darkAvailable = true, branch: FormBranch = null): BattleState {
   return {
@@ -50,7 +50,6 @@ export function act(battle: BattleState, action: BattleAction): BattleState {
       b.player.anima = Math.min(100, b.player.anima + 25);
       b.log.push("Carga: +25 Ánima.");
       break;
-    case "evolve":
     case "evolve-light":
     case "evolve-dark": {
       const selectedBranch = action === "evolve-dark" ? "Dark" : "Light";
