@@ -84,3 +84,55 @@ Fórmula de daño, estados, economía definitiva, probabilidades/pity, recetas d
 
 ## Regla de continuidad
 Este documento es la fuente de verdad del proyecto. Las cifras marcadas como tentativas no son reglas finales. Actualizarlo cuando se aprueben cambios y nunca afirmar que una integración está terminada sin probarla.
+
+## Continuidad de diseño — cartas sociales, clases y mito de Medusa (14-10-2026)
+
+**Estado de trabajo:** seguimos en diseño. No implementar código, modificar sistemas ni generar arte hasta recibir autorización expresa. Las ideas propuestas no se vuelven canon automáticamente; distinguir decisiones confirmadas de preguntas pendientes.
+
+### Dos grandes familias de cartas
+El universo de cartas se organiza primero en dos grandes familias:
+- **Cartas de héroes:** personajes que fueron héroes, campeones o aliados de los dioses.
+- **Cartas de monstruos:** seres que combatieron contra esos héroes y fueron perseguidos o asesinados por ellos.
+
+Muchos monstruos invocados podrían inclinarse hacia el Abismo porque odian a los dioses y a los héroes que los mataron. Sin embargo, no todos quieren combatir ni servir al Abismo: cada uno tiene voluntad, historia y motivos propios. No tratar a todos los monstruos como malvados sin matices.
+
+### Medusa y las Gorgonas: base mitológica que debe respetarse
+El arco de la niña vinculada a Medusa debe tener sentido dentro de la historia de Medusa y las Gorgonas: la carta no es simplemente un poder monstruoso al azar. La idea central que el usuario quiere explorar es la de alguien que intenta proteger a quienes ama, pero acaba siendo vista como un monstruo y cazada por un héroe. La transformación trágica debe reflejar el destino de Medusa y/o las Gorgonas y el modo en que una figura considerada monstruosa puede tener una historia de sufrimiento, protección y persecución.
+
+**Idea narrativa propuesta por el usuario (todavía en desarrollo):** una niña pequeña es odiada y maltratada por su pueblo, pero lo soporta para proteger a su hermanita. Cuando obtiene una carta vinculada a Medusa, los demás la perciben como una amenaza. Ella intimida al pueblo para exigir que dejen en paz a su hermana; como resultado, el pueblo y posiblemente su propia hermana la odian aún más. La niña acepta cargar con ese odio si así evita que su hermana sufra el mismo maltrato. El vínculo con Medusa debe justificar temáticamente cómo la niña pasa de intentar proteger a alguien a convertirse, a ojos de los demás, en el monstruo que merece ser cazado.
+
+**Dirección que no debe perderse:** antes de fijar escenas, revisar y escoger conscientemente qué tradición del mito de Medusa y las Gorgonas sirve de base, porque existen versiones diferentes. No afirmar que todas las versiones mitológicas cuentan exactamente la misma historia. El usuario quiere que la conexión sea coherente con el mito, no solo usar el nombre o la apariencia de Medusa.
+
+**Pendiente de decidir:** cómo se conecta concretamente la niña con Medusa y las Gorgonas; qué evento la convierte en aquello que el héroe acaba cazando; si la niña se alía finalmente con el Abismo por desesperación o permanece como monstruo independiente para proteger a su hermana. No decidir todavía si hay una elección/ruta del jugador, ni si derrotarla significa matarla o salvarla.
+
+### Apariciones de cartas en grupos de Telegram/Discord
+Este sistema es independiente de los desafíos PvP. El bot publica una carta y quien la reclama la recibe en su inventario personal, no en un inventario compartido del grupo.
+- Apariciones normales: mezcla de horarios programados e intervalos aleatorios; los horarios concretos y el rango de intervalo siguen sin fijarse.
+- Apariciones sorpresa: ocasionales.
+- Duración: 5 minutos para aparición normal y 10 minutos para evento.
+- Si una carta expira sin que nadie la reclame, desaparece y se espera a la siguiente aparición prevista; no se publica otra inmediatamente.
+- Duplicados reclamados se conservan como copias; no se convierten ni fusionan automáticamente.
+- R: cupo de 2 o 3 jugadores por aparición; el bot debe anunciar el cupo exacto de esa aparición.
+- S: cupo de 1 jugador por aparición.
+- SR: apariciones especiales distribuidas a lo largo de una semana; una sola persona puede reclamar cada aparición SR.
+- SSR y UR: solo durante eventos. El cupo exacto de reclamaciones por aparición aún no está confirmado.
+- Límite individual: 1 carta por hora en cada grupo, aplicado por separado a cada grupo.
+- Antiabuso: registrar actividad sospechosa para revisión administrativa, sin sanción automática.
+- **Pregunta pendiente:** para SR, decidir si hay varias apariciones durante la semana (cada una con una sola persona ganadora) o una única aparición en toda la semana.
+- Los duelos por ahora son 1v1; un jugador publica que busca duelo y otra persona puede aceptar. Solo una persona puede ocupar/aceptar el desafío.
+
+### Diseño de la información en las cartas
+Propuesta de frente: ilustración y fondo temático; nombre; rareza R/S/SR/SSR/UR; poder, ataque y defensa; tipo/afinidad; clase o rol; personalidad; habilidad de héroe; habilidad de apoyo; frase memorable o mini historia.
+Reverso: vida y estadísticas completas; detalles de habilidades, costes, condiciones, duración y límites; afinidad y clase; nivel, evolución, mejoras y efectos especiales.
+Distinciones recomendadas:
+- **Tipo/afinidad:** naturaleza, como Luz, Oscuridad, Fuego o Agua.
+- **Clase/rol:** función en combate y/o estilo de lucha.
+- **Personalidad:** rasgos y descripción del personaje.
+
+**Dos elecciones pendientes del usuario:**
+1. Sistema de clases: por función de combate (Atacante, Defensora, Apoyo, Control), por estilo de lucha (Espadachina, Lancera, Arquera, Maga) o mixto.
+2. Personalidad en la carta: descripción breve en el frente, lista de rasgos, o descripción breve al frente + perfil ampliado al reverso.
+Recomendación anterior, aún no confirmada: clases mixtas y personalidad breve al frente con detalles en el reverso.
+
+### Cómo retomar en otro chat
+Frase clave sugerida: **«Eres el cerebro de UMBRA: Card Frontier. Lee el documento maestro CEREBRO_Y_OBRERO.md del repositorio eltiootaku2020-cmyk/cardwaifu y continúa desde las decisiones pendientes. Estamos en diseño, no implementes cambios sin que te lo autorice.»**
