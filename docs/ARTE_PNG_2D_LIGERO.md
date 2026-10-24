@@ -25,7 +25,7 @@ Crear una aventura de cartas que se sienta viva usando ilustraciones 2D propias,
 
 ## Registro de arte
 
-La interfaz lee `web/public/assets/umbra/manifest.json`. Las rutas aceptadas deben ser locales a `/assets/umbra/`; no se cargan URLs de terceros. Mientras una entrada esté a `null`, se mantiene la ilustración de reserva. Añadir una imagen no marca una tarea como terminada por sí sola: se debe revisar su encuadre, carga, legibilidad, tamaño y comportamiento de reemplazo.
+La interfaz lee `web/public/assets/umbra/manifest.json` y también permite vincular arte desde el Taller de cartas. La vinculación local se guarda en IndexedDB del navegador para probar el retrato o fondo al instante, pero no se sincroniza con otros dispositivos ni con el WebView de Telegram. Para publicar el arte en todos los dispositivos, agrega al repositorio una copia optimizada y declara su ruta en el manifiesto. Las rutas aceptadas deben ser locales a `/assets/umbra/`; no se cargan URLs de terceros. Mientras una entrada esté a `null` y no exista arte local, se mantiene la ilustración de reserva. Añadir una imagen no marca una tarea como terminada por sí sola: se debe revisar su encuadre, carga, legibilidad, tamaño y comportamiento de reemplazo.
 
 ## Criterios de aceptación
 
@@ -36,6 +36,7 @@ La interfaz lee `web/public/assets/umbra/manifest.json`. Las rutas aceptadas deb
 - «Efectos ligeros» persiste en el mismo navegador y desactiva/reduce las animaciones decorativas.
 - Las preferencias del sistema operativo que solicitan movimiento reducido se respetan como ajuste inicial.
 - La aplicación sigue siendo usable si el manifiesto no se encuentra o no se puede leer.
+- El Taller de cartas permite vincular una imagen optimizada a un destino del juego sin editar TypeScript.
 - El rendimiento se medirá por separado en el PC del usuario y en Telegram antes de declarar la fase de rendimiento completada.
 
 ## Qué no está incluido todavía
