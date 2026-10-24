@@ -1,3 +1,5 @@
+import { saveLocalArt } from "./art.js";
+
 export function openCardStudio(): void {
   if (document.querySelector("#umbra-card-studio")) return;
   const overlay = document.createElement("div");
@@ -20,13 +22,47 @@ export function openCardStudio(): void {
           <div class="studio-stat-row"><label>Ataque<input id="studio-art-atk" type="number" min="0" max="9999" value="28"></label><label>Vida / poder<input id="studio-art-hp" type="number" min="0" max="9999" value="120"></label></div>
           <label>Escala del arte<input id="studio-art-scale" type="range" min="55" max="135" value="100"></label>
           <label>Marco original<select id="studio-art-frame"><option value="arcane">Arcana · violeta</option><option value="flame">Llama · carmesí</option><option value="frost">Escarcha · azul</option><option value="nature">Raíz · verde</option><option value="gold">Reliquia · dorada</option></select></label>
+          <label>Vincular al juego (opcional)
+            <select id="studio-art-target">
+              <option value="">Solo guardar la carta</option>
+              <optgroup label="Retratos de portadoras">
+                <option value="character:tiny:portrait">Tiny · exploradora goblin</option>
+                <option value="character:elizabeth:portrait">Elizabeth</option>
+                <option value="character:artoria:portrait">Artoria</option>
+                <option value="character:juana:portrait">Juana de Arco</option>
+                <option value="character:cleopatra:portrait">Cleopatra</option>
+                <option value="character:musashi:portrait">Musashi</option>
+                <option value="character:heracles:portrait">Heracles</option>
+                <option value="character:robin-hood:portrait">Robin Hood</option>
+                <option value="character:guardiana-bretana:portrait">Guardiana de Bretaña</option>
+                <option value="character:cazadora-musgo:portrait">Cazadora del Musgo</option>
+              </optgroup>
+              <optgroup label="Retratos de enemigas">
+                <option value="enemy:goblin:portrait">Enemiga goblin</option>
+                <option value="enemy:miasma:portrait">Enemiga de miasma</option>
+                <option value="enemy:beast:portrait">Enemiga bestial</option>
+                <option value="enemy:boss:portrait">Jefa</option>
+                <option value="enemy:forest:portrait">Enemiga del bosque</option>
+              </optgroup>
+              <optgroup label="Fondos de bioma">
+                <option value="scene:village:background">Aldea</option>
+                <option value="scene:path:background">Sendero</option>
+                <option value="scene:landmark:background">Puesto o lugar emblemático</option>
+                <option value="scene:camp:background">Manantial o campamento</option>
+                <option value="scene:ruin:background">Ruinas</option>
+                <option value="scene:dungeon:background">Mazmorra</option>
+              </optgroup>
+            </select>
+          </label>
+          <button type="button" class="secondary" id="studio-art-link">↗ Vincular PNG al juego</button>
+          <p class="muted studio-note">La vinculación se guarda solo en este navegador. El arte no se sube a internet. Para incluirlo en una versión desplegada en otros dispositivos, usa los assets públicos y el manifiesto.</p>
           <label>Prompt para generar la imagen<textarea id="studio-art-prompt" rows="5" placeholder="1 girl, tall girl, brown hair, bronze clothes, Hercules"></textarea></label>
           <div class="studio-buttons"><button type="button" class="secondary" id="studio-art-prompt-refresh">↻ Generar prompt</button><button type="button" class="secondary" id="studio-art-prompt-copy">Copiar prompt</button></div>
           <p class="muted studio-note">Prompt corto en inglés, separado por comas. Todo lo que represente un ser será una waifu; las armas son la única excepción. Sin etiquetas de calidad ni relleno.</p>
           <div class="studio-buttons"><button type="button" class="primary" id="studio-art-save">＋ Guardar carta</button><button type="button" class="secondary" id="studio-art-export">↓ Exportar PNG</button></div>
           <p class="muted studio-note">El editor crea marcos propios por código. Para que el personaje quede bien integrado, usa PNG con canal alfa y ajusta la escala.</p>
         </div>
-        <div class="studio-result"><canvas id="studio-art-canvas" width="600" height="900" aria-label="Vista previa de carta"></canvas><div class="studio-gallery-head"><strong>Galería de esta sesión</strong><span id="studio-art-count">0 cartas</span></div><div id="studio-art-gallery" class="studio-gallery"></div></div>
+        <div class="studio-result"><canvas id="studio-art-canvas" width="600" height="900" aria-label="Vista previa de carta"></canvas><div class="studio-gallery-head"><strong>Galería local</strong><span id="studio-art-count">0 cartas</span></div><div id="studio-art-gallery" class="studio-gallery"></div></div>
       </div>
     </section>`;
   document.body.append(overlay);
@@ -223,6 +259,40 @@ export function openCardStudio(): void {
     image.onload = () => { art = image; draw(); };
     image.onerror = () => window.alert("No se pudo leer la imagen. Prueba con PNG, WEBP o JPG.");
     image.src = objectUrl;
+  };
+  get<HTMLButtonElement>("studio-art-link").onclick = async () => {
+    const target = get<HTMLSelectElement>("studio-art-target").value;
+    if (!target) {
+      window.alert("Elige una portadora, una enemiga o un fondo en «Vincular al juego».");
+      return;
+    }
+    if (!art) {
+      window.alert("Primero carga un PNG, WEBP o JPG.");
+      return;
+    }
+    const maxSide = 1024;
+    const scale = Math.min(1, maxSide / Math.max(art.naturalWidth, art.naturalHeight));
+    const width = Math.max(1, Math.round(art.naturalWidth * scale));
+    const height = Math.max(1, Math.round(art.naturalHeight * scale));
+    const optimized = document.createElement("canvas");
+    optimized.width = width;
+    optimized.height = height;
+    const optimizedContext = optimized.getContext("2d", { alpha: true });
+    if (!optimizedContext) {
+      window.alert("No se pudo preparar la imagen en este navegador.");
+      return;
+    }
+    optimizedContext.clearRect(0, 0, width, height);
+    optimizedContext.drawImage(art, 0, 0, width, height);
+    try {
+      const blob = await new Promise<Blob>((resolve, reject) => {
+        optimized.toBlob(result => result ? resolve(result) : reject(new Error("No se pudo optimizar la imagen.")), "image/png");
+      });
+      await saveLocalArt(target, blob);
+      window.alert("Arte vinculado. Se usará en la interfaz cuando corresponda. El PNG optimizado se guarda en este navegador.");
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : "No se pudo guardar el arte local.");
+    }
   };
   get<HTMLButtonElement>("studio-art-export").onclick = () => { draw(); exportPng(); };
   get<HTMLButtonElement>("studio-art-save").onclick = () => {
