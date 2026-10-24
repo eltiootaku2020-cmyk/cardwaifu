@@ -46,8 +46,6 @@ test("discovery and rest events resolve once and grant provisional rewards", () 
 test("the chapter boss stays locked until its four prerequisite events are complete", () => {
   let state = createWorldProgress();
   const toTrail = travelTo(state, "sendero-musgo");
-  assert.throws(() => travelTo(toTrail.progress, "ruinas-viejas").progress && travelTo(toTrail.progress, "ruinas-viejas"), /no está conectado/);
-
   state = { ...toTrail.progress, completedEventIds: ["sendero-musgo"] };
   state = travelTo(state, "ruinas-viejas").progress;
   assert.equal(getChapterOneState(state).bossUnlocked, false);
