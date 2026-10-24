@@ -412,6 +412,8 @@ async function restoreActiveBattle() {
 render();
 window.addEventListener("umbra-art-updated", () => render());
 void loadArtManifest().then(() => render());
+void loadCollection();
+void loadLoadout();
 void loadWorld();
 void restoreActiveBattle();
 void fetch("/api/me", { headers: headers() }).then(async response => {
