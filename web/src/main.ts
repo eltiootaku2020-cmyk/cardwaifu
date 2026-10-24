@@ -23,11 +23,14 @@ type PlayerRewards = { xp: number; coins: number; materials: number; level: numb
 type WorldNode = {
   id: string; name: string; kind: string; danger: number; levelRange: string;
   description: string; event: string; connections: string[];
+  unlocked?: boolean; lockedReason?: string;
 };
+type ChapterObjective = { id: string; label: string; completed: boolean };
+type ChapterOneState = { objectives: ChapterObjective[]; bossUnlocked: boolean; completed: boolean };
 type HeroineCard = { id: string; name: string; rarity: string; stage: Stage; heroClass: string; description: string; };
 type WorldView = {
   progress: { currentNodeId: string; visitedNodeIds: string[]; completedEventIds: string[] };
-  current: WorldNode; destinations: WorldNode[];
+  current: WorldNode; destinations: WorldNode[]; chapter: ChapterOneState;
 };
 const root = document.querySelector<HTMLDivElement>("#app")!;
 installBattleVfx(root);
@@ -95,18 +98,38 @@ function renderWorld(): string {
   if (!world) return `<section class="panel expedition"><p class="eyebrow">MAPA DE EXPEDICIÓN</p><h2>El Bosque Oscuro</h2><p class="muted">${escapeHtml(worldNote)}</p></section>`;
   const current = world.current;
   const visited = new Set(world.progress.visitedNodeIds);
+  const completed = new Set(world.progress.completedEventIds);
+  const currentResolved = completed.has(current.id);
+  const canResolve = !currentResolved && ["safe", "discovery", "rest"].includes(current.event);
+  const objectiveDone = world.chapter.objectives.filter(objective => objective.completed).length;
+  const currentEventLabel = currentResolved
+    ? (current.event === "boss" ? "Capítulo completado" : current.event === "encounter" ? "Encuentro despejado" : "Evento resuelto")
+    : eventLabel(current.event);
   return `<section class="panel expedition">
     <div class="section-title expedition-title"><div><p class="eyebrow">MAPA DE EXPEDICIÓN · REGIÓN 01</p><h2>El Bosque Oscuro</h2></div><span>${world.progress.visitedNodeIds.length} lugares descubiertos</span></div>
-    <div class="current-location"><span class="node-icon">${nodeIcon(current.kind)}</span><div><small>UBICACIÓN ACTUAL · ${escapeHtml(current.levelRange)}</small><h3>${escapeHtml(current.name)}</h3><p>${escapeHtml(current.description)}</p><span class="event-tag">${eventLabel(current.event)}</span></div></div>
+    <div class="current-location"><span class="node-icon">${nodeIcon(current.kind)}</span><div><small>UBICACIÓN ACTUAL · ${escapeHtml(current.levelRange)}</small><h3>${escapeHtml(current.name)}</h3><p>${escapeHtml(current.description)}</p><span class="event-tag">${escapeHtml(currentEventLabel)}</span></div></div>
+    <div class="chapter-objectives">
+      <div class="chapter-objectives-head"><strong>Objetivos del capítulo</strong><span>${objectiveDone}/${world.chapter.objectives.length}</span></div>
+      <div class="objective-list">${world.chapter.objectives.map(objective => `<div class="objective-row ${objective.completed ? "objective-complete" : ""}"><span aria-hidden="true">${objective.completed ? "✓" : "○"}</span><span>${escapeHtml(objective.label)}</span></div>`).join("")}</div>
+      <p class="muted chapter-note">${world.chapter.completed ? "Capítulo 1 completado. Tu progreso quedó guardado." : world.chapter.bossUnlocked ? "La entrada al Abismo está abierta." : "Resuelve los eventos y despeja los encuentros para abrir el acceso a la amenaza final."}</p>
+    </div>
+    ${canResolve ? `<button type="button" class="primary full resolve-event" id="resolve-event">${current.event === "discovery" ? "✧ Investigar lugar" : current.event === "rest" ? "☾ Descansar y recuperar Alma" : "⌂ Registrar visita"}</button>` : ""}
+    ${currentResolved ? `<p class="muted event-complete-note">Este lugar ya está resuelto. Tu progreso se conserva aunque cierres el juego.</p>` : ""}
     <p class="route-heading">Rutas conectadas</p>
-    <div class="route-grid">${world.destinations.map(node => `<article class="route-card ${visited.has(node.id) ? "visited" : ""}">
-      <div class="route-card-top"><span class="node-icon">${nodeIcon(node.kind)}</span><span class="danger danger-${node.danger}">${node.danger === 0 ? "Seguro" : "Peligro " + "◆".repeat(node.danger)}</span></div>
-      <h3>${escapeHtml(node.name)}</h3><small>${escapeHtml(node.levelRange)}</small><p>${escapeHtml(node.description)}</p><button class="route-button" data-travel="${escapeHtml(node.id)}">${visited.has(node.id) ? "Volver a visitar" : "Explorar ruta"} →</button>
-    </article>`).join("")}</div>
+    <div class="route-grid">${world.destinations.map(node => {
+      const unlocked = node.unlocked !== false;
+      const resolved = completed.has(node.id);
+      return `<article class="route-card ${visited.has(node.id) ? "visited" : ""} ${!unlocked ? "route-locked" : ""}">
+        <div class="route-card-top"><span class="node-icon">${nodeIcon(node.kind)}</span><span class="danger danger-${node.danger}">${node.danger === 0 ? "Seguro" : "Peligro " + "◆".repeat(node.danger)}</span></div>
+        <h3>${escapeHtml(node.name)}</h3><small>${escapeHtml(node.levelRange)}</small><p>${escapeHtml(node.description)}</p>
+        ${resolved ? `<p class="route-resolved">✓ Evento resuelto</p>` : ""}
+        ${!unlocked ? `<p class="route-lock-note">${escapeHtml(node.lockedReason ?? "Ruta bloqueada")}</p>` : ""}
+        <button class="route-button" data-travel="${escapeHtml(node.id)}" ${unlocked ? "" : "disabled"}>${!unlocked ? "Bloqueado" : visited.has(node.id) ? "Volver a visitar" : "Explorar ruta"} ${unlocked ? "→" : "·"}</button>
+      </article>`;
+    }).join("")}</div>
     <p class="muted expedition-note">${escapeHtml(worldNote)} El viaje se guarda en el servidor para que puedas retomarlo después.</p>
   </section>`;
-}
-function renderLoadout(): string {
+}function renderLoadout(): string {
   if (equipment.length === 0) return `<section class="panel loadout"><p class="eyebrow">EQUIPAMIENTO</p><h2>Preparación de expedición</h2><p class="muted">${escapeHtml(loadoutNote)}</p></section>`;
   const labels: Record<EquipmentSlot, string> = { weapon: "Arma", armor: "Equipamiento", accessory: "Accesorio", support: "Apoyo" };
   const options = (slot: EquipmentSlot) => equipment.filter(item => item.slot === slot).map(item => `<option value="${item.id}" ${loadout[slot] === item.id ? "selected" : ""}>${escapeHtml(item.name)} · ${item.rarity}</option>`).join("");
@@ -131,7 +154,7 @@ function render() {
       <button class="primary full" id="summon" ${linkedHeroine ? "disabled" : ""}>${linkedHeroine ? "✦ Primera invocación completada" : "✦ Realizar primera invocación"}</button>
       <p class="muted summon-note">${escapeHtml(linkedHeroine ? "Vínculo establecido: " + linkedHeroine.name + " · " + linkedHeroine.rarity : summonNote)}</p>
       ${linkedHeroine ? `<div class="linked-heroine ${summonReveal ? "reveal-card" : ""}" data-rarity="${escapeHtml(linkedHeroine.rarity)}"><span class="rarity-pill">${escapeHtml(linkedHeroine.rarity)}</span><div><b>${escapeHtml(linkedHeroine.name)}</b><small>${escapeHtml(linkedHeroine.heroClass)} · Forma inicial ${escapeHtml(linkedHeroine.stage)}</small><p>${escapeHtml(linkedHeroine.description)}</p></div></div>` : ""}
-      <button class="primary full" id="start" ${linkedHeroine && world && (world.current.event === "encounter" || world.current.event === "boss") ? "" : "disabled"}>⚔ ${world && world.current.event === "boss" ? "Enfrentar amenaza mayor" : "Combatir en esta zona"}</button>
+      <button class="primary full" id="start" ${linkedHeroine && world && (world.current.event === "encounter" || world.current.event === "boss") && !world.progress.completedEventIds.includes(world.current.id) && (world.current.event !== "boss" || world.chapter.bossUnlocked) ? "" : "disabled"}>⚔ ${world && world.current.event === "boss" ? "Enfrentar amenaza mayor" : "Combatir en esta zona"}</button>
     </section>
     ${renderWorld()}
     <div class="section-title"><div><p class="eyebrow">ARCHIVO DE LEYENDAS</p><h2>Heroínas conocidas</h2></div><span>R · S · SR</span></div>
@@ -160,6 +183,7 @@ function render() {
   root.querySelector<HTMLButtonElement>("#summon")!.onclick = () => void summonFirst();
   root.querySelector<HTMLButtonElement>("#start")!.onclick = () => void startBattle();
   root.querySelectorAll<HTMLButtonElement>("[data-travel]").forEach(button => button.onclick = () => void travel(button.dataset.travel ?? ""));
+  root.querySelector<HTMLButtonElement>("#resolve-event")?.addEventListener("click", () => void resolveCurrentEvent());
   root.querySelectorAll<HTMLSelectElement>("[data-equipment-slot]").forEach(select => select.onchange = () => void saveLoadout(select.dataset.equipmentSlot as EquipmentSlot, select.value));
   drawBattle();
 }
@@ -248,6 +272,7 @@ async function act(action: string) {
     window.setTimeout(() => { if (lastBattleAction === action) lastBattleAction = null; }, 1100);
     resources = { alma: battle!.alma, anima: battle!.player.anima };
     if (data.rewards) rewards = data.rewards as PlayerRewards;
+    if (data.world) world = data.world as WorldView;
     note = data.rewardGranted ? "¡Victoria! Recompensas: +" + (data.rewards?.xp ?? 0) + " XP, +" + (data.rewards?.coins ?? 0) + " monedas y +" + (data.rewards?.materials ?? 0) + " materiales." : "Acción validada por el servidor.";
   } catch (error) {
     note = error instanceof Error ? error.message : "Error de combate";
@@ -334,11 +359,41 @@ async function travel(destinationId: string) {
     const response = await fetch("/api/world/travel", { method: "POST", headers: headers(), body: JSON.stringify({ destinationId }) });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "No se pudo recorrer esa ruta.");
-    world = { progress: data.progress, current: data.destination, destinations: data.destinations };
-    worldNote = data.firstVisit ? "Lugar descubierto. " + eventLabel(data.event) + ": " + data.destination.description : "Has regresado a un lugar conocido.";
+    world = { progress: data.progress, current: data.destination, destinations: data.destinations, chapter: data.chapter as ChapterOneState };
+    worldNote = data.firstVisit ? "Has llegado a " + data.destination.name + ". " + (data.progress.completedEventIds.includes(data.destination.id) ? "Este lugar ya está resuelto." : eventLabel(data.event) + ": " + data.destination.description) : "Has regresado a un lugar conocido.";
     if (data.event === "encounter" || data.event === "boss") note = "La expedición ha detectado peligro. Inicia un encuentro cuando estés listo.";
   } catch (error) {
     worldNote = error instanceof Error ? error.message : "No se pudo recorrer esa ruta.";
+  }
+  render();
+}
+async function resolveCurrentEvent() {
+  if (!world) return;
+  worldNote = "Resolviendo evento…";
+  render();
+  try {
+    const response = await fetch("/api/world/resolve", { method: "POST", headers: headers(), body: JSON.stringify({}) });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "No se pudo resolver el evento.");
+    world = { progress: data.progress, current: data.current, destinations: data.destinations, chapter: data.chapter as ChapterOneState };
+    resources = { ...resources, alma: Number(data.alma ?? resources.alma) };
+    if (battle) battle.alma = resources.alma;
+    if (data.rewards) rewards = data.rewards as PlayerRewards;
+    const reward = data.reward as { xp: number; coins: number; materials: number; alma: number };
+    const gained = [
+      reward.xp ? "+" + reward.xp + " XP" : "",
+      reward.coins ? "+" + reward.coins + " monedas" : "",
+      reward.materials ? "+" + reward.materials + " materiales" : "",
+      reward.alma ? "+" + reward.alma + " Alma" : ""
+    ].filter(Boolean).join(", ");
+    worldNote = data.event === "discovery"
+      ? "Lugar investigado. " + (gained ? "Recompensa: " + gained + "." : "")
+      : data.event === "rest"
+        ? "Has descansado. " + (gained ? "Recuperaste " + gained + "." : "Ya tienes el Alma al máximo.")
+        : "Visita registrada.";
+    note = worldNote;
+  } catch (error) {
+    worldNote = error instanceof Error ? error.message : "No se pudo resolver el evento.";
   }
   render();
 }
