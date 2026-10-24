@@ -12,3 +12,73 @@
 .loadout-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.gear-slot{display:grid;gap:7px;align-content:start;min-width:0;padding:12px;border:1px solid var(--line);border-radius:12px;background:#0c1221}.gear-slot>span{font-size:11px;font-weight:900;letter-spacing:.06em}.gear-slot select{width:100%;min-width:0;padding:10px 8px;border:1px solid #3c4b69;border-radius:8px;background:#182238;color:#f1f4ff;font:inherit;font-size:11px}.gear-slot small{font-size:10px;line-height:1.5;color:var(--muted)}.gear-bonuses{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}.gear-bonuses span{padding:8px 10px;border:1px solid #354565;border-radius:9px;color:var(--muted);font-size:10px}.gear-bonuses b{color:var(--gold);margin-left:4px}.loadout-note{margin-bottom:0}@media(max-width:420px){.loadout-grid{grid-template-columns:1fr}}
 
 .enemy-intent{margin-top:7px;padding:7px 9px;border:1px solid #8a6537;border-radius:8px;background:#2a2118;color:#ffdca0;font-size:10px;font-weight:800;line-height:1.45;letter-spacing:.025em}.enemy-intent[role=status]{display:block}
+
+
+/* UMBRA: accesibilidad visual y modo de bajo consumo. */
+.top { gap: 10px; flex-wrap: wrap; }
+.visual-toggle {
+  flex: 0 0 auto;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #192238;
+  color: #dceaff;
+  padding: 9px 11px;
+  font-size: 11px;
+  font-weight: 800;
+}
+.visual-toggle[aria-pressed="true"] { border-color: #7df2bb; color: #bfffe0; }
+.visual-toggle:focus-visible, .gender button:focus-visible, button:focus-visible, select:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+}
+.profile-note { margin: 0 0 10px; }
+.backview[data-gender="mujer"] .body {
+  width: 50px;
+  left: 22px;
+  border-radius: 18px 18px 9px 9px;
+}
+.backview[data-gender="mujer"] .cape {
+  width: 86px;
+  left: 4px;
+}
+.backview[data-gender="hombre"] .body {
+  width: 64px;
+  left: 15px;
+  border-radius: 16px 16px 7px 7px;
+}
+.backview[data-gender="hombre"] .cape {
+  width: 78px;
+  left: 8px;
+  clip-path: polygon(15% 0, 85% 0, 100% 100%, 50% 86%, 0 100%);
+}
+.hero-card .art { isolation: isolate; }
+.hero-card .symbol { position: relative; z-index: 1; }
+.hero-card .rarity, .hero-card .stage { z-index: 2; }
+.hero-card .hero-card-art {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+}
+.hero-card .art.has-art .symbol { display: none; }
+@media (max-width: 560px) {
+  .top { align-items: center; }
+  .resource { order: 3; flex: 1 1 100%; white-space: normal; text-align: center; }
+  .brand { flex: 1 1 auto; }
+  .visual-toggle { font-size: 10px; padding: 8px; }
+}
+html[data-umbra-effects="reduced"] *, 
+html[data-umbra-effects="reduced"] *::before, 
+html[data-umbra-effects="reduced"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+html[data-umbra-effects="reduced"] .scene-fog,
+html[data-umbra-effects="reduced"] .summon-sigil,
+html[data-umbra-effects="reduced"] .impact-burst { display: none !important; }
+html[data-umbra-effects="reduced"] .battle-scene { box-shadow: none; }
