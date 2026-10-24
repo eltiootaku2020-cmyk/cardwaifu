@@ -2,6 +2,7 @@ import "./style.css";
 import "./battle-vfx.css";
 import { installBattleVfx } from "./battle-vfx.js";
 import { openCardStudio } from "./card-studio.js";
+import { getCharacterPortrait, getEnemyPortrait, getSceneBackground, loadArtManifest } from "./art.js";
 
 declare global {
   interface Window {
@@ -11,7 +12,7 @@ declare global {
 type Stage = "Lily" | "Hero" | "Epic";
 type Battle = {
   id: string; turn: number; alma: number; stage: Stage; branch: "Light" | "Dark" | null; darkAvailable: boolean;
-  player: { name: string; hp: number; maxHp: number; anima: number };
+  player: { name: string; hp: number; maxHp: number; attack: number; anima: number };
   enemy: { name: string; hp: number; maxHp: number; intent?: "quick-attack" | "heavy-attack" | "guard" };
   status: string; evolved?: boolean; log: string[];
 };
@@ -44,14 +45,41 @@ let rewards: PlayerRewards = { xp: 0, coins: 0, materials: 0, level: 1, xpIntoLe
 let equipment: EquipmentItem[] = [];
 let loadout: EquipmentLoadout = { weapon: "wooden-bow", armor: "forest-cloak", accessory: "amber-charm", support: "healing-herbs" };
 let loadoutNote = "Preparando el equipo inicial…";
-let gender = "Mujer";
+let gender: "Mujer" | "Hombre" = "Mujer";
+let profileNote = "La elección de protagonista se guarda en tu partida.";
+type VisualMode = "full" | "reduced";
+const visualPreferenceKey = "umbra-visual-mode-v1";
+function getInitialVisualMode(): VisualMode {
+  try {
+    const stored = localStorage.getItem(visualPreferenceKey);
+    if (stored === "full" || stored === "reduced") return stored;
+  } catch { /* El juego sigue siendo usable si el almacenamiento no está disponible. */ }
+  return typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ? "reduced"
+    : "full";
+}
+let visualMode: VisualMode = getInitialVisualMode();
+function applyVisualMode(): void {
+  document.documentElement.dataset.umbraEffects = visualMode;
+}
+function bindArtworkFallbacks(container: ParentNode): void {
+  container.querySelectorAll<HTMLImageElement>("img[data-art-image]").forEach(image => {
+    const fallback = () => {
+      image.closest<HTMLElement>(".has-art")?.classList.remove("has-art");
+      image.remove();
+    };
+    image.addEventListener("error", fallback, { once: true });
+    if (image.complete && image.naturalWidth === 0) fallback();
+  });
+}
+applyVisualMode();
 let note = "Elige tu vínculo y entra en el primer encuentro.";
 let worldNote = "Cargando rutas de la expedición…";
 const heroes = [
-  { name: "Tiny, la exploradora", rarity: "S", stage: "Lily", icon: "⌁", role: "Exploradora · Arturo", desc: "Una goblin que protege a su pueblo y conoce cada sendero.", color: "teal" },
-  { name: "Elizabeth", rarity: "SR", stage: "Hero", icon: "♛", role: "Portadora de Arturo", desc: "Una noble que carga con el peso de mantener unida su ciudad.", color: "blue" },
-  { name: "Guardiana de Bretaña", rarity: "SR", stage: "Hero", icon: "✧", role: "Protectora", desc: "Canaliza la epopeya mediante defensa y contraataques.", color: "gold" },
-  { name: "Cazadora del Musgo", rarity: "R", stage: "Lily", icon: "➶", role: "Arquera", desc: "Rastrea amenazas y encuentra rutas ocultas.", color: "red" }
+  { id: "tiny", name: "Tiny, la exploradora", rarity: "S", stage: "Lily", icon: "⌁", role: "Exploradora · Arturo", desc: "Una goblin que protege a su pueblo y conoce cada sendero.", color: "teal" },
+  { id: "elizabeth", name: "Elizabeth", rarity: "SR", stage: "Hero", icon: "♛", role: "Portadora de Arturo", desc: "Una noble que carga con el peso de mantener unida su ciudad.", color: "blue" },
+  { id: "guardiana-bretana", name: "Guardiana de Bretaña", rarity: "SR", stage: "Hero", icon: "✧", role: "Protectora", desc: "Canaliza la epopeya mediante defensa y contraataques.", color: "gold" },
+  { id: "cazadora-musgo", name: "Cazadora del Musgo", rarity: "R", stage: "Lily", icon: "➶", role: "Arquera", desc: "Rastrea amenazas y encuentra rutas ocultas.", color: "red" }
 ];
 const headers = () => ({ "Content-Type": "application/json", "x-telegram-init-data": tg?.initData ?? "" });
 function escapeHtml(value: string): string {
@@ -94,11 +122,12 @@ function renderLoadout(): string {
   </section>`;
 }
 function render() {
-  root.innerHTML = `<header class="top"><div class="brand"><span class="logo">✦</span><div><b>UMBRA</b><small>CARD FRONTIER</small></div></div><span class="resource">◈ Alma <b>${battle?.alma ?? resources.alma}</b> · Ánima <b>${battle?.player.anima ?? resources.anima}</b> · Nv. <b>${rewards.level}</b> · XP <b>${rewards.xp}</b></span></header>
+  root.innerHTML = `<header class="top"><div class="brand"><span class="logo">✦</span><div><b>UMBRA</b><small>CARD FRONTIER</small></div></div><span class="resource">◈ Alma <b>${battle?.alma ?? resources.alma}</b> · Ánima <b>${battle?.player.anima ?? resources.anima}</b> · Nv. <b>${rewards.level}</b> · XP <b>${rewards.xp}</b></span><button type="button" class="visual-toggle" id="visual-toggle" aria-pressed="${visualMode === "reduced"}" title="Cambiar nivel de animaciones">${visualMode === "reduced" ? "⚡ Efectos ligeros" : "✦ Efectos completos"}</button></header>
   <main>
     <section class="welcome panel ${summonReveal ? "gacha-reveal" : ""}">${summonReveal ? `<div class="summon-ceremony" aria-live="polite"><span class="summon-sigil">✦</span><strong>LA CARTA HA ELEGIDO</strong><small>VÍNCULO ESTABLECIDO</small></div>` : ""}<p class="eyebrow">CRÓNICAS · CAPÍTULO 01</p><h1>Las leyendas<br>despiertan.</h1><p class="muted">Explora ruinas, crea vínculos y rescata epopeyas de eras olvidadas.</p>
-      <div class="gender"><button data-gender="Mujer" class="${gender === "Mujer" ? "selected" : ""}">Protagonista mujer</button><button data-gender="Hombre" class="${gender === "Hombre" ? "selected" : ""}">Protagonista hombre</button></div>
-      <div class="backview"><div class="halo"></div><div class="figure"><div class="head"></div><div class="body"></div><div class="cape"></div></div><span>VISTA DESDE ATRÁS · ROSTRO OCULTO</span></div>
+      <div class="gender"><button data-gender="Mujer" class="${gender === "Mujer" ? "selected" : ""}" aria-pressed="${gender === "Mujer"}">Protagonista mujer</button><button data-gender="Hombre" class="${gender === "Hombre" ? "selected" : ""}" aria-pressed="${gender === "Hombre"}">Protagonista hombre</button></div>
+      <p class="muted profile-note" aria-live="polite">${escapeHtml(profileNote)}</p>
+      <div class="backview" data-gender="${gender.toLowerCase()}"><div class="halo"></div><div class="figure"><div class="head"></div><div class="body"></div><div class="cape"></div></div><span>VISTA DESDE ATRÁS · ROSTRO OCULTO</span></div>
       <button class="primary full" id="summon" ${linkedHeroine ? "disabled" : ""}>${linkedHeroine ? "✦ Primera invocación completada" : "✦ Realizar primera invocación"}</button>
       <p class="muted summon-note">${escapeHtml(linkedHeroine ? "Vínculo establecido: " + linkedHeroine.name + " · " + linkedHeroine.rarity : summonNote)}</p>
       ${linkedHeroine ? `<div class="linked-heroine ${summonReveal ? "reveal-card" : ""}" data-rarity="${escapeHtml(linkedHeroine.rarity)}"><span class="rarity-pill">${escapeHtml(linkedHeroine.rarity)}</span><div><b>${escapeHtml(linkedHeroine.name)}</b><small>${escapeHtml(linkedHeroine.heroClass)} · Forma inicial ${escapeHtml(linkedHeroine.stage)}</small><p>${escapeHtml(linkedHeroine.description)}</p></div></div>` : ""}
@@ -106,17 +135,28 @@ function render() {
     </section>
     ${renderWorld()}
     <div class="section-title"><div><p class="eyebrow">ARCHIVO DE LEYENDAS</p><h2>Heroínas conocidas</h2></div><span>R · S · SR</span></div>
-    <section class="hero-grid">${heroes.map(h => `<article class="hero-card ${h.color}"><div class="art"><span class="rarity">${h.rarity}</span><span class="symbol">${h.icon}</span><span class="stage">${h.stage}</span></div><h3>${h.name}</h3><p class="muted">${h.role}</p><p>${h.desc}</p></article>`).join("")}</section>
+    <section class="hero-grid">${heroes.map(h => {
+      const portrait = getCharacterPortrait(h.id);
+      return `<article class="hero-card ${h.color}"><div class="art ${portrait ? "has-art" : ""}">${portrait ? `<img class="hero-card-art" data-art-image src="${escapeHtml(portrait)}" alt="" loading="lazy" decoding="async">` : ""}<span class="rarity">${h.rarity}</span><span class="symbol">${h.icon}</span><span class="stage">${h.stage}</span></div><h3>${h.name}</h3><p class="muted">${h.role}</p><p>${h.desc}</p></article>`;
+    }).join("")}</section>
     <section class="panel battle"><p class="eyebrow">ENCUENTRO</p><h2>El camino aguarda</h2><p id="status" class="muted">${escapeHtml(note)}</p><div id="battle-view"></div></section>
     <footer>UMBRA · prototipo jugable en desarrollo · el guardado de expedición y combate depende del servidor.</footer>
   </main>`;
+  bindArtworkFallbacks(root);
+  root.querySelector<HTMLButtonElement>("#visual-toggle")!.onclick = () => {
+    visualMode = visualMode === "full" ? "reduced" : "full";
+    try { localStorage.setItem(visualPreferenceKey, visualMode); } catch { /* Preferencia temporal si el navegador no permite guardar. */ }
+    applyVisualMode();
+    note = visualMode === "reduced" ? "Efectos visuales reducidos para priorizar la fluidez." : "Efectos visuales completos activados.";
+    render();
+  };
   const studioButton = document.createElement("button");
   studioButton.type = "button";
   studioButton.className = "primary studio-launch";
   studioButton.textContent = "✦ Abrir taller de cartas";
   studioButton.onclick = () => openCardStudio();
   root.querySelector("main")?.insertBefore(studioButton, root.querySelector(".expedition"));
-  root.querySelectorAll<HTMLButtonElement>("[data-gender]").forEach(button => button.onclick = () => { gender = button.dataset.gender ?? "Mujer"; render(); });
+  root.querySelectorAll<HTMLButtonElement>("[data-gender]").forEach(button => button.onclick = () => void chooseGender(button.dataset.gender ?? "Mujer"));
   root.querySelector<HTMLButtonElement>("#summon")!.onclick = () => void summonFirst();
   root.querySelector<HTMLButtonElement>("#start")!.onclick = () => void startBattle();
   root.querySelectorAll<HTMLButtonElement>("[data-travel]").forEach(button => button.onclick = () => void travel(button.dataset.travel ?? ""));
@@ -132,21 +172,24 @@ function drawBattle() {
   const enemyArchetype = enemyName.includes("goblin") ? "goblin" : enemyName.includes("miasma") ? "miasma" : enemyName.includes("sabuesa") || enemyName.includes("lobo") ? "beast" : current.enemy.maxHp >= 140 ? "boss" : "forest";
   const biome = world?.current.kind ?? "path";
   const locationName = world?.current.name ?? "Bosque Oscuro";
+  const playerPortraitUrl = getCharacterPortrait(linkedHeroine?.id);
+  const enemyPortraitUrl = getEnemyPortrait(enemyArchetype);
+  const sceneBackgroundUrl = getSceneBackground(biome);
   const action = lastBattleAction ?? "";
   const actionLabels: Record<string, string> = { attack: "CORTE COORDINADO", skill: "TÉCNICA HEROICA", defend: "GUARDIA", evade: "EVASIÓN", charge: "ACUMULANDO ÁNIMA", "evolve-light": "MANIFESTACIÓN · LIGHT", "evolve-dark": "MANIFESTACIÓN · DARK" };
   const bar = (value: number, max: number) => Math.max(0, value / max * 100);
   const actions = ["attack", "skill", "defend", "evade", "charge", "evolve-light", "evolve-dark"] as const;
   const labels: Record<typeof actions[number], string> = { attack: "⚔ Atacar", skill: "✧ Habilidad", defend: "🛡 Defender", evade: "💨 Evadir", charge: "⚡ Cargar", "evolve-light": "✦ Evolucionar Light", "evolve-dark": "☾ Evolucionar Dark" };
   el.innerHTML = `<div class="battle-scene biome-${escapeHtml(biome)}" data-biome="${escapeHtml(biome)}" data-battle-id="${escapeHtml(current.id)}" data-turn="${current.turn}" data-action="${escapeHtml(action)}" data-battle-status="${current.status}">
-    <div class="scene-backdrop" aria-hidden="true"><span class="scene-tree tree-a"></span><span class="scene-tree tree-b"></span><span class="scene-fog fog-one"></span><span class="scene-fog fog-two"></span><span class="scene-location">${escapeHtml(locationName)}</span></div>
+    <div class="scene-backdrop" ${sceneBackgroundUrl ? `style="--scene-art-image: url('${escapeHtml(sceneBackgroundUrl)}')"` : ""} aria-hidden="true"><span class="scene-tree tree-a"></span><span class="scene-tree tree-b"></span><span class="scene-fog fog-one"></span><span class="scene-fog fog-two"></span><span class="scene-location">${escapeHtml(locationName)}</span></div>
     <div class="battle-hud"><span>PROTOCOLO DE COMBATE · TURNO <b>${current.turn}</b></span><span>ÁNIMA <b>${current.player.anima}</b> · ALMA <b>${current.alma}</b></span></div>
     <div class="fight-grid">
       <div class="combatant-panel player-panel" data-combatant="player" data-hp="${current.player.hp}" data-max-hp="${current.player.maxHp}">
-        <div class="unit-portrait player-portrait heroine-portrait" aria-hidden="true"><span class="portrait-silhouette"><i></i></span><span class="portrait-mark">${current.branch === "Dark" ? "☾" : current.stage === "Lily" ? "⌁" : "✦"}</span></div>
+        <div class="unit-portrait player-portrait heroine-portrait ${playerPortraitUrl ? "has-art" : ""}" aria-hidden="true">${playerPortraitUrl ? `<img class="portrait-art" data-art-image src="${escapeHtml(playerPortraitUrl)}" alt="" loading="lazy" decoding="async">` : ""}<span class="portrait-silhouette"><i></i></span><span class="portrait-mark">${current.branch === "Dark" ? "☾" : current.stage === "Lily" ? "⌁" : "✦"}</span></div>
         <div class="unit-info"><b>✦ ${escapeHtml(current.player.name)}</b><div class="hp"><i style="width:${bar(current.player.hp, current.player.maxHp)}%"></i></div><small>${current.player.hp}/${current.player.maxHp} HP · ATQ ${current.player.attack}</small><div class="combat-status">PORTADORA · ${current.stage.toUpperCase()}${current.branch ? " · " + current.branch.toUpperCase() : ""}</div></div>
       </div>
       <div class="combatant-panel enemy-panel" data-enemy="${enemyArchetype}" data-threat="${current.enemy.maxHp >= 140 ? "boss" : "standard"}" data-combatant="enemy" data-hp="${current.enemy.hp}" data-max-hp="${current.enemy.maxHp}">
-        <div class="unit-portrait enemy-portrait" aria-hidden="true"><span class="portrait-silhouette"><i></i></span><span class="portrait-mark">${enemyArchetype === "goblin" ? "⌁" : enemyArchetype === "miasma" ? "☾" : enemyArchetype === "beast" ? "♧" : "◈"}</span></div>
+        <div class="unit-portrait enemy-portrait ${enemyPortraitUrl ? "has-art" : ""}" aria-hidden="true">${enemyPortraitUrl ? `<img class="portrait-art" data-art-image src="${escapeHtml(enemyPortraitUrl)}" alt="" loading="lazy" decoding="async">` : ""}<span class="portrait-silhouette"><i></i></span><span class="portrait-mark">${enemyArchetype === "goblin" ? "⌁" : enemyArchetype === "miasma" ? "☾" : enemyArchetype === "beast" ? "♧" : "◈"}</span></div>
         <div class="unit-info"><b>☠ ${escapeHtml(current.enemy.name)}</b><div class="hp enemy"><i style="width:${bar(current.enemy.hp, current.enemy.maxHp)}%"></i></div><small>${current.enemy.hp}/${current.enemy.maxHp} HP</small><div class="combat-status">${current.enemy.maxHp >= 140 ? "AMENAZA MAYOR" : "OBJETIVO HOSTIL"}</div><div class="enemy-intent" role="status">${current.enemy.intent === "heavy-attack" ? "⚠ PREPARA GOLPE CARGADO · Defender o evadir" : current.enemy.intent === "guard" ? "🛡 EN GUARDIA · Busca una apertura" : "⚔ PREPARA ATAQUE RÁPIDO · Puedes responder"}</div></div>
       </div>
     </div>
@@ -154,7 +197,30 @@ function drawBattle() {
     <div class="actions">${actions.map(actionName => `<button data-action="${actionName}" ${current.status !== "active" || (actionName === "skill" && current.player.anima < 20) || ((actionName === "evolve-light" || actionName === "evolve-dark") && (current.stage === "Epic" || current.evolved || (actionName === "evolve-dark" && !current.darkAvailable) || (current.branch !== null && current.branch !== (actionName === "evolve-dark" ? "Dark" : "Light")))) ? "disabled" : ""}>${labels[actionName]}</button>`).join("")}</div>
     <div class="log">${current.log.slice(-4).map(line => "<p>" + escapeHtml(line) + "</p>").join("")}</div>
   </div>`;
+  bindArtworkFallbacks(el);
   el.querySelectorAll<HTMLButtonElement>("[data-action]").forEach(button => button.onclick = () => void act(button.dataset.action ?? ""));
+}
+async function chooseGender(nextGender: string): Promise<void> {
+  if (nextGender !== "Mujer" && nextGender !== "Hombre") return;
+  const previous = gender;
+  gender = nextGender;
+  profileNote = "Guardando elección...";
+  render();
+  try {
+    const response = await fetch("/api/profile/gender", {
+      method: "POST",
+      headers: headers(),
+      body: JSON.stringify({ gender: nextGender })
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "No se pudo guardar la elección.");
+    gender = data.gender === "Hombre" ? "Hombre" : "Mujer";
+    profileNote = "Elección guardada en tu partida.";
+  } catch (error) {
+    gender = previous;
+    profileNote = error instanceof Error ? error.message : "No se pudo guardar la elección.";
+  }
+  render();
 }
 async function startBattle() {
   note = "Preparando encuentro…";
@@ -289,9 +355,16 @@ async function restoreActiveBattle() {
   } catch { /* El servidor puede no estar disponible durante la carga inicial. */ }
 }
 render();
+void loadArtManifest().then(() => render());
 void loadWorld();
 void restoreActiveBattle();
 void fetch("/api/me", { headers: headers() }).then(async response => {
   const data = await response.json();
-  if (response.ok && data.player) { resources = { alma: data.player.alma, anima: data.player.anima }; if (data.rewards) rewards = data.rewards as PlayerRewards; render(); }
+  if (response.ok && data.player) {
+    resources = { alma: data.player.alma, anima: data.player.anima };
+    if (data.player.gender === "Hombre" || data.player.gender === "Mujer") gender = data.player.gender;
+    if (data.rewards) rewards = data.rewards as PlayerRewards;
+    profileNote = "Elección y recursos recuperados de tu partida.";
+    render();
+  }
 }).catch(() => {});
