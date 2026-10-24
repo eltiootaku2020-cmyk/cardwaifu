@@ -1,5 +1,19 @@
 # Hoja de ruta
 
+## Prioridad actual: MVP 2D ligero con arte PNG
+
+La dirección visual es 2D, usando ilustraciones PNG, fondos por bioma y efectos breves de CSS. No introducir motor 3D ni 2.5D realista. Las tareas visuales no deben cambiar las reglas de combate salvo que una corrección técnica lo exija.
+
+- [ ] Verificar en CI la reparación del error de compilación conocido en `web/src/main.ts` (`Battle.player.attack` no estaba declarado).
+- [x] Añadir el registro local `web/public/assets/umbra/manifest.json` y fallback si no hay ilustración.
+- [x] Preparar retratos y fondos PNG opcionales en la interfaz, sin solicitudes si el manifiesto indica `null`.
+- [x] Añadir el modo «Efectos ligeros» y respetar la preferencia de movimiento reducido del sistema.
+- [x] Añadir persistencia de la elección de protagonista en SQLite y endpoint de perfil; falta confirmación de pruebas CI.
+- [ ] Añadir las ilustraciones finales del usuario a sus entradas del manifiesto y revisar el encuadre.
+- [ ] Medir fluidez en el PC del usuario y dentro de Telegram; no declarar la optimización completa antes de medir.
+- [ ] Completar el MVP jugable y verificar el recorrido de principio a fin según los criterios inferiores.
+
+
 ## Base
 - [x] Consolidar lore y sistemas en CEREBRO_Y_OBRERO.md.
 - [x] Definir Mini App + API + bot + SQLite.
@@ -43,4 +57,4 @@
 - [ ] Moderación, logs sin secretos, backups y límites de frecuencia.
 - [ ] Cooperación y PvP después de estabilizar PvE.
 
-El análisis de dificultad está documentado; las hipótesis numéricas y el balance todavía requieren simulación y playtests. Las maquetas no cuentan como integraciones completas; marcar tareas solo tras comprobar el flujo real. Build, typecheck y pruebas automatizadas pasan en GitHub Actions en el último commit de la tanda. La integración real con Telegram, despliegue HTTPS, token de bot, persistencia en entorno alojado y recorrido completo de usuario aún no se han validado en producción. Las pruebas automatizadas se ejecutan durante el desarrollo; el usuario no necesita hacer pasos técnicos manuales.
+El análisis de dificultad está documentado; las hipótesis numéricas y el balance todavía requieren simulación y playtests. Las maquetas no cuentan como integraciones completas; marcar tareas solo tras comprobar el flujo real. Estado verificado al comenzar esta tanda: el último commit de `main` (`34d780c`) fallaba en `npm run build` por TS2339 en `web/src/main.ts` y, por ello, las pruebas automáticas se omitían. Esta tanda corrige el tipo y añade pruebas para el nuevo perfil; las tareas solo se marcarán verificadas después de que CI termine correctamente. La integración real con Telegram, el despliegue HTTPS, el token del bot, la persistencia en entorno alojado y el recorrido completo de usuario siguen sin validación en producción.
