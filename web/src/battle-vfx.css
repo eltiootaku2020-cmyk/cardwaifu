@@ -479,3 +479,48 @@
   .combat-float { animation: combat-number-static 900ms linear both !important; }
   @keyframes combat-number-static { 0%, 82% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, 0); } }
 }
+
+
+/* Local PNG art slots: the CSS silhouette stays visible until a real portrait loads. */
+.scene-backdrop {
+  background-image:
+    linear-gradient(180deg, #08101a12 0%, #08101a33 46%, #060a15dd 100%),
+    var(--scene-art-image, none),
+    radial-gradient(ellipse at 50% 66%, #6e9ba822, transparent 55%);
+  background-position: center, center, center;
+  background-size: cover, cover, cover;
+  background-repeat: no-repeat;
+}
+.unit-portrait { isolation: isolate; }
+.portrait-art {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+}
+.unit-portrait.has-art .portrait-silhouette { display: none; }
+.unit-portrait.has-art .portrait-mark {
+  z-index: 2;
+  padding: 2px 5px;
+  border-radius: 6px;
+  background: #080d18aa;
+}
+html[data-umbra-effects="reduced"] .scene-backdrop::before,
+html[data-umbra-effects="reduced"] .scene-fog,
+html[data-umbra-effects="reduced"] .camera-impact,
+html[data-umbra-effects="reduced"] .impact-burst { animation: none !important; }
+html[data-umbra-effects="reduced"] .combatant-panel,
+html[data-umbra-effects="reduced"] .combatant-panel .hp i,
+html[data-umbra-effects="reduced"] .power-banner { transition: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-umbra-effects="full"]) *,
+  html:not([data-umbra-effects="full"]) *::before,
+  html:not([data-umbra-effects="full"]) *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
