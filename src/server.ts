@@ -3,7 +3,7 @@ import { randomInt } from "node:crypto";
 import express from "express";
 import { resolve } from "node:path";
 import { createBattle, act, type BattleAction } from "./game/combat.js";
-import { getOrCreatePlayer, getBattle, getLatestActiveBattle, saveBattleProgress, getWorldProgress, saveWorldProgress, getInventory, grantFirstHeroine, savePlayerFormStage, getPlayerRewards, getPlayerLoadout, savePlayerLoadout } from "./db.js";
+import { getOrCreatePlayer, getBattle, getLatestActiveBattle, saveBattleProgress, getWorldProgress, saveWorldProgress, getInventory, grantFirstHeroine, savePlayerFormStage, getPlayerRewards, getPlayerLoadout, savePlayerLoadout, saveProtagonistGender } from "./db.js";
 import { getAvailableDestinations, getWorldNode, travelTo } from "./game/world.js";
 import { getFirstSummonPool, getHeroine } from "./game/catalog.js";
 import { EQUIPMENT, getEquipmentBonuses, isValidLoadout } from "./game/equipment.js";
@@ -29,6 +29,20 @@ app.get("/api/health", (_req, res) => res.json({ ok: true, game: "UMBRA: Card Fr
 app.get("/api/me", (req, res) => {
   try { const currentPlayer = player(req); res.json({ player: currentPlayer, rewards: getPlayerRewards(currentPlayer.telegramId) }); }
   catch (error) { res.status(401).json({ error: error instanceof Error ? error.message : "No autorizado" }); }
+});
+
+app.post("/api/profile/gender", (req, res) => {
+  try {
+    const currentPlayer = player(req);
+    const gender = req.body?.gender;
+    if (gender !== "Mujer" && gender !== "Hombre") {
+      return res.status(400).json({ error: "Elige protagonista mujer u hombre." });
+    }
+    saveProtagonistGender(currentPlayer.telegramId, gender);
+    res.json({ gender });
+  } catch (error) {
+    res.status(401).json({ error: error instanceof Error ? error.message : "No se pudo guardar el perfil." });
+  }
 });
 
 app.get("/api/loadout", (req, res) => {
