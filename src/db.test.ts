@@ -7,7 +7,7 @@ import { createBattle, act } from "./game/combat.js";
 
 const testDir = mkdtempSync(join(tmpdir(), "umbra-db-test-"));
 process.env.DATABASE_PATH = join(testDir, "test.sqlite");
-const { db, getOrCreatePlayer, saveBattleProgress, getBattle, getLatestActiveBattle } = await import("./db.js");
+const { db, getOrCreatePlayer, saveBattleProgress, getBattle, getLatestActiveBattle, saveProtagonistGender } = await import("./db.js");
 
 test.after(() => {
   db.close();
@@ -30,6 +30,14 @@ test("player resources and form stage persist in SQLite with battle state", () =
   assert.deepEqual(restoredBattle?.battle, evolved);
   assert.equal(restoredBattle?.ownerId, "player-test-1");
   assert.equal(getLatestActiveBattle("player-test-1")?.id, evolved.id);
+});
+
+test("protagonist gender persists in SQLite", () => {
+  const player = getOrCreatePlayer("player-gender-persist", "Prueba de perfil");
+  assert.equal(player.gender, "Mujer");
+  saveProtagonistGender(player.telegramId, "Hombre");
+  const restored = getOrCreatePlayer(player.telegramId, player.displayName);
+  assert.equal(restored.gender, "Hombre");
 });
 
 test("active battle lookup excludes completed battles", () => {
