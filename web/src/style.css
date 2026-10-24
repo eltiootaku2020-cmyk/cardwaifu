@@ -82,3 +82,28 @@ html[data-umbra-effects="reduced"] .scene-fog,
 html[data-umbra-effects="reduced"] .summon-sigil,
 html[data-umbra-effects="reduced"] .impact-burst { display: none !important; }
 html[data-umbra-effects="reduced"] .battle-scene { box-shadow: none; }
+
+
+/* Chapter events: readable goals without adding a heavy map engine. */
+.chapter-objectives {
+  margin: 16px 0;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: #0c1221;
+}
+.chapter-objectives-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px; }
+.chapter-objectives-head strong { font-size:12px; }
+.chapter-objectives-head>span { font-size:10px; color:var(--cyan); font-weight:900; }
+.objective-list { display:grid; gap:7px; }
+.objective-row { display:flex; align-items:flex-start; gap:8px; color:var(--muted); font-size:11px; line-height:1.45; }
+.objective-row>span:first-child { flex:0 0 17px; width:17px; height:17px; display:grid; place-items:center; border:1px solid #465570; border-radius:50%; font-size:10px; }
+.objective-complete { color:#baf4d3; }
+.objective-complete>span:first-child { color:#9df0c0; border-color:#4b9c77; background:#173328; }
+.chapter-note, .event-complete-note { margin:10px 0 0; font-size:11px; }
+.resolve-event { margin: 2px 0 12px; }
+.route-locked { border-color:#4d3b4b; opacity:.92; }
+.route-lock-note { margin:8px 0; padding:8px; border-radius:8px; background:#231821; color:#f0b8c7; font-size:10px; line-height:1.45; }
+.route-resolved { margin:8px 0; color:#9df0c0; font-size:10px; font-weight:800; }
+.route-button:disabled { cursor:not-allowed; opacity:.5; background:#151923; color:#8b95ab; border-color:#36394a; }
+.resolve-event:disabled, .primary:disabled { cursor:not-allowed; opacity:.48; }
