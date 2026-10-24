@@ -72,3 +72,12 @@ test("winning an encounter completes its exploration objective and chapter boss 
   state = markBattleEventComplete(state, "entrada-abismo");
   assert.equal(getChapterOneState(state).completed, true);
 });
+
+test("battle objectives remain tied to their origin when the player travels elsewhere", () => {
+  let state = createWorldProgress();
+  state = travelTo(state, "sendero-musgo").progress;
+  state = travelTo(state, "aldea-bruma").progress;
+  const completed = markBattleEventComplete(state, "sendero-musgo");
+  assert.equal(completed.currentNodeId, "aldea-bruma");
+  assert.ok(completed.completedEventIds.includes("sendero-musgo"));
+});
