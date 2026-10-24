@@ -143,7 +143,7 @@ export function resolveWorldEvent(progress: WorldProgress): WorldEventResolution
 export function markBattleEventComplete(progress: WorldProgress, nodeId: string): WorldProgress {
   const node = getWorldNode(nodeId);
   if (!node) throw new Error("Lugar de combate desconocido.");
-  if (progress.currentNodeId !== nodeId) throw new Error("El combate no corresponde a la ubicación actual.");
+  if (!progress.visitedNodeIds.includes(nodeId)) throw new Error("El lugar del combate todavía no ha sido visitado.");
   if (node.event !== "encounter" && node.event !== "boss") throw new Error("El lugar no tiene un combate registrado.");
   if (progress.completedEventIds.includes(nodeId)) return progress;
   return {
