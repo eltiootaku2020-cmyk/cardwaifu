@@ -107,3 +107,77 @@ html[data-umbra-effects="reduced"] .battle-scene { box-shadow: none; }
 .route-resolved { margin:8px 0; color:#9df0c0; font-size:10px; font-weight:800; }
 .route-button:disabled { cursor:not-allowed; opacity:.5; background:#151923; color:#8b95ab; border-color:#36394a; }
 .resolve-event:disabled, .primary:disabled { cursor:not-allowed; opacity:.48; }
+
+
+/* Owned collection: one light 2D card grid with a readable reverse. */
+.collection-panel { margin-top: 22px; }
+.collection-title { margin-top:0; }
+.collection-empty { margin:0; padding:16px; border:1px dashed var(--line); border-radius:12px; }
+.owned-card-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.owned-card {
+  min-width:0;
+  overflow:hidden;
+  border:1px solid #425374;
+  border-radius:15px;
+  background:linear-gradient(155deg,#17233c,#0d1322);
+  box-shadow:0 8px 20px #0002;
+  animation: owned-card-appear .22s ease-out both;
+}
+.owned-card[data-rarity="R"] { border-color:#52677c; }
+.owned-card[data-rarity="S"] { border-color:#4b8f94; }
+.owned-card[data-rarity="SR"] { border-color:#8970c8; }
+.owned-card[data-rarity="SSR"] { border-color:#b58b50; }
+.owned-card[data-rarity="UR"] { border-color:#d78cbe; }
+.owned-card-art {
+  position:relative;
+  display:grid;
+  place-items:center;
+  height:180px;
+  overflow:hidden;
+  background:radial-gradient(ellipse at 50% 30%,#384b70,#111727 72%);
+  border-bottom:1px solid var(--line);
+}
+.owned-card-art>img {
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  object-position:center bottom;
+}
+.owned-card-art>span[aria-hidden="true"] { color:var(--violet); font-size:48px; text-shadow:0 0 22px #b58cff66; }
+.owned-card-art .rarity-pill { position:absolute; top:9px; left:9px; }
+.copy-count {
+  position:absolute;
+  top:9px;
+  right:9px;
+  min-width:26px;
+  padding:5px 7px;
+  border-radius:7px;
+  border:1px solid #53658b;
+  background:#080d18d9;
+  color:#e7eeff;
+  font-size:10px;
+  font-weight:900;
+  text-align:center;
+}
+.owned-card-body { padding:12px; }
+.owned-card-body h3,.owned-card-back h3 { font-size:14px; line-height:1.35; margin:0 0 5px; }
+.owned-class { color:var(--cyan); font-size:10px; margin:0 0 8px; }
+.owned-description { color:var(--muted); font-size:11px; line-height:1.5; margin:0 0 12px; }
+.card-flip-button { width:100%; }
+.owned-card-back { padding:13px; min-height:320px; animation: owned-card-flip-in .22s ease-out both; }
+.owned-card-back .owned-card-top { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:15px; }
+.owned-card-back .copy-count { position:static; }
+.owned-card-back .muted { font-size:9px; letter-spacing:.1em; }
+.owned-stat-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin:12px 0; }
+.owned-stat-grid>div { border:1px solid var(--line); border-radius:9px; padding:10px; background:#0b1120; }
+.owned-stat-grid small,.owned-stat-grid strong { display:block; }
+.owned-stat-grid small { color:var(--muted); font-size:9px; letter-spacing:.08em; }
+.owned-stat-grid strong { color:var(--gold); font-size:24px; margin-top:5px; }
+.owned-detail { display:flex; justify-content:space-between; align-items:start; gap:8px; padding:8px 0; border-bottom:1px solid #29344e; font-size:10px; }
+.owned-detail span { color:var(--muted); }
+.owned-detail strong { text-align:right; }
+@keyframes owned-card-appear { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
+@keyframes owned-card-flip-in { from { opacity:.25; transform:rotateY(8deg) scale(.985); } to { opacity:1; transform:rotateY(0) scale(1); } }
+@media (min-width:700px) { .owned-card-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } .owned-card-art { height:225px; } }
+@media (max-width:360px) { .owned-card-grid { grid-template-columns:1fr; } }
+html[data-umbra-effects="reduced"] .owned-card { animation:none !important; }
