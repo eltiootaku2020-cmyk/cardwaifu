@@ -19,6 +19,7 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS players(
     telegram_id TEXT PRIMARY KEY,
     display_name TEXT NOT NULL,
+    protagonist_gender TEXT NOT NULL DEFAULT 'Mujer' CHECK(protagonist_gender IN ('Mujer','Hombre')),
     alma INTEGER NOT NULL DEFAULT 100 CHECK(alma BETWEEN 0 AND 100),
     anima INTEGER NOT NULL DEFAULT 0 CHECK(anima BETWEEN 0 AND 100),
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -55,10 +56,12 @@ db.exec(`
   );
 `);
 try { db.exec("ALTER TABLE player_progress ADD COLUMN form_branch TEXT CHECK(form_branch IS NULL OR form_branch IN ('Light','Dark'))"); } catch { /* La columna ya existe en bases creadas con el esquema actual. */ }
+try { db.exec("ALTER TABLE players ADD COLUMN protagonist_gender TEXT NOT NULL DEFAULT 'Mujer' CHECK(protagonist_gender IN ('Mujer','Hombre'))"); } catch { /* La base ya contiene la columna de perfil. */ }
 
 export interface PlayerRecord {
   telegramId: string;
   displayName: string;
+  gender: "Mujer" | "Hombre";
   alma: number;
   anima: number;
   createdAt: string;
@@ -72,11 +75,15 @@ export function getOrCreatePlayer(id: string, name: string): PlayerRecord {
   db.prepare("INSERT OR IGNORE INTO player_rewards(telegram_id) VALUES(?)").run(id);
   db.prepare("INSERT OR IGNORE INTO player_loadout(telegram_id,state_json) VALUES(?,?)").run(id, JSON.stringify(DEFAULT_LOADOUT));
   return db.prepare(`
-    SELECT p.telegram_id AS telegramId, p.display_name AS displayName, p.alma, p.anima,
+    SELECT p.telegram_id AS telegramId, p.display_name AS displayName, p.protagonist_gender AS gender, p.alma, p.anima,
            p.created_at AS createdAt, g.form_stage AS formStage, g.form_branch AS formBranch
     FROM players p JOIN player_progress g ON g.telegram_id=p.telegram_id
     WHERE p.telegram_id=?
   `).get(id) as PlayerRecord;
+}
+
+export function saveProtagonistGender(id: string, gender: "Mujer" | "Hombre"): void {
+  db.prepare("UPDATE players SET protagonist_gender=? WHERE telegram_id=?").run(gender, id);
 }
 
 export function savePlayerResources(id: string, alma: number, anima: number): void {
