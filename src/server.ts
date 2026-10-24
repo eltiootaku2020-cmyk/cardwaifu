@@ -182,7 +182,10 @@ app.post("/api/battle/start", (req, res) => {
     const encounter = encounters[node.id] ?? { name: "Exploradora hostil del bosque", hp: 90, attack: 13 };
     const loadout = getPlayerLoadout(currentPlayer.telegramId);
     const gearBonuses = getEquipmentBonuses(loadout);
-    const battle = createBattle(heroine.name, currentPlayer.alma, currentPlayer.formStage, currentPlayer.anima, encounter.name, encounter.hp, encounter.attack, heroine.attack + gearBonuses.attackBonus, heroine.maxHp + gearBonuses.hpBonus);
+    const battle = {
+      ...createBattle(heroine.name, currentPlayer.alma, currentPlayer.formStage, currentPlayer.anima, encounter.name, encounter.hp, encounter.attack, heroine.attack + gearBonuses.attackBonus, heroine.maxHp + gearBonuses.hpBonus),
+      worldNodeId: node.id
+    };
     saveBattleProgress(currentPlayer.telegramId, battle);
     res.json({ battle });
   } catch (error) {
@@ -214,11 +217,12 @@ app.post("/api/battle/action", (req, res) => {
     const next = act(resourceBase, action as BattleAction);
     const progress = getWorldProgress(currentPlayer.telegramId);
     const node = getWorldNode(progress.currentNodeId);
-    const victoryRewards = node?.kind === "dungeon"
+    const battleNode = getWorldNode(resourceBase.worldNodeId ?? progress.currentNodeId);
+    const victoryRewards = battleNode?.kind === "dungeon"
       ? { xp: 60, coins: 20, materials: 3 }
       : { xp: 25, coins: 8, materials: 1 };
     const rewardGranted = resourceBase.status === "active" && next.status === "won";
-    const worldEventNodeId = next.status === "won" && node && (node.event === "encounter" || node.event === "boss") ? node.id : undefined;
+    const worldEventNodeId = next.status === "won" && battleNode && (battleNode.event === "encounter" || battleNode.event === "boss") ? battleNode.id : undefined;
     const savedBattle = saveBattleProgress(currentPlayer.telegramId, next, resourceBase, victoryRewards, worldEventNodeId);
     const updatedProgress = getWorldProgress(currentPlayer.telegramId);
     const current = getWorldNode(updatedProgress.currentNodeId);
