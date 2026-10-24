@@ -27,7 +27,8 @@ type WorldNode = {
 };
 type ChapterObjective = { id: string; label: string; completed: boolean };
 type ChapterOneState = { objectives: ChapterObjective[]; bossUnlocked: boolean; completed: boolean };
-type HeroineCard = { id: string; name: string; rarity: string; stage: Stage; heroClass: string; description: string; };
+type HeroineCard = { id: string; name: string; rarity: string; stage: Stage; heroClass: string; description: string; attack?: number; maxHp?: number; darkAvailable?: boolean; };
+type OwnedCard = { heroineId: string; copies: number; heroine: HeroineCard | null };
 type WorldView = {
   progress: { currentNodeId: string; visitedNodeIds: string[]; completedEventIds: string[] };
   current: WorldNode; destinations: WorldNode[]; chapter: ChapterOneState;
@@ -40,6 +41,8 @@ tg?.expand();
 let battle: Battle | null = null;
 let world: WorldView | null = null;
 let linkedHeroine: HeroineCard | null = null;
+let collection: OwnedCard[] = [];
+const flippedCards = new Set<string>();
 let lastBattleAction: string | null = null;
 let summonReveal = false;
 let summonNote = "Tu primera carta elegirá una heroína consciente.";
@@ -129,7 +132,43 @@ function renderWorld(): string {
     }).join("")}</div>
     <p class="muted expedition-note">${escapeHtml(worldNote)} El viaje se guarda en el servidor para que puedas retomarlo después.</p>
   </section>`;
-}function renderLoadout(): string {
+}function renderCollection(): string {
+  return `<section class="panel collection-panel">
+    <div class="section-title collection-title"><div><p class="eyebrow">ARCHIVO PERSONAL</p><h2>Mi colección</h2></div><span>${collection.length} cartas</span></div>
+    ${collection.length === 0
+      ? `<p class="muted collection-empty">Todavía no tienes cartas vinculadas. Realiza la primera invocación para recibir una heroína y guardarla en tu colección.</p>`
+      : `<div class="owned-card-grid">${collection.map(entry => {
+        const hero = entry.heroine;
+        const id = hero?.id ?? entry.heroineId;
+        const name = hero?.name ?? entry.heroineId;
+        const rarity = hero?.rarity ?? "—";
+        const stage = hero?.stage ?? "Lily";
+        const portrait = getCharacterPortrait(id);
+        const flipped = flippedCards.has(id);
+        if (flipped) {
+          return `<article class="owned-card owned-card-back" data-rarity="${escapeHtml(rarity)}">
+            <div class="owned-card-top"><span class="rarity-pill">${escapeHtml(rarity)}</span><span class="copy-count">Copias ×${entry.copies}</span></div>
+            <h3>${escapeHtml(name)}</h3>
+            <p class="muted">REVERSE · DATOS DE COMBATE</p>
+            <div class="owned-stat-grid"><div><small>ATAQUE</small><strong>${hero?.attack ?? "—"}</strong></div><div><small>VIDA MÁX.</small><strong>${hero?.maxHp ?? "—"}</strong></div></div>
+            <div class="owned-detail"><span>Clase</span><strong>${escapeHtml(hero?.heroClass ?? "Pendiente")}</strong></div>
+            <div class="owned-detail"><span>Forma actual del catálogo</span><strong>${escapeHtml(stage)}</strong></div>
+            <div class="owned-detail"><span>Rama Dark</span><strong>${hero?.darkAvailable === undefined ? "Sin datos" : hero.darkAvailable ? "Disponible" : "No disponible"}</strong></div>
+            <p class="muted owned-description">${escapeHtml(hero?.description ?? "No hay una ficha de datos para esta carta.")}</p>
+            <button type="button" class="route-button card-flip-button" data-card-flip="${escapeHtml(id)}">↶ Ver frente</button>
+          </article>`;
+        }
+        return `<article class="owned-card" data-rarity="${escapeHtml(rarity)}">
+          <div class="owned-card-art ${portrait ? "has-art" : ""}">${portrait ? `<img data-art-image src="${escapeHtml(portrait)}" alt="${escapeHtml("Ilustración de " + name)}" loading="lazy" decoding="async">` : `<span aria-hidden="true">✦</span>`}
+            <span class="rarity-pill">${escapeHtml(rarity)}</span><span class="copy-count">×${entry.copies}</span>
+          </div>
+          <div class="owned-card-body"><h3>${escapeHtml(name)}</h3><p class="owned-class">${escapeHtml(hero?.heroClass ?? "Clase pendiente")} · ${escapeHtml(stage)}</p><p class="owned-description">${escapeHtml(hero?.description ?? "No hay una ficha disponible para esta carta.")}</p>
+          <button type="button" class="route-button card-flip-button" data-card-flip="${escapeHtml(id)}">Ver reverso ↻</button></div>
+        </article>`;
+      }).join("")}</div>`}
+  </section>`;
+}
+function renderLoadout(): string {
   if (equipment.length === 0) return `<section class="panel loadout"><p class="eyebrow">EQUIPAMIENTO</p><h2>Preparación de expedición</h2><p class="muted">${escapeHtml(loadoutNote)}</p></section>`;
   const labels: Record<EquipmentSlot, string> = { weapon: "Arma", armor: "Equipamiento", accessory: "Accesorio", support: "Apoyo" };
   const options = (slot: EquipmentSlot) => equipment.filter(item => item.slot === slot).map(item => `<option value="${item.id}" ${loadout[slot] === item.id ? "selected" : ""}>${escapeHtml(item.name)} · ${item.rarity}</option>`).join("");
@@ -156,8 +195,9 @@ function render() {
       ${linkedHeroine ? `<div class="linked-heroine ${summonReveal ? "reveal-card" : ""}" data-rarity="${escapeHtml(linkedHeroine.rarity)}"><span class="rarity-pill">${escapeHtml(linkedHeroine.rarity)}</span><div><b>${escapeHtml(linkedHeroine.name)}</b><small>${escapeHtml(linkedHeroine.heroClass)} · Forma inicial ${escapeHtml(linkedHeroine.stage)}</small><p>${escapeHtml(linkedHeroine.description)}</p></div></div>` : ""}
       <button class="primary full" id="start" ${linkedHeroine && world && (world.current.event === "encounter" || world.current.event === "boss") && !world.progress.completedEventIds.includes(world.current.id) && (world.current.event !== "boss" || world.chapter.bossUnlocked) ? "" : "disabled"}>⚔ ${world && world.current.event === "boss" ? "Enfrentar amenaza mayor" : "Combatir en esta zona"}</button>
     </section>
+    ${renderCollection()}
     ${renderWorld()}
-    <div class="section-title"><div><p class="eyebrow">ARCHIVO DE LEYENDAS</p><h2>Heroínas conocidas</h2></div><span>R · S · SR</span></div>
+    <div class="section-title"><div><p class="eyebrow">CATÁLOGO DE REFERENCIA</p><h2>Heroínas conocidas</h2></div><span>R · S · SR</span></div>
     <section class="hero-grid">${heroes.map(h => {
       const portrait = getCharacterPortrait(h.id);
       return `<article class="hero-card ${h.color}"><div class="art ${portrait ? "has-art" : ""}">${portrait ? `<img class="hero-card-art" data-art-image src="${escapeHtml(portrait)}" alt="" loading="lazy" decoding="async">` : ""}<span class="rarity">${h.rarity}</span><span class="symbol">${h.icon}</span><span class="stage">${h.stage}</span></div><h3>${h.name}</h3><p class="muted">${h.role}</p><p>${h.desc}</p></article>`;
@@ -181,6 +221,13 @@ function render() {
   root.querySelector("main")?.insertBefore(studioButton, root.querySelector(".expedition"));
   root.querySelectorAll<HTMLButtonElement>("[data-gender]").forEach(button => button.onclick = () => void chooseGender(button.dataset.gender ?? "Mujer"));
   root.querySelector<HTMLButtonElement>("#summon")!.onclick = () => void summonFirst();
+  root.querySelectorAll<HTMLButtonElement>("[data-card-flip]").forEach(button => button.onclick = () => {
+    const id = button.dataset.cardFlip;
+    if (!id) return;
+    if (flippedCards.has(id)) flippedCards.delete(id);
+    else flippedCards.add(id);
+    render();
+  });
   root.querySelector<HTMLButtonElement>("#start")!.onclick = () => void startBattle();
   root.querySelectorAll<HTMLButtonElement>("[data-travel]").forEach(button => button.onclick = () => void travel(button.dataset.travel ?? ""));
   root.querySelector<HTMLButtonElement>("#resolve-event")?.addEventListener("click", () => void resolveCurrentEvent());
@@ -288,8 +335,14 @@ async function summonFirst() {
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "No se pudo realizar la invocación.");
     linkedHeroine = data.heroine as HeroineCard;
+    collection = (data.collection as Array<{ heroineId: string; copies: number }>).map(entry => ({
+      heroineId: entry.heroineId,
+      copies: entry.copies,
+      heroine: entry.heroineId === linkedHeroine?.id ? linkedHeroine : null
+    }));
     summonReveal = Boolean(data.created);
     summonNote = data.created ? "La carta te ha elegido. El vínculo queda guardado." : "Tu vínculo anterior ha sido restaurado; no se ha gastado otra invocación.";
+    void loadCollection();
   } catch (error) {
     summonNote = error instanceof Error ? error.message : "No se pudo completar la invocación.";
   }
@@ -301,9 +354,10 @@ async function loadCollection() {
     const response = await fetch("/api/collection", { headers: headers() });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "No se pudo cargar la colección.");
-    const first = (data.collection as Array<{ heroine: HeroineCard | null }>).find(entry => entry.heroine)?.heroine;
+    collection = (data.collection as OwnedCard[]) ?? [];
+    const first = collection.find(entry => entry.heroine)?.heroine ?? null;
     if (first) linkedHeroine = first;
-    if (linkedHeroine) summonNote = "Vínculo restaurado desde tu colección.";
+    if (linkedHeroine && !summonReveal) summonNote = "Vínculo restaurado desde tu colección.";
   } catch (error) {
     summonNote = error instanceof Error ? error.message : "La colección necesita conexión con el servidor.";
   }
