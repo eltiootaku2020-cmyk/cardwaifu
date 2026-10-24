@@ -355,6 +355,7 @@ async function restoreActiveBattle() {
   } catch { /* El servidor puede no estar disponible durante la carga inicial. */ }
 }
 render();
+window.addEventListener("umbra-art-updated", () => render());
 void loadArtManifest().then(() => render());
 void loadWorld();
 void restoreActiveBattle();
