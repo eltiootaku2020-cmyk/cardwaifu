@@ -3,8 +3,8 @@ import { randomInt } from "node:crypto";
 import express from "express";
 import { resolve } from "node:path";
 import { createBattle, act, type BattleAction } from "./game/combat.js";
-import { getOrCreatePlayer, getBattle, getLatestActiveBattle, saveBattleProgress, getWorldProgress, saveWorldProgress, getInventory, grantFirstHeroine, savePlayerFormStage, getPlayerRewards, getPlayerLoadout, savePlayerLoadout, saveProtagonistGender } from "./db.js";
-import { getAvailableDestinations, getWorldNode, travelTo } from "./game/world.js";
+import { getOrCreatePlayer, getBattle, getLatestActiveBattle, saveBattleProgress, getWorldProgress, saveWorldProgress, getInventory, grantFirstHeroine, savePlayerFormStage, getPlayerRewards, getPlayerLoadout, savePlayerLoadout, saveProtagonistGender, resolveExplorationEvent } from "./db.js";
+import { getAvailableDestinations, getChapterOneState, getWorldNode, travelTo } from "./game/world.js";
 import { getFirstSummonPool, getHeroine } from "./game/catalog.js";
 import { EQUIPMENT, getEquipmentBonuses, isValidLoadout } from "./game/equipment.js";
 import { validateTelegramInitData } from "./telegram/auth.js";
@@ -104,7 +104,7 @@ app.get("/api/world", (req, res) => {
     const progress = getWorldProgress(currentPlayer.telegramId);
     const current = getWorldNode(progress.currentNodeId);
     if (!current) throw new Error("La ruta guardada no es válida.");
-    res.json({ progress, current, destinations: getAvailableDestinations(progress) });
+    res.json({ progress, current, destinations: getAvailableDestinations(progress), chapter: getChapterOneState(progress) });
   } catch (error) {
     res.status(401).json({ error: error instanceof Error ? error.message : "No se pudo cargar la expedición." });
   }
@@ -117,9 +117,33 @@ app.post("/api/world/travel", (req, res) => {
     const progress = getWorldProgress(currentPlayer.telegramId);
     const result = travelTo(progress, destinationId);
     saveWorldProgress(currentPlayer.telegramId, result.progress);
-    res.json({ ...result, destinations: getAvailableDestinations(result.progress) });
+    res.json({ ...result, destinations: getAvailableDestinations(result.progress), chapter: getChapterOneState(result.progress) });
   } catch (error) {
     res.status(400).json({ error: error instanceof Error ? error.message : "No se pudo recorrer esa ruta." });
+  }
+});
+
+app.post("/api/world/resolve", (req, res) => {
+  let currentPlayer: ReturnType<typeof player>;
+  try {
+    currentPlayer = player(req);
+  } catch (error) {
+    return res.status(401).json({ error: error instanceof Error ? error.message : "No autorizado." });
+  }
+  try {
+    const result = resolveExplorationEvent(currentPlayer.telegramId);
+    res.json({
+      progress: result.progress,
+      current: result.node,
+      destinations: getAvailableDestinations(result.progress),
+      chapter: getChapterOneState(result.progress),
+      event: result.event,
+      reward: result.reward,
+      alma: result.alma,
+      rewards: result.rewards
+    });
+  } catch (error) {
+    res.status(400).json({ error: error instanceof Error ? error.message : "No se pudo resolver el evento." });
   }
 });
 
@@ -142,6 +166,13 @@ app.post("/api/battle/start", (req, res) => {
     const node = getWorldNode(progress.currentNodeId);
     if (!node || (node.event !== "encounter" && node.event !== "boss")) {
       return res.status(400).json({ error: "No hay una amenaza activa aquí. Explora una ruta marcada como posible encuentro o amenaza mayor." });
+    }
+    if (progress.completedEventIds.includes(node.id)) {
+      return res.status(400).json({ error: "Este encuentro ya está resuelto. Continúa por otra ruta." });
+    }
+    if (node.event === "boss" && !getChapterOneState(progress).bossUnlocked) {
+      const route = getAvailableDestinations(progress).find(destination => destination.id === node.id);
+      return res.status(403).json({ error: route?.lockedReason ?? "Completa los objetivos del capítulo antes de entrar." });
     }
     const encounters: Record<string, { name: string; hp: number; attack: number }> = {
       "sendero-musgo": { name: "Sabuesa contaminada", hp: 82, attack: 12 },
@@ -181,15 +212,31 @@ app.post("/api/battle/action", (req, res) => {
       }
     };
     const next = act(resourceBase, action as BattleAction);
-    const node = getWorldNode(getWorldProgress(currentPlayer.telegramId).currentNodeId);
+    const progress = getWorldProgress(currentPlayer.telegramId);
+    const node = getWorldNode(progress.currentNodeId);
     const victoryRewards = node?.kind === "dungeon"
       ? { xp: 60, coins: 20, materials: 3 }
       : { xp: 25, coins: 8, materials: 1 };
     const rewardGranted = resourceBase.status === "active" && next.status === "won";
-    const savedBattle = saveBattleProgress(currentPlayer.telegramId, next, resourceBase, victoryRewards);
-    res.json({ battle: savedBattle, rewards: getPlayerRewards(currentPlayer.telegramId), rewardGranted });
+    const worldEventNodeId = next.status === "won" && node && (node.event === "encounter" || node.event === "boss") ? node.id : undefined;
+    const savedBattle = saveBattleProgress(currentPlayer.telegramId, next, resourceBase, victoryRewards, worldEventNodeId);
+    const updatedProgress = getWorldProgress(currentPlayer.telegramId);
+    const current = getWorldNode(updatedProgress.currentNodeId);
+    res.json({
+      battle: savedBattle,
+      rewards: getPlayerRewards(currentPlayer.telegramId),
+      rewardGranted,
+      world: current ? {
+        progress: updatedProgress,
+        current,
+        destinations: getAvailableDestinations(updatedProgress),
+        chapter: getChapterOneState(updatedProgress)
+      } : null
+    });
   } catch (error) {
-    res.status(500).json({ error: error instanceof Error ? error.message : "No se pudo guardar el combate." });
+    const message = error instanceof Error ? error.message : "No se pudo guardar el combate.";
+    const status = message.includes("cambió con otra acción") ? 409 : 500;
+    res.status(status).json({ error: message });
   }
 });
 
