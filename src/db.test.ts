@@ -7,7 +7,8 @@ import { createBattle, act } from "./game/combat.js";
 
 const testDir = mkdtempSync(join(tmpdir(), "umbra-db-test-"));
 process.env.DATABASE_PATH = join(testDir, "test.sqlite");
-const { db, getOrCreatePlayer, saveBattleProgress, getBattle, getLatestActiveBattle, saveProtagonistGender } = await import("./db.js");
+const { db, getOrCreatePlayer, saveBattleProgress, getBattle, getLatestActiveBattle, saveProtagonistGender, saveWorldProgress, getWorldProgress, resolveExplorationEvent, getPlayerRewards } = await import("./db.js");
+const { travelTo } = await import("./game/world.js");
 
 test.after(() => {
   db.close();
@@ -121,4 +122,55 @@ test("evolution in one battle synchronizes alma and form for another battle", ()
   assert.equal(synchronizedPlayer.alma, 75);
   assert.equal(synchronizedPlayer.anima, 12);
   assert.equal(synchronizedPlayer.formStage, "Hero");
+});
+
+
+test("exploration event rewards and completion persist exactly once", () => {
+  const player = getOrCreatePlayer("player-exploration-once", "Exploradora");
+  const start = getWorldProgress(player.telegramId);
+  const atVigil = travelTo(start, "puesto-vigilia").progress;
+  saveWorldProgress(player.telegramId, atVigil);
+
+  const result = resolveExplorationEvent(player.telegramId);
+  assert.equal(result.event, "discovery");
+  assert.deepEqual(result.reward, { xp: 10, coins: 3, materials: 0, alma: 0 });
+  assert.ok(result.progress.completedEventIds.includes("puesto-vigilia"));
+  assert.equal(result.rewards.xp, 10);
+  assert.equal(result.rewards.coins, 3);
+  assert.throws(() => resolveExplorationEvent(player.telegramId), /ya fue resuelto/);
+  assert.equal(getPlayerRewards(player.telegramId).xp, 10);
+  assert.equal(getPlayerRewards(player.telegramId).coins, 3);
+});
+
+test("rest events restore Alma with its cap and save completion", () => {
+  const player = getOrCreatePlayer("player-exploration-rest", "Descanso");
+  const progress = travelTo(getWorldProgress(player.telegramId), "sendero-musgo").progress;
+  const atSpring = travelTo(progress, "manantial-luna").progress;
+  saveWorldProgress(player.telegramId, atSpring);
+  const result = resolveExplorationEvent(player.telegramId);
+  assert.equal(result.alma, 100);
+  assert.ok(result.progress.completedEventIds.includes("manantial-luna"));
+});
+
+test("stale simultaneous battle actions cannot overwrite a newer turn", () => {
+  const player = getOrCreatePlayer("player-stale-action", "Turno simultáneo");
+  const battle = createBattle("Vínculo", player.alma, player.formStage, player.anima);
+  saveBattleProgress(player.telegramId, battle);
+
+  const base = {
+    ...battle,
+    alma: player.alma,
+    stage: player.formStage,
+    branch: player.formBranch,
+    player: { ...battle.player, anima: player.anima }
+  };
+  const firstAction = act(base, "attack");
+  saveBattleProgress(player.telegramId, firstAction, base);
+
+  const staleAction = act(base, "defend");
+  assert.throws(
+    () => saveBattleProgress(player.telegramId, staleAction, base),
+    /cambió con otra acción/
+  );
+  assert.equal(getBattle(battle.id)?.battle.turn, 1);
 });
