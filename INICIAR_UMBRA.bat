@@ -60,11 +60,20 @@ echo.
 echo Iniciando UMBRA en una ventana visible.
 echo Para detenerlo, cierra la ventana titulada "UMBRA - Servidor".
 start "UMBRA - Servidor" /D "%CD%" cmd /k "npm run dev"
-timeout /t 4 /nobreak >nul
+echo Esperando a que UMBRA responda (hasta 30 segundos)...
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$deadline=(Get-Date).AddSeconds(30); while ((Get-Date) -lt $deadline) { try { $r=Invoke-WebRequest -Uri 'http://localhost:5173' -UseBasicParsing -TimeoutSec 1; if ($r.StatusCode -ge 200) { exit 0 } } catch {}; Start-Sleep -Milliseconds 500 }; exit 1"
+if errorlevel 1 (
+  echo.
+  echo UMBRA no respondio dentro de 30 segundos.
+  echo Revisa la ventana "UMBRA - Servidor" para ver el mensaje de error.
+  echo Puedes volver a intentarlo cuando el problema este resuelto.
+  pause
+  exit /b 1
+)
 start "" "http://localhost:5173"
 
 echo.
-echo Se abrio el navegador en http://localhost:5173
+echo UMBRA esta abierto en http://localhost:5173
 echo Esta ventana solo muestra estas instrucciones.
 echo Cuando termines de jugar, cierra la ventana "UMBRA - Servidor".
 pause
