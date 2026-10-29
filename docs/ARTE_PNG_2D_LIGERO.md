@@ -56,3 +56,8 @@ Si no hay imagen, la ruta falla o el navegador no permite el almacenamiento loca
 El selector **Arte frontal de cartas** ofrece los objetivos `character:<id>:card` para Pivy y las primeras portadoras de referencia. Cuando vincules una imagen a uno de esos destinos, la colección prioriza ese PNG en el frente de la carta. Si ese archivo no carga y existe un retrato de la misma portadora, la interfaz intenta usar el retrato antes de mostrar el espacio de reserva.
 
 Esto mantiene un solo sistema de dibujo y evita duplicar imágenes innecesarias. El arte vinculado se conserva localmente; para compartirlo con otras instalaciones debe añadirse de forma deliberada a `web/public/assets/umbra/` y declararse en `manifest.json`, revisando su tamaño.
+
+
+## Movimiento ligero sin rigging
+
+Los PNG del protagonista, Pivy y la portadora activa pueden usar un movimiento vertical de dos píxeles con un ciclo lento. No genera sprites adicionales ni anima toda la colección a la vez; aplica una transformación simple al arte visible. El botón **Efectos ligeros** desactiva este movimiento y también se respeta `prefers-reduced-motion`. Los efectos de ataque y evolución siguen siendo independientes, cortos y ligados a acciones confirmadas por el servidor. Este efecto no convierte un PNG plano en un personaje articulado: para separar brazos, pelo o ropa se necesitan capas o fotogramas dibujados.
