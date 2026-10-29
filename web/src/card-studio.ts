@@ -399,6 +399,7 @@ export function openCardStudio(): void {
   };
   get<HTMLButtonElement>("studio-art-export").onclick = () => { draw(); exportPng(); };
   get<HTMLButtonElement>("studio-art-save").onclick = async () => {
+    await galleryLoadPromise;
     draw();
     gallery.unshift({
       name: get<HTMLInputElement>("studio-art-name").value || "Carta sin nombre",
