@@ -81,3 +81,36 @@ test("battle objectives remain tied to their origin when the player travels else
   assert.equal(completed.currentNodeId, "aldea-bruma");
   assert.ok(completed.completedEventIds.includes("sendero-musgo"));
 });
+
+
+test("chapter one can be completed and the player can return to Aldea Bruma by connected routes", () => {
+  let state = createWorldProgress();
+
+  state = travelTo(state, "sendero-musgo").progress;
+  state = markBattleEventComplete(state, "sendero-musgo");
+  state = travelTo(state, "aldea-bruma").progress;
+  state = travelTo(state, "puesto-vigilia").progress;
+  state = resolveWorldEvent(state).progress;
+  state = travelTo(state, "ruinas-viejas").progress;
+  state = resolveWorldEvent(state).progress;
+
+  state = travelTo(state, "sendero-musgo").progress;
+  state = travelTo(state, "manantial-luna").progress;
+  state = travelTo(state, "nido-goblin").progress;
+  state = markBattleEventComplete(state, "nido-goblin");
+
+  state = travelTo(state, "manantial-luna").progress;
+  state = travelTo(state, "sendero-musgo").progress;
+  state = travelTo(state, "ruinas-viejas").progress;
+  assert.equal(getChapterOneState(state).bossUnlocked, true);
+  state = travelTo(state, "entrada-abismo").progress;
+  state = markBattleEventComplete(state, "entrada-abismo");
+  assert.equal(getChapterOneState(state).completed, true);
+
+  state = travelTo(state, "ruinas-viejas").progress;
+  state = travelTo(state, "sendero-musgo").progress;
+  state = travelTo(state, "aldea-bruma").progress;
+  assert.equal(state.currentNodeId, "aldea-bruma");
+  assert.equal(getChapterOneState(state).completed, true);
+  assert.equal(getChapterOneState(state).returnedToVillage, false);
+});
