@@ -26,7 +26,7 @@ type WorldNode = {
   unlocked?: boolean; lockedReason?: string;
 };
 type ChapterObjective = { id: string; label: string; completed: boolean };
-type ChapterOneState = { objectives: ChapterObjective[]; bossUnlocked: boolean; completed: boolean };
+type ChapterOneState = { objectives: ChapterObjective[]; bossUnlocked: boolean; completed: boolean; returnedToVillage: boolean };
 type HeroineCard = { id: string; name: string; rarity: string; stage: Stage; heroClass: string; description: string; attack?: number; maxHp?: number; darkAvailable?: boolean; };
 type OwnedCard = { heroineId: string; copies: number; heroine: HeroineCard | null };
 type WorldView = {
@@ -114,9 +114,20 @@ function renderWorld(): string {
     <div class="chapter-objectives">
       <div class="chapter-objectives-head"><strong>Objetivos del capítulo</strong><span>${objectiveDone}/${world.chapter.objectives.length}</span></div>
       <div class="objective-list">${world.chapter.objectives.map(objective => `<div class="objective-row ${objective.completed ? "objective-complete" : ""}"><span aria-hidden="true">${objective.completed ? "✓" : "○"}</span><span>${escapeHtml(objective.label)}</span></div>`).join("")}</div>
-      <p class="muted chapter-note">${world.chapter.completed ? "Capítulo 1 completado. Tu progreso quedó guardado." : world.chapter.bossUnlocked ? "La entrada al Abismo está abierta." : "Resuelve los eventos y despeja los encuentros para abrir el acceso a la amenaza final."}</p>
+      <p class="muted chapter-note">${world.chapter.returnedToVillage
+        ? "Regreso registrado. El capítulo 1 está cerrado y tu progreso quedó guardado."
+        : world.chapter.completed
+          ? current.id === "aldea-bruma"
+            ? "La amenaza ha sido derrotada. Registra el regreso para cerrar el capítulo."
+            : "La amenaza ha sido derrotada. Vuelve por las rutas conectadas hasta la Aldea Bruma para registrar el regreso."
+          : world.chapter.bossUnlocked
+            ? "La entrada al Abismo está abierta."
+            : "Resuelve los eventos y despeja los encuentros para abrir el acceso a la amenaza final."}</p>
     </div>
     ${canResolve ? `<button type="button" class="primary full resolve-event" id="resolve-event">${current.event === "discovery" ? "✧ Investigar lugar" : current.event === "rest" ? "☾ Descansar y recuperar Alma" : "⌂ Registrar visita"}</button>` : ""}
+    ${world.chapter.completed && current.id === "aldea-bruma" && !world.chapter.returnedToVillage
+      ? `<button type="button" class="primary full chapter-return" id="close-chapter">Registrar regreso y cerrar capítulo</button>`
+      : ""}
     ${currentResolved ? `<p class="muted event-complete-note">Este lugar ya está resuelto. Tu progreso se conserva aunque cierres el juego.</p>` : ""}
     <p class="route-heading">Rutas conectadas</p>
     <div class="route-grid">${world.destinations.map(node => {
@@ -231,6 +242,7 @@ function render() {
   root.querySelector<HTMLButtonElement>("#start")!.onclick = () => void startBattle();
   root.querySelectorAll<HTMLButtonElement>("[data-travel]").forEach(button => button.onclick = () => void travel(button.dataset.travel ?? ""));
   root.querySelector<HTMLButtonElement>("#resolve-event")?.addEventListener("click", () => void resolveCurrentEvent());
+  root.querySelector<HTMLButtonElement>("#close-chapter")?.addEventListener("click", () => void returnFromChapter());
   root.querySelectorAll<HTMLSelectElement>("[data-equipment-slot]").forEach(select => select.onchange = () => void saveLoadout(select.dataset.equipmentSlot as EquipmentSlot, select.value));
   drawBattle();
 }
@@ -451,6 +463,34 @@ async function resolveCurrentEvent() {
   }
   render();
 }
+async function returnFromChapter() {
+  if (!world || world.current.id !== "aldea-bruma" || !world.chapter.completed || world.chapter.returnedToVillage) return;
+  worldNote = "Registrando el regreso del capítulo…";
+  render();
+  try {
+    const response = await fetch("/api/chapter/return", {
+      method: "POST",
+      headers: headers(),
+      body: JSON.stringify({})
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "No se pudo registrar el regreso.");
+    world = {
+      progress: data.progress,
+      current: data.current,
+      destinations: data.destinations,
+      chapter: data.chapter as ChapterOneState
+    };
+    worldNote = data.alreadyReturned
+      ? "El regreso del capítulo ya estaba registrado."
+      : "Regreso registrado. El capítulo 1 queda cerrado y guardado.";
+    note = worldNote;
+  } catch (error) {
+    worldNote = error instanceof Error ? error.message : "No se pudo registrar el regreso.";
+  }
+  render();
+}
+
 async function restoreActiveBattle() {
   try {
     const response = await fetch("/api/battle/active", { headers: headers() });
