@@ -215,3 +215,20 @@ Se aplicó una primera pasada conservadora sobre el combate del prototipo:
 - Se añadieron pruebas automáticas para coste de habilidad, intención enemiga, defensa y carga. Deben pasar en CI antes de considerar validada la integración completa.
 
 **Limitaciones actuales:** el patrón aún es compartido y básico, no existe todavía un sistema completo de arquetipos ni una simulación estadística de miles de combates. La intención de guardia está tipada para extensiones, pero no se selecciona todavía como patrón autónomo. La dificultad no debe escalarse hasta verificar build, pruebas, distribución de turnos, resultados y comportamiento de la interfaz. Los números son una primera hipótesis ajustable, no un balance final.
+
+
+## 11. Simulador estadístico reproducible (en verificación)
+
+Se añadió una herramienta interna de desarrollo en `src/game/combat-sim.ts` que reutiliza el motor de combate real y permite inyectar una secuencia pseudoaleatoria con semilla fija. El flujo de juego normal continúa usando `crypto.randomInt`; la simulación no cambia el azar de las partidas reales.
+
+Comando interno del BOT OBRERO:
+
+```bash
+npm run simulate:combat -- --seed=20261029 --iterations=1000 --enemy-hp=150 --enemy-attack=16 --strategy=balanced
+```
+
+Parámetros disponibles: `seed`, `iterations`, `max-turns`, `enemy-hp`, `enemy-attack`, `hero-attack`, `hero-hp` y `strategy=balanced|attack-only`. El número de encuentros se limita a 10.000 y el máximo de turnos por combate a 100 para evitar ejecuciones accidentales demasiado grandes.
+
+La salida incluye victorias, derrotas, tiempos agotados, tasa de victoria, duración media, daño recibido, HP restante y recuento de acciones. Las pruebas automatizadas comprueban repetibilidad con la misma semilla, que todos los encuentros se contabilicen, los límites de ejecución y la estrategia de ataque básico.
+
+**Estado actual:** código y pruebas añadidos en `work/png-2d-lightweight-mvp`; la aceptación queda pendiente de que CI confirme el build y toda la suite. No se debe usar esta simulación para decidir automáticamente estadísticas, declarar divertido el combate ni afirmar que el balance está terminado. Los resultados dependen de la política de referencia y de los parámetros elegidos; después de revisar tendencias se requieren pruebas de interfaz y playtests.
