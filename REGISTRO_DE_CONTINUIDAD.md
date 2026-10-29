@@ -11,7 +11,7 @@ Actualizado: 2026-10-29
 - Análisis de combate: [docs/ANALISIS_DIFICULTAD_JUSTA.md](./docs/ANALISIS_DIFICULTAD_JUSTA.md)
 - Rama de trabajo: `work/png-2d-lightweight-mvp`
 - Lanzador local Windows: [`INICIAR_UMBRA.bat`](./INICIAR_UMBRA.bat); CI solo comprueba código TypeScript, por lo que falta probar el doble clic en Windows.
-- Copia de datos: [`RESPALDAR_UMBRA.bat`](./RESPALDAR_UMBRA.bat) llama a `npm run backup:db`; `src/backup-db.ts` usa la copia en línea SQLite y conserva diez copias generadas. La prueba automatizada está en `src/backup-db.test.ts`, pendiente CI actual y prueba manual en Windows.
+- Copia de datos: [`RESPALDAR_UMBRA.bat`](./RESPALDAR_UMBRA.bat) llama a `npm run backup:db`; `src/backup-db.ts` usa la copia en línea SQLite y conserva diez copias generadas. La prueba `src/backup-db.test.ts` pasó CI en [40867781026](https://github.com/eltiootaku2020-cmyk/cardwaifu/actions/runs/40867781026). La verificación manual de creación/restauración en Windows sigue pendiente. `.gitignore` excluye `/data/`, `/backups/`, `*.sqlite` y `*.db` para prevenir que progreso privado se suba al repositorio.
 - Pull request: https://github.com/eltiootaku2020-cmyk/cardwaifu/pull/1 (sigue en borrador; no está integrado en `main`).
 
 ## Estado confirmado
@@ -58,11 +58,11 @@ El 2026-10-29, la acción `create_file` del conector escribió `INICIAR_UMBRA.ba
 5. Añadir las ilustraciones PNG finales suministradas por el usuario, incluido el retrato de espalda del protagonista, y revisar tamaño, transparencia, encuadre y fallbacks.
 6. Medir fluidez en el PC del usuario y dentro de Telegram; ningún agente de GitHub puede confirmar el rendimiento en el dispositivo sin una prueba real.
 7. Configurar `BOT_TOKEN` y una URL HTTPS real, desplegar el cliente/API y probar inicio, autenticación, guardado y reinicio en Telegram. No inventar credenciales ni afirmar que está desplegado.
-8. Añadir backups de la base de datos, rate limiting, moderación y los flujos sociales solo después de estabilizar el MVP.
+8. Completar prueba manual de los backups SQLite, añadir rate limiting/moderación y abordar los flujos sociales solo después de estabilizar el MVP.
 
 ## Siguiente acción permitida
 
-El siguiente paso es probar manualmente el Taller y el capítulo 1 en navegador; no marcar como terminado el rendimiento de PC o Telegram sin pruebas reales. Después implementar la función de Pivy como apoyo y completar diálogos/decisiones del capítulo usando decisiones aprobadas. Mantener el arco de Medusa como propuesta no aprobada.
+CI detectó un error TS2709 en el tipo de la prueba de copia SQLite; se corrigió con `InstanceType<typeof Database>` en el commit `5ad1284`, y la CI de recuperación pasó en run [40867781026](https://github.com/eltiootaku2020-cmyk/cardwaifu/actions/runs/40867781026). El siguiente paso es probar manualmente los dos lanzadores en Windows, la creación/restauración de copias, el Taller y el capítulo 1; no marcar como terminado el rendimiento de PC o Telegram sin pruebas reales. Después implementar la función de Pivy como apoyo y completar diálogos/decisiones del capítulo usando decisiones aprobadas. Mantener el arco de Medusa como propuesta no aprobada.
 
 ## Regla de cierre
 
