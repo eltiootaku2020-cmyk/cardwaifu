@@ -10,6 +10,7 @@ La dirección visual es 2D, usando ilustraciones PNG, fondos por bioma y efectos
 - [x] Añadir el modo «Efectos ligeros», respetar la preferencia de movimiento reducido del sistema y guardar el ajuste en el navegador.
 - [x] Guardar la elección de protagonista en SQLite mediante endpoint de perfil; el test de persistencia pasa en CI.
 - [x] Añadir al Taller de cartas vinculación de PNG a una portadora, enemiga o fondo, con optimización y guardado local en IndexedDB (no sincroniza ni publica automáticamente).
+- [ ] Verificar la nueva galería del Taller en IndexedDB, migración de galerías antiguas y exportación/restauración de copia JSON; la copia no incluye arte vinculado al juego ni sustituye los PNG originales (pendiente CI y prueba manual).
 - [ ] Añadir las ilustraciones finales del usuario a las entradas públicas del manifiesto y revisar el encuadre.
 - [ ] Medir fluidez en el PC del usuario y dentro de Telegram; no declarar la optimización completa antes de medir.
 - [ ] Completar el MVP jugable y verificar el recorrido de principio a fin según los criterios inferiores.
