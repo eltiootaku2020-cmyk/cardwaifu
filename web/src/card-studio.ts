@@ -60,6 +60,9 @@ export function openCardStudio(): void {
           <div class="studio-buttons"><button type="button" class="secondary" id="studio-art-prompt-refresh">↻ Generar prompt</button><button type="button" class="secondary" id="studio-art-prompt-copy">Copiar prompt</button></div>
           <p class="muted studio-note">Prompt corto en inglés, separado por comas. Todo lo que represente un ser será una waifu; las armas son la única excepción. Sin etiquetas de calidad ni relleno.</p>
           <div class="studio-buttons"><button type="button" class="primary" id="studio-art-save">＋ Guardar carta</button><button type="button" class="secondary" id="studio-art-export">↓ Exportar PNG</button></div>
+          <div class="studio-buttons"><button type="button" class="secondary" id="studio-art-backup">↓ Exportar copia de galería</button><button type="button" class="secondary" id="studio-art-import-trigger">↑ Restaurar copia</button></div>
+          <input id="studio-art-import-file" type="file" accept=".json,application/json" hidden>
+          <p class="muted studio-note">La galería se guarda en almacenamiento local del navegador y también puedes exportarla como copia JSON. La copia incluye las cartas del taller y sus prompts, pero no incluye el arte enlazado al juego ni sustituye tus PNG originales. No se sube nada a internet.</p>
           <p class="muted studio-note">El editor crea marcos propios por código. Para que el personaje quede bien integrado, usa PNG con canal alfa y ajusta la escala.</p>
         </div>
         <div class="studio-result"><canvas id="studio-art-canvas" width="600" height="900" aria-label="Vista previa de carta"></canvas><div class="studio-gallery-head"><strong>Galería local</strong><span id="studio-art-count">0 cartas</span></div><div id="studio-art-gallery" class="studio-gallery"></div></div>
@@ -79,28 +82,128 @@ export function openCardStudio(): void {
   let art: HTMLImageElement | null = null;
   let objectUrl = "";
   type GalleryCard = { name: string; data: string; prompt: string };
+  type StoredGalleryCard = { id: number; name: string; blob: Blob; prompt: string; order: number };
   const gallery: GalleryCard[] = [];
   const galleryStorageKey = "umbra-card-studio-gallery-v1";
+  const galleryDbName = "umbra-card-gallery-v1";
+  const galleryStoreName = "cards";
   const galleryLimit = 12;
-  try {
-    const stored: unknown = JSON.parse(localStorage.getItem(galleryStorageKey) ?? "[]");
-    if (Array.isArray(stored)) {
-      stored.slice(0, galleryLimit).forEach((item: unknown) => {
-        if (item && typeof item === "object" && "name" in item && "data" in item && "prompt" in item &&
-            typeof item.name === "string" && typeof item.data === "string" &&
-            item.data.startsWith("data:image/png;base64,") && typeof item.prompt === "string") {
-          gallery.push({ name: item.name.slice(0, 100), data: item.data, prompt: item.prompt.slice(0, 4000) });
+  const maxBackupBytes = 24 * 1024 * 1024;
+
+  function openGalleryDatabase(): Promise<IDBDatabase> {
+    return new Promise((resolve, reject) => {
+      if (!("indexedDB" in window)) {
+        reject(new Error("Este navegador no permite almacenamiento local de la galería."));
+        return;
+      }
+      const request = indexedDB.open(galleryDbName, 1);
+      request.onupgradeneeded = () => {
+        if (!request.result.objectStoreNames.contains(galleryStoreName)) {
+          request.result.createObjectStore(galleryStoreName, { keyPath: "id" });
         }
-      });
-    }
-  } catch { /* El taller sigue funcionando si el almacenamiento está deshabilitado. */ }
-  function persistGallery(): boolean {
+      };
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error ?? new Error("No se pudo abrir la galería local."));
+    });
+  }
+
+  function dataUrlToBlob(value: string): Blob {
+    const match = value.match(/^data:(image\\/png);base64,([A-Za-z0-9+/=]+)$/);
+    if (!match) throw new Error("Una carta de la galería no contiene un PNG válido.");
+    const binary = atob(match[2]!);
+    const bytes = new Uint8Array(binary.length);
+    for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
+    return new Blob([bytes], { type: match[1] });
+  }
+
+  function blobToDataUrl(blob: Blob): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => typeof reader.result === "string" ? resolve(reader.result) : reject(new Error("No se pudo leer el PNG guardado."));
+      reader.onerror = () => reject(reader.error ?? new Error("No se pudo leer el PNG guardado."));
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  async function loadGallery(): Promise<void> {
     try {
-      localStorage.setItem(galleryStorageKey, JSON.stringify(gallery));
+      const database = await openGalleryDatabase();
+      let records: StoredGalleryCard[] = [];
+      try {
+        const transaction = database.transaction(galleryStoreName, "readonly");
+        const request = transaction.objectStore(galleryStoreName).getAll() as IDBRequest<StoredGalleryCard[]>;
+        records = await new Promise<StoredGalleryCard[]>((resolve, reject) => {
+          request.onsuccess = () => resolve(request.result ?? []);
+          request.onerror = () => reject(request.error ?? new Error("No se pudo leer la galería local."));
+        });
+      } finally {
+        database.close();
+      }
+      if (records.length > 0) {
+        const sorted = records
+          .filter(record => record && typeof record.name === "string" && record.blob instanceof Blob &&
+            record.blob.type === "image/png" && typeof record.prompt === "string" && Number.isFinite(record.order))
+          .sort((left, right) => left.order - right.order)
+          .slice(0, galleryLimit);
+        for (const record of sorted) {
+          gallery.push({ name: record.name.slice(0, 100), data: await blobToDataUrl(record.blob), prompt: record.prompt.slice(0, 4000) });
+        }
+        return;
+      }
+    } catch {
+      // La migración desde localStorage y la exportación manual siguen disponibles como alternativa.
+    }
+
+    // Migrate cards made by older versions from localStorage to IndexedDB.
+    try {
+      const stored: unknown = JSON.parse(localStorage.getItem(galleryStorageKey) ?? "[]");
+      if (Array.isArray(stored)) {
+        stored.slice(0, galleryLimit).forEach((item: unknown) => {
+          if (item && typeof item === "object" && "name" in item && "data" in item && "prompt" in item &&
+            typeof item.name === "string" && typeof item.data === "string" &&
+            /^data:image\\/png;base64,[A-Za-z0-9+/=]+$/.test(item.data) && typeof item.prompt === "string") {
+            gallery.push({ name: item.name.slice(0, 100), data: item.data, prompt: item.prompt.slice(0, 4000) });
+          }
+        });
+      }
+    } catch { /* The workshop remains usable even if old browser storage is damaged. */ }
+    if (gallery.length > 0) await persistGallery();
+  }
+
+  async function persistGallery(): Promise<boolean> {
+    try {
+      const database = await openGalleryDatabase();
+      try {
+        const transaction = database.transaction(galleryStoreName, "readwrite");
+        const store = transaction.objectStore(galleryStoreName);
+        store.clear();
+        gallery.forEach((card, order) => {
+          store.put({
+            id: order,
+            name: card.name.slice(0, 100),
+            blob: dataUrlToBlob(card.data),
+            prompt: card.prompt.slice(0, 4000),
+            order
+          } satisfies StoredGalleryCard);
+        });
+        await new Promise<void>((resolve, reject) => {
+          transaction.oncomplete = () => resolve();
+          transaction.onerror = () => reject(transaction.error ?? new Error("No se pudo guardar la galería local."));
+          transaction.onabort = () => reject(transaction.error ?? new Error("Se canceló el guardado de la galería."));
+        });
+      } finally {
+        database.close();
+      }
+      try { localStorage.removeItem(galleryStorageKey); } catch { /* Old browser storage may be read-only. */ }
       return true;
     } catch {
-      window.alert("No se pudo guardar la galería en este navegador. Exporta tus cartas como PNG para conservarlas.");
-      return false;
+      try {
+        localStorage.setItem(galleryStorageKey, JSON.stringify(gallery));
+        return true;
+      } catch {
+        window.alert("No se pudo guardar automáticamente la galería. Exporta una copia JSON desde el taller antes de cerrar.");
+        return false;
+      }
     }
   }
   const themes: Record<string, [string, string, string]> = {
@@ -295,16 +398,92 @@ export function openCardStudio(): void {
     }
   };
   get<HTMLButtonElement>("studio-art-export").onclick = () => { draw(); exportPng(); };
-  get<HTMLButtonElement>("studio-art-save").onclick = () => {
+  get<HTMLButtonElement>("studio-art-save").onclick = async () => {
     draw();
-    gallery.unshift({ name: get<HTMLInputElement>("studio-art-name").value || "Carta sin nombre", data: canvas.toDataURL("image/png"), prompt: get<HTMLTextAreaElement>("studio-art-prompt").value });
+    gallery.unshift({
+      name: get<HTMLInputElement>("studio-art-name").value || "Carta sin nombre",
+      data: canvas.toDataURL("image/png"),
+      prompt: get<HTMLTextAreaElement>("studio-art-prompt").value
+    });
     if (gallery.length > galleryLimit) gallery.length = galleryLimit;
-    persistGallery();
+    await persistGallery();
     renderGallery();
   };
-  const close = () => { if (objectUrl) URL.revokeObjectURL(objectUrl); overlay.remove(); };
+
+  const galleryLoadPromise = loadGallery().then(() => renderGallery());
+
+  get<HTMLButtonElement>("studio-art-backup").onclick = async () => {
+    try {
+      await galleryLoadPromise;
+      const backup = {
+        format: "umbra-card-studio-gallery",
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        cards: gallery
+      };
+      const json = JSON.stringify(backup);
+      if (json.length > maxBackupBytes) {
+        throw new Error("La copia supera los 24 MB. Exporta algunas cartas PNG por separado para reducir el tamaño.");
+      }
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.download = "umbra-galeria-" + new Date().toISOString().slice(0, 10) + ".json";
+      link.href = url;
+      link.click();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1500);
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : "No se pudo exportar la copia.");
+    }
+  };
+
+  get<HTMLButtonElement>("studio-art-import-trigger").onclick = () => get<HTMLInputElement>("studio-art-import-file").click();
+  get<HTMLInputElement>("studio-art-import-file").onchange = async event => {
+    const file = (event.currentTarget as HTMLInputElement).files?.[0];
+    if (!file) return;
+    try {
+      await galleryLoadPromise;
+      if (file.size > maxBackupBytes) throw new Error("La copia supera el límite de 24 MB.");
+      const parsed: unknown = JSON.parse(await file.text());
+      if (!parsed || typeof parsed !== "object" || !("format" in parsed) || !("version" in parsed) || !("cards" in parsed)) {
+        throw new Error("El archivo no tiene el formato de copia de UMBRA.");
+      }
+      const candidate = parsed as { format: unknown; version: unknown; cards: unknown };
+      if (candidate.format !== "umbra-card-studio-gallery" || candidate.version !== 1 || !Array.isArray(candidate.cards)) {
+        throw new Error("La copia no es compatible con esta versión del taller.");
+      }
+      const restored: GalleryCard[] = [];
+      let contentBytes = 0;
+      for (const item of candidate.cards) {
+        if (restored.length >= galleryLimit) break;
+        if (!item || typeof item !== "object" || !("name" in item) || !("data" in item) || !("prompt" in item)) continue;
+        if (typeof item.name !== "string" || typeof item.data !== "string" || typeof item.prompt !== "string") continue;
+        if (!/^data:image\\/png;base64,[A-Za-z0-9+/=]+$/.test(item.data)) continue;
+        contentBytes += item.data.length;
+        if (contentBytes > maxBackupBytes) throw new Error("Los datos de la copia superan el límite permitido.");
+        restored.push({ name: item.name.slice(0, 100), data: item.data, prompt: item.prompt.slice(0, 4000) });
+      }
+      if (restored.length === 0) throw new Error("La copia no contiene cartas PNG válidas.");
+      if (!window.confirm("Se restaurarán " + restored.length + " cartas y se reemplazará la galería actual. Exporta una copia de la galería actual antes de continuar si deseas conservarla.")) {
+        get<HTMLInputElement>("studio-art-import-file").value = "";
+        return;
+      }
+      gallery.splice(0, gallery.length, ...restored);
+      const persisted = await persistGallery();
+      renderGallery();
+      if (persisted) window.alert("Copia restaurada: " + restored.length + " cartas.");
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : "No se pudo importar la copia.");
+    } finally {
+      get<HTMLInputElement>("studio-art-import-file").value = "";
+    }
+  };
+
+  const close = () => {
+    if (objectUrl) URL.revokeObjectURL(objectUrl);
+    overlay.remove();
+  };
   get<HTMLButtonElement>("studio-close").onclick = close;
   overlay.addEventListener("click", event => { if (event.target === overlay) close(); });
-  renderGallery();
   draw();
 }
