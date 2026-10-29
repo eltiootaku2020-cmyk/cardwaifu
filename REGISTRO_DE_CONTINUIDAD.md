@@ -84,3 +84,10 @@ No integrar el PR ni declarar el programa completo por la existencia de código.
 - No se ha probado `INICIAR_UMBRA.bat` ni `RESPALDAR_UMBRA.bat` en Windows real; tampoco el backup/restore de arte, el rendimiento en el PC o Telegram en producción.
 - Mantener la rama `work/png-2d-lightweight-mvp`, PR #1 borrador; nunca fusionar automáticamente a `main`.
 - La tarea siguiente es conseguir CI verde en el último commit y revisar que la copia SQLite, los dos accesos directos, el PNG/fallback y el cierre de capítulo están descritos con límites honestos. Después continuar con el MVP dentro de decisiones ya confirmadas; no inventar rates de gacha, números de duplicados, habilidades de Pivy ni canonizar Medusa.
+
+
+## Obtención e inicio sin comandos — 29-10-2026
+
+- El README incluye un enlace al ZIP de `work/png-2d-lightweight-mvp` para evitar descargar `main` por error.
+- El lanzador espera hasta 30 segundos a que `http://localhost:5173` responda antes de abrir el navegador; si no responde, dirige al usuario a la ventana de servidor para ver el error.
+- Esto está pendiente de prueba manual en Windows real; CI no ejecuta el `.bat`.
