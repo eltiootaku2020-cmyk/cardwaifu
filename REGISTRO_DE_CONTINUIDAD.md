@@ -68,3 +68,19 @@ CI detectó un error TS2709 en el tipo de la prueba de copia SQLite; se corrigi�
 ## Regla de cierre
 
 No integrar el PR ni declarar el programa completo por la existencia de código. Primero revisar la evidencia, mantener el PR visible y en revisión, y no afirmar que Telegram, la carga de arte, el rendimiento del PC o el balance están verificados sin pruebas de esos entornos.
+
+
+## Actualización de continuidad — 29-10-2026
+
+### Tanda 2D PNG y facilidad de uso
+- Pivy se presenta como compañera de viaje desde el inicio en `web/src/main.ts`; sigue separada de la invocación aleatoria. No se le asignó una bonificación de combate no aprobada.
+- La ilustración activa del protagonista, Pivy y la portadora usa una animación CSS vertical de solo 2 px con ciclo lento. `Efectos ligeros` y `prefers-reduced-motion` la desactivan; no se anima todo el catálogo.
+- El panel de navegación facilita saltar a Inicio, Cartas, Expedición, Equipo y Combate. El taller muestra PNG frontal de carta con fallback al retrato.
+- Se añadieron los accesos directos `INICIAR_UMBRA.bat` y `RESPALDAR_UMBRA.bat`. El segundo hace una copia consistente por SQLite, conserva 10 copias, y el test de la API SQLite pasó CI en [40867781026](https://github.com/eltiootaku2020-cmyk/cardwaifu/actions/runs/40867781026). `.gitignore` excluye `/data/`, `/backups/`, `*.sqlite` y `*.db`.
+- La última evidencia de CI de la implementación visual anterior a la animación PNG y su documentación es [40868412632](https://github.com/eltiootaku2020-cmyk/cardwaifu/actions/runs/40868412632), y la CI de animación/documentación fue lanzada en [40868522785](https://github.com/eltiootaku2020-cmyk/cardwaifu/actions/runs/40868522785). Consultar la ejecución más reciente de la rama antes de aceptar el siguiente cambio.
+
+### Límites explícitos
+- Esta tanda no pone arte final del usuario: el manifiesto tiene sus targets en null hasta que el usuario aporte los PNG.
+- No se ha probado `INICIAR_UMBRA.bat` ni `RESPALDAR_UMBRA.bat` en Windows real; tampoco el backup/restore de arte, el rendimiento en el PC o Telegram en producción.
+- Mantener la rama `work/png-2d-lightweight-mvp`, PR #1 borrador; nunca fusionar automáticamente a `main`.
+- La tarea siguiente es conseguir CI verde en el último commit y revisar que la copia SQLite, los dos accesos directos, el PNG/fallback y el cierre de capítulo están descritos con límites honestos. Después continuar con el MVP dentro de decisiones ya confirmadas; no inventar rates de gacha, números de duplicados, habilidades de Pivy ni canonizar Medusa.
