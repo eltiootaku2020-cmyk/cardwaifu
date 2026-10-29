@@ -8,6 +8,10 @@ Lee [CEREBRO_Y_OBRERO.md](./CEREBRO_Y_OBRERO.md) antes de modificar lore o regla
 ## Estado
 MVP jugable en construcción. Ya incluye combate por turnos en servidor, primera invocación persistente, mapa del Bosque Oscuro, equipo inicial, recompensas básicas y taller de cartas. La dirección visual es 2D ligera: el juego admite retratos y fondos PNG mediante `web/public/assets/umbra/manifest.json`, usa reemplazos cuando aún no hay arte y ofrece un modo «Efectos ligeros». La integración/despliegue real de Telegram todavía no está completada ni validada.
 
+## Obtener la versión de trabajo
+
+Descarga el ZIP de la rama que contiene estas mejoras: [**Descargar UMBRA 2D ligero (.zip)**](https://github.com/eltiootaku2020-cmyk/cardwaifu/archive/refs/heads/work/png-2d-lightweight-mvp.zip). Extrae la carpeta antes de ejecutar el lanzador. No descargues el ZIP de `main` para probar estas mejoras: esta tanda continúa en la rama de trabajo y aún no se ha integrado.
+
 ## Iniciar en Windows sin escribir comandos
 1. Instala Node.js 20 o superior si aún no está instalado: [nodejs.org](https://nodejs.org/).
 2. En la carpeta del proyecto, haz doble clic en **`INICIAR_UMBRA.bat`**.
