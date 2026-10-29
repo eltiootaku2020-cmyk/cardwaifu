@@ -7,7 +7,8 @@ import { createBattle, act } from "./game/combat.js";
 
 const testDir = mkdtempSync(join(tmpdir(), "umbra-db-test-"));
 process.env.DATABASE_PATH = join(testDir, "test.sqlite");
-const { db, getOrCreatePlayer, saveBattleProgress, getBattle, getLatestActiveBattle } = await import("./db.js");
+const { db, getOrCreatePlayer, saveBattleProgress, getBattle, getLatestActiveBattle, saveProtagonistGender, saveWorldProgress, getWorldProgress, resolveExplorationEvent, getPlayerRewards, resolveChapterReturn } = await import("./db.js");
+const { travelTo } = await import("./game/world.js");
 
 test.after(() => {
   db.close();
@@ -30,6 +31,14 @@ test("player resources and form stage persist in SQLite with battle state", () =
   assert.deepEqual(restoredBattle?.battle, evolved);
   assert.equal(restoredBattle?.ownerId, "player-test-1");
   assert.equal(getLatestActiveBattle("player-test-1")?.id, evolved.id);
+});
+
+test("protagonist gender persists in SQLite", () => {
+  const player = getOrCreatePlayer("player-gender-persist", "Prueba de perfil");
+  assert.equal(player.gender, "Mujer");
+  saveProtagonistGender(player.telegramId, "Hombre");
+  const restored = getOrCreatePlayer(player.telegramId, player.displayName);
+  assert.equal(restored.gender, "Hombre");
 });
 
 test("active battle lookup excludes completed battles", () => {
@@ -114,3 +123,80 @@ test("evolution in one battle synchronizes alma and form for another battle", ()
   assert.equal(synchronizedPlayer.anima, 12);
   assert.equal(synchronizedPlayer.formStage, "Hero");
 });
+
+
+test("exploration event rewards and completion persist exactly once", () => {
+  const player = getOrCreatePlayer("player-exploration-once", "Exploradora");
+  const start = getWorldProgress(player.telegramId);
+  const atVigil = travelTo(start, "puesto-vigilia").progress;
+  saveWorldProgress(player.telegramId, atVigil);
+
+  const result = resolveExplorationEvent(player.telegramId);
+  assert.equal(result.event, "discovery");
+  assert.deepEqual(result.reward, { xp: 10, coins: 3, materials: 0, alma: 0 });
+  assert.ok(result.progress.completedEventIds.includes("puesto-vigilia"));
+  assert.equal(result.rewards.xp, 10);
+  assert.equal(result.rewards.coins, 3);
+  assert.throws(() => resolveExplorationEvent(player.telegramId), /ya fue resuelto/);
+  assert.equal(getPlayerRewards(player.telegramId).xp, 10);
+  assert.equal(getPlayerRewards(player.telegramId).coins, 3);
+});
+
+test("rest events restore Alma with its cap and save completion", () => {
+  const player = getOrCreatePlayer("player-exploration-rest", "Descanso");
+  const progress = travelTo(getWorldProgress(player.telegramId), "sendero-musgo").progress;
+  const atSpring = travelTo(progress, "manantial-luna").progress;
+  saveWorldProgress(player.telegramId, atSpring);
+  const result = resolveExplorationEvent(player.telegramId);
+  assert.equal(result.alma, 100);
+  assert.ok(result.progress.completedEventIds.includes("manantial-luna"));
+});
+
+test("stale simultaneous battle actions cannot overwrite a newer turn", () => {
+  const player = getOrCreatePlayer("player-stale-action", "Turno simultáneo");
+  const battle = createBattle("Vínculo", player.alma, player.formStage, player.anima);
+  saveBattleProgress(player.telegramId, battle);
+
+  const base = {
+    ...battle,
+    alma: player.alma,
+    stage: player.formStage,
+    branch: player.formBranch,
+    player: { ...battle.player, anima: player.anima }
+  };
+  const firstAction = act(base, "attack");
+  saveBattleProgress(player.telegramId, firstAction, base);
+
+  const staleAction = act(base, "defend");
+  assert.throws(
+    () => saveBattleProgress(player.telegramId, staleAction, base),
+    /cambió con otra acción/
+  );
+  assert.equal(getBattle(battle.id)?.battle.turn, 1);
+});
+
+test("chapter return requires the boss, happens in the village, and is registered only once", () => {
+  const player = getOrCreatePlayer("player-chapter-return", "Regreso de capítulo");
+  assert.throws(() => resolveChapterReturn(player.telegramId), /Derrota primero a la Guardiana/);
+
+  const initial = getWorldProgress(player.telegramId);
+  const completeProgress = {
+    ...initial,
+    visitedNodeIds: ["aldea-bruma", "sendero-musgo", "puesto-vigilia", "manantial-luna", "ruinas-viejas", "nido-goblin", "entrada-abismo"],
+    completedEventIds: ["sendero-musgo", "puesto-vigilia", "ruinas-viejas", "nido-goblin", "entrada-abismo"]
+  };
+  saveWorldProgress(player.telegramId, { ...completeProgress, currentNodeId: "sendero-musgo" });
+  assert.throws(() => resolveChapterReturn(player.telegramId), /Vuelve a la Aldea Bruma/);
+
+  saveWorldProgress(player.telegramId, { ...completeProgress, currentNodeId: "aldea-bruma" });
+  const first = resolveChapterReturn(player.telegramId);
+  assert.equal(first.alreadyReturned, false);
+  assert.equal(first.chapter.completed, true);
+  assert.equal(first.chapter.returnedToVillage, true);
+  assert.equal(first.progress.completedEventIds.filter(id => id === "chapter-1-return").length, 1);
+
+  const second = resolveChapterReturn(player.telegramId);
+  assert.equal(second.alreadyReturned, true);
+  assert.equal(second.progress.completedEventIds.filter(id => id === "chapter-1-return").length, 1);
+});
+

@@ -83,8 +83,8 @@ test("Epic cannot evolve beyond the final form", () => {
 
 
 test("encounter archetype controls enemy and linked heroine base stats", () => {
-  const battle = createBattle("Tiny, la exploradora", 100, "Lily", 0, "Goblin cazadora", 96, 14, 22, 120);
-  assert.equal(battle.player.name, "Tiny, la exploradora");
+  const battle = createBattle("Pivy, la exploradora", 100, "Lily", 0, "Goblin cazadora", 96, 14, 22, 120);
+  assert.equal(battle.player.name, "Pivy, la exploradora");
   assert.equal(battle.player.attack, 22);
   assert.equal(battle.player.maxHp, 120);
   assert.equal(battle.enemy.name, "Goblin cazadora");

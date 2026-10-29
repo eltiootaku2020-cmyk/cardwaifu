@@ -1,7 +1,7 @@
 import type { Heroine } from "./types.js";
 
 export const HEROINES: Heroine[] = [
-  { id: "tiny", name: "Tiny, la exploradora", rarity: "S", heroClass: "Arquera", stage: "Lily", darkAvailable: false, attack: 22, maxHp: 120, description: "Goblin exploradora elegida por la epopeya de Arturo. Ágil, observadora y protectora de su pueblo." },
+  { id: "tiny", name: "Pivy, la exploradora", rarity: "S", heroClass: "Arquera", stage: "Lily", darkAvailable: false, attack: 22, maxHp: 120, description: "Pivy es una goblin elegida por la epopeya de Arturo. Ágil, observadora y protectora de su pueblo." },
   { id: "elizabeth", name: "Elizabeth, heredera de Arturo", rarity: "SR", heroClass: "Espadachina", stage: "Hero", darkAvailable: true, attack: 31, maxHp: 130, description: "Noble gobernante que manifiesta la epopeya de Arturo con un poder de rango SR." },
   { id: "artoria", name: "Artoria, manifestación de Arturo", rarity: "SSR", heroClass: "Espadachina", stage: "Epic", darkAvailable: true, attack: 35, maxHp: 115, description: "Manifestación femenina de la epopeya del rey caballero. La leyenda no pertenece a una sola portadora." },
   { id: "juana", name: "Juana de Arco", rarity: "SR", heroClass: "Lancera", stage: "Hero", darkAvailable: true, attack: 23, maxHp: 135, description: "Doncella guerrera que protege a sus aliadas y resiste bajo presión." },

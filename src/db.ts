@@ -2,7 +2,7 @@ import Database from "better-sqlite3";
 import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import type { BattleState, FormBranch, FormStage } from "./game/types.js";
-import { createWorldProgress, type WorldProgress } from "./game/world.js";
+import { createWorldProgress, type WorldProgress, markBattleEventComplete, resolveWorldEvent, getChapterOneState, START_NODE_ID } from "./game/world.js";
 import { DEFAULT_LOADOUT, type EquipmentLoadout } from "./game/equipment.js";
 
 const filename = resolve(process.env.DATABASE_PATH ?? "./data/umbra.sqlite");
@@ -19,6 +19,7 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS players(
     telegram_id TEXT PRIMARY KEY,
     display_name TEXT NOT NULL,
+    protagonist_gender TEXT NOT NULL DEFAULT 'Mujer' CHECK(protagonist_gender IN ('Mujer','Hombre')),
     alma INTEGER NOT NULL DEFAULT 100 CHECK(alma BETWEEN 0 AND 100),
     anima INTEGER NOT NULL DEFAULT 0 CHECK(anima BETWEEN 0 AND 100),
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -55,10 +56,12 @@ db.exec(`
   );
 `);
 try { db.exec("ALTER TABLE player_progress ADD COLUMN form_branch TEXT CHECK(form_branch IS NULL OR form_branch IN ('Light','Dark'))"); } catch { /* La columna ya existe en bases creadas con el esquema actual. */ }
+try { db.exec("ALTER TABLE players ADD COLUMN protagonist_gender TEXT NOT NULL DEFAULT 'Mujer' CHECK(protagonist_gender IN ('Mujer','Hombre'))"); } catch { /* La base ya contiene la columna de perfil. */ }
 
 export interface PlayerRecord {
   telegramId: string;
   displayName: string;
+  gender: "Mujer" | "Hombre";
   alma: number;
   anima: number;
   createdAt: string;
@@ -72,11 +75,15 @@ export function getOrCreatePlayer(id: string, name: string): PlayerRecord {
   db.prepare("INSERT OR IGNORE INTO player_rewards(telegram_id) VALUES(?)").run(id);
   db.prepare("INSERT OR IGNORE INTO player_loadout(telegram_id,state_json) VALUES(?,?)").run(id, JSON.stringify(DEFAULT_LOADOUT));
   return db.prepare(`
-    SELECT p.telegram_id AS telegramId, p.display_name AS displayName, p.alma, p.anima,
+    SELECT p.telegram_id AS telegramId, p.display_name AS displayName, p.protagonist_gender AS gender, p.alma, p.anima,
            p.created_at AS createdAt, g.form_stage AS formStage, g.form_branch AS formBranch
     FROM players p JOIN player_progress g ON g.telegram_id=p.telegram_id
     WHERE p.telegram_id=?
   `).get(id) as PlayerRecord;
+}
+
+export function saveProtagonistGender(id: string, gender: "Mujer" | "Hombre"): void {
+  db.prepare("UPDATE players SET protagonist_gender=? WHERE telegram_id=?").run(gender, id);
 }
 
 export function savePlayerResources(id: string, alma: number, anima: number): void {
@@ -130,11 +137,19 @@ export const saveBattleProgress = db.transaction((
   ownerId: string,
   battle: BattleState,
   resourceBase?: BattleState,
-  victoryRewards?: { xp: number; coins: number; materials: number }
+  victoryRewards?: { xp: number; coins: number; materials: number },
+  worldEventNodeId?: string
 ): BattleState => {
   let savedBattle = battle;
 
   if (resourceBase) {
+    const stored = db.prepare("SELECT state_json AS stateJson, status FROM battles WHERE battle_id=? AND telegram_id=?")
+      .get(battle.id, ownerId) as { stateJson: string; status: "active" | "won" | "lost" } | undefined;
+    if (!stored) throw new Error("El combate guardado no está disponible.");
+    const storedBattle = JSON.parse(stored.stateJson) as BattleState;
+    if (stored.status !== resourceBase.status || storedBattle.turn !== resourceBase.turn) {
+      throw new Error("El combate cambió con otra acción. Recarga la partida antes de continuar.");
+    }
     const resources = db.prepare(`
       SELECT p.alma, p.anima, g.form_stage AS formStage, g.form_branch AS formBranch
       FROM players p JOIN player_progress g ON g.telegram_id=p.telegram_id
@@ -156,10 +171,18 @@ export const saveBattleProgress = db.transaction((
     };
   }
 
+  const storedBeforeSave = resourceBase
+    ? db.prepare("SELECT status FROM battles WHERE battle_id=? AND telegram_id=?").get(battle.id, ownerId) as { status: "active" | "won" | "lost" } | undefined
+    : undefined;
+  const firstVictory = storedBeforeSave?.status === "active" && savedBattle.status === "won";
   saveBattle(ownerId, savedBattle);
-  if (resourceBase?.status === "active" && savedBattle.status === "won" && victoryRewards) {
+  if (firstVictory && victoryRewards) {
     db.prepare("UPDATE player_rewards SET xp=xp+?, coins=coins+?, materials=materials+? WHERE telegram_id=?")
       .run(Math.max(0, victoryRewards.xp), Math.max(0, victoryRewards.coins), Math.max(0, victoryRewards.materials), ownerId);
+    if (worldEventNodeId) {
+      const progress = getWorldProgress(ownerId);
+      saveWorldProgress(ownerId, markBattleEventComplete(progress, worldEventNodeId));
+    }
   }
   savePlayerResources(ownerId, savedBattle.alma, savedBattle.player.anima);
   savePlayerFormStage(ownerId, savedBattle.stage);
@@ -189,6 +212,51 @@ export function saveWorldProgress(ownerId: string, progress: WorldProgress): voi
       updated_at=CURRENT_TIMESTAMP
   `).run(ownerId, JSON.stringify(progress));
 }
+
+export const resolveChapterReturn = db.transaction((ownerId: string) => {
+  const progress = getWorldProgress(ownerId);
+  if (progress.currentNodeId !== START_NODE_ID) {
+    throw new Error("Vuelve a la Aldea Bruma antes de registrar el regreso del capítulo.");
+  }
+  const chapter = getChapterOneState(progress);
+  if (!chapter.completed) {
+    throw new Error("Derrota primero a la Guardiana del Miasma para cerrar el capítulo.");
+  }
+
+  const marker = "chapter-1-return";
+  const alreadyReturned = progress.completedEventIds.includes(marker);
+  const next = alreadyReturned ? progress : {
+    ...progress,
+    visitedNodeIds: [...progress.visitedNodeIds],
+    completedEventIds: [...progress.completedEventIds, marker]
+  };
+  if (!alreadyReturned) saveWorldProgress(ownerId, next);
+  return {
+    progress: next,
+    chapter: getChapterOneState(next),
+    alreadyReturned
+  };
+});
+
+export const resolveExplorationEvent = db.transaction((ownerId: string) => {
+  const progress = getWorldProgress(ownerId);
+  const resolution = resolveWorldEvent(progress);
+  const player = db.prepare("SELECT alma, anima FROM players WHERE telegram_id=?")
+    .get(ownerId) as { alma: number; anima: number } | undefined;
+  if (!player) throw new Error("Jugador no encontrado.");
+  const alma = Math.max(0, Math.min(100, player.alma + resolution.reward.alma));
+  saveWorldProgress(ownerId, resolution.progress);
+  if (alma !== player.alma) savePlayerResources(ownerId, alma, player.anima);
+  if (resolution.reward.xp || resolution.reward.coins || resolution.reward.materials) {
+    db.prepare("UPDATE player_rewards SET xp=xp+?, coins=coins+?, materials=materials+? WHERE telegram_id=?")
+      .run(resolution.reward.xp, resolution.reward.coins, resolution.reward.materials, ownerId);
+  }
+  return {
+    ...resolution,
+    alma,
+    rewards: getPlayerRewards(ownerId)
+  };
+});
 
 
 export interface InventoryEntry {

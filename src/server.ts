@@ -3,8 +3,8 @@ import { randomInt } from "node:crypto";
 import express from "express";
 import { resolve } from "node:path";
 import { createBattle, act, type BattleAction } from "./game/combat.js";
-import { getOrCreatePlayer, getBattle, getLatestActiveBattle, saveBattleProgress, getWorldProgress, saveWorldProgress, getInventory, grantFirstHeroine, savePlayerFormStage, getPlayerRewards, getPlayerLoadout, savePlayerLoadout } from "./db.js";
-import { getAvailableDestinations, getWorldNode, travelTo } from "./game/world.js";
+import { getOrCreatePlayer, getBattle, getLatestActiveBattle, saveBattleProgress, getWorldProgress, saveWorldProgress, getInventory, grantFirstHeroine, savePlayerFormStage, getPlayerRewards, getPlayerLoadout, savePlayerLoadout, saveProtagonistGender, resolveExplorationEvent, resolveChapterReturn } from "./db.js";
+import { getAvailableDestinations, getChapterOneState, getWorldNode, travelTo } from "./game/world.js";
 import { getFirstSummonPool, getHeroine } from "./game/catalog.js";
 import { EQUIPMENT, getEquipmentBonuses, isValidLoadout } from "./game/equipment.js";
 import { validateTelegramInitData } from "./telegram/auth.js";
@@ -29,6 +29,20 @@ app.get("/api/health", (_req, res) => res.json({ ok: true, game: "UMBRA: Card Fr
 app.get("/api/me", (req, res) => {
   try { const currentPlayer = player(req); res.json({ player: currentPlayer, rewards: getPlayerRewards(currentPlayer.telegramId) }); }
   catch (error) { res.status(401).json({ error: error instanceof Error ? error.message : "No autorizado" }); }
+});
+
+app.post("/api/profile/gender", (req, res) => {
+  try {
+    const currentPlayer = player(req);
+    const gender = req.body?.gender;
+    if (gender !== "Mujer" && gender !== "Hombre") {
+      return res.status(400).json({ error: "Elige protagonista mujer u hombre." });
+    }
+    saveProtagonistGender(currentPlayer.telegramId, gender);
+    res.json({ gender });
+  } catch (error) {
+    res.status(401).json({ error: error instanceof Error ? error.message : "No se pudo guardar el perfil." });
+  }
 });
 
 app.get("/api/loadout", (req, res) => {
@@ -90,7 +104,7 @@ app.get("/api/world", (req, res) => {
     const progress = getWorldProgress(currentPlayer.telegramId);
     const current = getWorldNode(progress.currentNodeId);
     if (!current) throw new Error("La ruta guardada no es válida.");
-    res.json({ progress, current, destinations: getAvailableDestinations(progress) });
+    res.json({ progress, current, destinations: getAvailableDestinations(progress), chapter: getChapterOneState(progress) });
   } catch (error) {
     res.status(401).json({ error: error instanceof Error ? error.message : "No se pudo cargar la expedición." });
   }
@@ -103,9 +117,55 @@ app.post("/api/world/travel", (req, res) => {
     const progress = getWorldProgress(currentPlayer.telegramId);
     const result = travelTo(progress, destinationId);
     saveWorldProgress(currentPlayer.telegramId, result.progress);
-    res.json({ ...result, destinations: getAvailableDestinations(result.progress) });
+    res.json({ ...result, destinations: getAvailableDestinations(result.progress), chapter: getChapterOneState(result.progress) });
   } catch (error) {
     res.status(400).json({ error: error instanceof Error ? error.message : "No se pudo recorrer esa ruta." });
+  }
+});
+
+app.post("/api/world/resolve", (req, res) => {
+  let currentPlayer: ReturnType<typeof player>;
+  try {
+    currentPlayer = player(req);
+  } catch (error) {
+    return res.status(401).json({ error: error instanceof Error ? error.message : "No autorizado." });
+  }
+  try {
+    const result = resolveExplorationEvent(currentPlayer.telegramId);
+    res.json({
+      progress: result.progress,
+      current: result.node,
+      destinations: getAvailableDestinations(result.progress),
+      chapter: getChapterOneState(result.progress),
+      event: result.event,
+      reward: result.reward,
+      alma: result.alma,
+      rewards: result.rewards
+    });
+  } catch (error) {
+    res.status(400).json({ error: error instanceof Error ? error.message : "No se pudo resolver el evento." });
+  }
+});
+
+app.post("/api/chapter/return", (req, res) => {
+  let currentPlayer: ReturnType<typeof player>;
+  try {
+    currentPlayer = player(req);
+  } catch (error) {
+    return res.status(401).json({ error: error instanceof Error ? error.message : "No autorizado." });
+  }
+  try {
+    const result = resolveChapterReturn(currentPlayer.telegramId);
+    const current = getWorldNode(result.progress.currentNodeId);
+    res.json({
+      progress: result.progress,
+      current,
+      destinations: getAvailableDestinations(result.progress),
+      chapter: result.chapter,
+      alreadyReturned: result.alreadyReturned
+    });
+  } catch (error) {
+    res.status(400).json({ error: error instanceof Error ? error.message : "No se pudo registrar el regreso." });
   }
 });
 
@@ -129,6 +189,13 @@ app.post("/api/battle/start", (req, res) => {
     if (!node || (node.event !== "encounter" && node.event !== "boss")) {
       return res.status(400).json({ error: "No hay una amenaza activa aquí. Explora una ruta marcada como posible encuentro o amenaza mayor." });
     }
+    if (progress.completedEventIds.includes(node.id)) {
+      return res.status(400).json({ error: "Este encuentro ya está resuelto. Continúa por otra ruta." });
+    }
+    if (node.event === "boss" && !getChapterOneState(progress).bossUnlocked) {
+      const route = getAvailableDestinations(progress).find(destination => destination.id === node.id);
+      return res.status(403).json({ error: route?.lockedReason ?? "Completa los objetivos del capítulo antes de entrar." });
+    }
     const encounters: Record<string, { name: string; hp: number; attack: number }> = {
       "sendero-musgo": { name: "Sabuesa contaminada", hp: 82, attack: 12 },
       "nido-goblin": { name: "Goblin cazadora", hp: 96, attack: 14 },
@@ -137,7 +204,10 @@ app.post("/api/battle/start", (req, res) => {
     const encounter = encounters[node.id] ?? { name: "Exploradora hostil del bosque", hp: 90, attack: 13 };
     const loadout = getPlayerLoadout(currentPlayer.telegramId);
     const gearBonuses = getEquipmentBonuses(loadout);
-    const battle = createBattle(heroine.name, currentPlayer.alma, currentPlayer.formStage, currentPlayer.anima, encounter.name, encounter.hp, encounter.attack, heroine.attack + gearBonuses.attackBonus, heroine.maxHp + gearBonuses.hpBonus);
+    const battle = {
+      ...createBattle(heroine.name, currentPlayer.alma, currentPlayer.formStage, currentPlayer.anima, encounter.name, encounter.hp, encounter.attack, heroine.attack + gearBonuses.attackBonus, heroine.maxHp + gearBonuses.hpBonus),
+      worldNodeId: node.id
+    };
     saveBattleProgress(currentPlayer.telegramId, battle);
     res.json({ battle });
   } catch (error) {
@@ -167,15 +237,32 @@ app.post("/api/battle/action", (req, res) => {
       }
     };
     const next = act(resourceBase, action as BattleAction);
-    const node = getWorldNode(getWorldProgress(currentPlayer.telegramId).currentNodeId);
-    const victoryRewards = node?.kind === "dungeon"
+    const progress = getWorldProgress(currentPlayer.telegramId);
+    const node = getWorldNode(progress.currentNodeId);
+    const battleNode = getWorldNode(resourceBase.worldNodeId ?? progress.currentNodeId);
+    const victoryRewards = battleNode?.kind === "dungeon"
       ? { xp: 60, coins: 20, materials: 3 }
       : { xp: 25, coins: 8, materials: 1 };
     const rewardGranted = resourceBase.status === "active" && next.status === "won";
-    const savedBattle = saveBattleProgress(currentPlayer.telegramId, next, resourceBase, victoryRewards);
-    res.json({ battle: savedBattle, rewards: getPlayerRewards(currentPlayer.telegramId), rewardGranted });
+    const worldEventNodeId = next.status === "won" && battleNode && (battleNode.event === "encounter" || battleNode.event === "boss") ? battleNode.id : undefined;
+    const savedBattle = saveBattleProgress(currentPlayer.telegramId, next, resourceBase, victoryRewards, worldEventNodeId);
+    const updatedProgress = getWorldProgress(currentPlayer.telegramId);
+    const current = getWorldNode(updatedProgress.currentNodeId);
+    res.json({
+      battle: savedBattle,
+      rewards: getPlayerRewards(currentPlayer.telegramId),
+      rewardGranted,
+      world: current ? {
+        progress: updatedProgress,
+        current,
+        destinations: getAvailableDestinations(updatedProgress),
+        chapter: getChapterOneState(updatedProgress)
+      } : null
+    });
   } catch (error) {
-    res.status(500).json({ error: error instanceof Error ? error.message : "No se pudo guardar el combate." });
+    const message = error instanceof Error ? error.message : "No se pudo guardar el combate.";
+    const status = message.includes("cambió con otra acción") ? 409 : 500;
+    res.status(status).json({ error: message });
   }
 });
 

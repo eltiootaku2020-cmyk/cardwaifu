@@ -205,3 +205,61 @@ Una de las mujeres dice que ha llegado nueva información sobre otro héroe y qu
 4. Los monstruos no son automáticamente malvados. Algunos se alían con el Abismo por la convergencia de sus propias tragedias y las de sus portadoras.
 5. El Abismo intentó invocar monstruos para aprovechar el sistema de invocaciones de los dioses; el intento falló y ambos bandos perdieron el control de las invocaciones, que se dispersaron por el mundo en busca de portadores.
 6. Mantener el arco de Medusa y la escena de Midas como propuestas narrativas hasta aprobación expresa del usuario.
+
+
+## Continuidad técnica — giro a PNG 2D ligero y estado de la entrega (24-10-2026)
+
+### Dirección visual vigente
+
+El MVP debe mantenerse en 2D. No introducir motor 3D ni 2.5D realista: aprovechar PNG propios, marcos de carta, fondos por bioma y animaciones breves de CSS. El usuario se ocupa de crear las ilustraciones; no generar arte por cuenta propia ni sustituir la regla de que todo personaje mostrado es una waifu excepto las armas.
+
+El detalle técnico se documenta en `docs/ARTE_PNG_2D_LIGERO.md`. El manifiesto `web/public/assets/umbra/manifest.json` permite conectar retratos y fondos locales. Las entradas están vacías hasta que el usuario agregue ilustraciones. La silueta de reserva debe seguir funcionando y una ruta de imagen rota no debe romper la interfaz.
+
+### Mejoras ejecutadas en la rama `work/png-2d-lightweight-mvp`
+
+- Se corrigió el tipo de la interfaz de combate para incluir el atributo de ataque que ya se mostraba y provocaba un error TS2339 en `npm run build`.
+- Se preparó el registro de arte PNG local y la conexión de retratos, fondos de bioma y tarjetas de catálogo sin descargar arte inexistente.
+- Se añadió modo visual completo/reducido con preferencia guardada en el navegador y soporte a movimiento reducido del sistema.
+- Se implementó la persistencia de la elección de protagonista (Mujer/Hombre) en SQLite, con endpoint de perfil y prueba automatizada.
+- Se evitó que el bot muestre un botón de Mini App cuando `MINI_APP_URL` está vacía, usa HTTP o conserva `example.com`.
+- No se agregaron ilustraciones finales porque el usuario las creará. El modo PNG, los efectos y el perfil necesitan confirmarse mediante CI antes de marcarse como completados.
+
+### Estado que no debe perderse
+
+La rama `main` de la que parte esta tarea tenía fallo de compilación en `web/src/main.ts(146,245)`: `Property 'attack' does not exist on type ...`. El job CI falló en el paso de compilación y no ejecutó las pruebas. No declarar resuelto hasta comprobar el resultado de CI en esta rama.
+
+### Alcance de autorización
+
+El usuario autorizó trabajar para corregir el programa y redirigir el MVP a un RPG 2D ligero basado en PNG. Esta autorización incluye las tareas técnicas descritas en la rama actual; no autoriza a canonizar propuestas narrativas pendientes, generar ilustraciones en su lugar ni dar por completado el despliegue de Telegram sin credenciales y pruebas reales.
+
+
+## Protocolo oficial de trabajo — CEREBRO, BOT OBRERO y REGISTRO DE CONTINUIDAD
+
+### CEREBRO — dirección y control
+- Define las fases, divide las tareas y establece antes de ejecutar el objetivo, alcance autorizado y criterios verificables.
+- Revisa evidencias reales, distingue completado / pendiente / bloqueado / en verificación y no declara una tarea completa por la mera existencia de un archivo o ficha.
+- Mantiene las decisiones confirmadas separadas de propuestas, y no canoniza contenido narrativo pendiente.
+- No declara validado un despliegue, rendimiento o flujo de usuario sin evidencia del entorno correspondiente.
+
+### BOT OBRERO — ejecución en GitHub
+- Inspecciona el repositorio, la rama y los archivos relevantes antes de editarlos.
+- Modifica solo la rama y los archivos permitidos por el alcance autorizado.
+- Ejecuta o solicita mediante CI las comprobaciones disponibles; registra cambios, resultados, errores y bloqueos.
+- No incluye ilustraciones del usuario, secretos, cambios destructivos ni decisiones de diseño fuera del alcance autorizado.
+- Un resultado que no pueda ejecutarse en este entorno debe quedar identificado como pendiente, no descrito como éxito.
+
+### REGISTRO DE CONTINUIDAD — memoria transferible
+- La fuente de estado operativo es `REGISTRO_DE_CONTINUIDAD.md`; este documento maestro sigue siendo la fuente de verdad de las reglas del juego y el lore confirmado.
+- Al terminar una tarea, actualizar estado, rama/commit, pruebas y enlaces de evidencia, pendientes y siguiente acción.
+- Otro chat o BOT OBRERO debe poder retomar desde esos archivos sin depender de la conversación actual.
+
+### Estados de aceptación
+- **Pendiente:** no ejecutada.
+- **En curso:** ejecución autorizada iniciada.
+- **En verificación:** existe un resultado, falta evidencia de aceptación.
+- **Bloqueada:** hay un impedimento concreto, como credenciales o acceso al dispositivo.
+- **Completada:** todos sus criterios están respaldados por evidencia.
+- **Rechazada:** el resultado no cumple criterios y requiere corrección.
+
+### Regla transversal
+Crear un archivo no demuestra que una mecánica funcione; compilar no demuestra que el recorrido completo sea correcto; una prueba no demuestra comportamientos que no cubre. Las reglas de combate, recursos, inventario y permisos permanecen autoritativas en el servidor. Mantener la tecnología en 2D ligera con PNG; no introducir un motor 3D ni 2.5D realista para el MVP.

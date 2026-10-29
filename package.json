@@ -11,7 +11,9 @@
     "start": "tsx src/server.ts",
     "bot": "tsx src/bot.ts",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test src/game/*.test.ts src/db.test.ts"
+    "test": "tsx --test src/game/*.test.ts src/db.test.ts src/backup-db.test.ts",
+    "simulate:combat": "tsx src/game/combat-sim-cli.ts",
+    "backup:db": "tsx src/backup-db.ts"
   },
   "dependencies": {
     "better-sqlite3": "^11.8.1",

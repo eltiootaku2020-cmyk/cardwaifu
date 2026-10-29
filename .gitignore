@@ -225,3 +225,11 @@ web/dist/
 .env
 .env.*
 !.env.example
+
+# UMBRA local progress and backup artifacts; never publish player save data.
+/data/
+/backups/
+*.sqlite
+*.sqlite-*
+*.db
+*.db-*
