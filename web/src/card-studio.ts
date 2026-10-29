@@ -26,7 +26,7 @@ export function openCardStudio(): void {
             <select id="studio-art-target">
               <option value="">Solo guardar la carta</option>
               <optgroup label="Retratos de portadoras">
-                <option value="character:tiny:portrait">Tiny · exploradora goblin</option>
+                <option value="character:tiny:portrait">Pivy · exploradora goblin</option>
                 <option value="character:elizabeth:portrait">Elizabeth</option>
                 <option value="character:artoria:portrait">Artoria</option>
                 <option value="character:juana:portrait">Juana de Arco</option>
