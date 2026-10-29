@@ -91,6 +91,129 @@ export async function saveLocalArt(target: string, blob: Blob): Promise<void> {
   window.dispatchEvent(new Event("umbra-art-updated"));
 }
 
+export interface LocalArtBackup {
+  format: "umbra-linked-art";
+  version: 1;
+  exportedAt: string;
+  items: Array<{ target: string; type: string; data: string; updatedAt: number }>;
+}
+
+function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => typeof reader.result === "string"
+      ? resolve(reader.result)
+      : reject(new Error("No se pudo preparar la copia del arte enlazado."));
+    reader.onerror = () => reject(reader.error ?? new Error("No se pudo leer el arte local."));
+    reader.readAsDataURL(blob);
+  });
+}
+
+function dataUrlToBlob(data: string): Blob {
+  const match = data.match(/^data:(image\/(?:png|webp|jpeg));base64,([A-Za-z0-9+/=]+)$/i);
+  if (!match) throw new Error("La copia contiene una imagen con un formato no permitido.");
+  let binary: string;
+  try {
+    binary = atob(match[2]!);
+  } catch {
+    throw new Error("La copia contiene datos de imagen dañados.");
+  }
+  const bytes = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
+  const blob = new Blob([bytes], { type: match[1]!.toLowerCase() });
+  if (blob.size > MAX_ART_BYTES) throw new Error("Una imagen de la copia supera el límite local de 8 MB.");
+  return blob;
+}
+
+export async function exportLocalArtBackup(): Promise<LocalArtBackup> {
+  const database = await openArtDatabase();
+  try {
+    const transaction = database.transaction(ART_STORE, "readonly");
+    const request = transaction.objectStore(ART_STORE).getAll() as IDBRequest<StoredArt[]>;
+    const records = await new Promise<StoredArt[]>((resolve, reject) => {
+      request.onsuccess = () => resolve(request.result ?? []);
+      request.onerror = () => reject(request.error ?? new Error("No se pudo leer el arte enlazado."));
+    });
+    const items: LocalArtBackup["items"] = [];
+    for (const record of records) {
+      if (!record || typeof record.target !== "string" || !validTarget.test(record.target)) continue;
+      if (!(record.blob instanceof Blob) || record.blob.size > MAX_ART_BYTES) continue;
+      if (!/^image\/(png|webp|jpeg)$/i.test(record.blob.type)) continue;
+      items.push({
+        target: record.target,
+        type: record.blob.type.toLowerCase(),
+        data: await blobToDataUrl(record.blob),
+        updatedAt: Number.isFinite(record.updatedAt) ? record.updatedAt : 0
+      });
+    }
+    return { format: "umbra-linked-art", version: 1, exportedAt: new Date().toISOString(), items };
+  } finally {
+    database.close();
+  }
+}
+
+/** Restores a full backup of locally linked portraits/backgrounds, replacing the current local art set. */
+export async function importLocalArtBackup(value: unknown): Promise<number> {
+  if (!value || typeof value !== "object" || !("format" in value) || !("version" in value) || !("items" in value)) {
+    throw new Error("El archivo no es una copia válida del arte enlazado de UMBRA.");
+  }
+  const backup = value as { format: unknown; version: unknown; items: unknown };
+  if (backup.format !== "umbra-linked-art" || backup.version !== 1 || !Array.isArray(backup.items)) {
+    throw new Error("La copia del arte enlazado no es compatible con esta versión.");
+  }
+  if (backup.items.length === 0 || backup.items.length > 100) {
+    throw new Error("La copia debe contener entre 1 y 100 imágenes enlazadas.");
+  }
+
+  const records: StoredArt[] = [];
+  const targets = new Set<string>();
+  let encodedSize = 0;
+  for (const item of backup.items) {
+    if (!item || typeof item !== "object" || !("target" in item) || !("type" in item) || !("data" in item)) continue;
+    const candidate = item as { target: unknown; type: unknown; data: unknown; updatedAt?: unknown };
+    if (typeof candidate.target !== "string" || !validTarget.test(candidate.target)) {
+      throw new Error("La copia contiene un destino de arte inválido.");
+    }
+    if (targets.has(candidate.target)) throw new Error("La copia contiene dos imágenes para el mismo destino.");
+    if (typeof candidate.data !== "string") throw new Error("La copia contiene una imagen inválida.");
+    encodedSize += candidate.data.length;
+    if (encodedSize > 24 * 1024 * 1024) throw new Error("La copia de arte enlazado supera el límite de 24 MB.");
+    const blob = dataUrlToBlob(candidate.data);
+    if (typeof candidate.type !== "string" || candidate.type.toLowerCase() !== blob.type) {
+      throw new Error("El tipo declarado no coincide con la imagen de la copia.");
+    }
+    targets.add(candidate.target);
+    records.push({
+      target: candidate.target,
+      blob,
+      updatedAt: typeof candidate.updatedAt === "number" && Number.isFinite(candidate.updatedAt) ? candidate.updatedAt : Date.now()
+    });
+  }
+  if (records.length !== backup.items.length) throw new Error("La copia contiene elementos incompletos o inválidos.");
+
+  const database = await openArtDatabase();
+  try {
+    const transaction = database.transaction(ART_STORE, "readwrite");
+    const store = transaction.objectStore(ART_STORE);
+    store.clear();
+    records.forEach(record => store.put(record));
+    await new Promise<void>((resolve, reject) => {
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error ?? new Error("No se pudo restaurar el arte enlazado."));
+      transaction.onabort = () => reject(transaction.error ?? new Error("Se canceló la restauración del arte enlazado."));
+    });
+  } finally {
+    database.close();
+  }
+
+  for (const url of uploadedArtUrls.values()) URL.revokeObjectURL(url);
+  uploadedArtUrls.clear();
+  records.forEach(record => setUploadedArt(record.target, record.blob));
+  window.dispatchEvent(new Event("umbra-art-updated"));
+  return records.length;
+}
+
+
 export function getCharacterPortrait(id: string | undefined): string | undefined {
   if (!id) return undefined;
   return uploadedArtUrls.get(`character:${id.trim().toLowerCase()}:portrait`)
