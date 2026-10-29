@@ -25,6 +25,10 @@ export function openCardStudio(): void {
           <label>Vincular al juego (opcional)
             <select id="studio-art-target">
               <option value="">Solo guardar la carta</option>
+              <optgroup label="Protagonista (vista desde atrás)">
+                <option value="protagonist:mujer:portrait">Protagonista mujer · espalda</option>
+                <option value="protagonist:hombre:portrait">Protagonista hombre · espalda</option>
+              </optgroup>
               <optgroup label="Retratos de portadoras">
                 <option value="character:tiny:portrait">Pivy · exploradora goblin</option>
                 <option value="character:elizabeth:portrait">Elizabeth</option>
@@ -55,7 +59,7 @@ export function openCardStudio(): void {
             </select>
           </label>
           <button type="button" class="secondary" id="studio-art-link">↗ Vincular PNG al juego</button>
-          <p class="muted studio-note">La vinculación se guarda solo en este navegador. El arte no se sube a internet. Para incluirlo en una versión desplegada en otros dispositivos, usa los assets públicos y el manifiesto.</p>
+          <p class="muted studio-note">La vinculación se guarda solo en este navegador. Para el protagonista, usa una ilustración de espalda/silueta con el rostro oculto. El arte no se sube a internet; para incluirlo en una versión desplegada en otros dispositivos, usa assets públicos y el manifiesto.</p>
           <label>Prompt para generar la imagen<textarea id="studio-art-prompt" rows="5" placeholder="1 girl, tall girl, brown hair, bronze clothes, Hercules"></textarea></label>
           <div class="studio-buttons"><button type="button" class="secondary" id="studio-art-prompt-refresh">↻ Generar prompt</button><button type="button" class="secondary" id="studio-art-prompt-copy">Copiar prompt</button></div>
           <p class="muted studio-note">Prompt corto en inglés, separado por comas. Todo lo que represente un ser será una waifu; las armas son la única excepción. Sin etiquetas de calidad ni relleno.</p>
