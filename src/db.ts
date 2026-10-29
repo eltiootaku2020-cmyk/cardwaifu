@@ -2,7 +2,7 @@ import Database from "better-sqlite3";
 import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import type { BattleState, FormBranch, FormStage } from "./game/types.js";
-import { createWorldProgress, type WorldProgress, markBattleEventComplete, resolveWorldEvent } from "./game/world.js";
+import { createWorldProgress, type WorldProgress, markBattleEventComplete, resolveWorldEvent, getChapterOneState, START_NODE_ID } from "./game/world.js";
 import { DEFAULT_LOADOUT, type EquipmentLoadout } from "./game/equipment.js";
 
 const filename = resolve(process.env.DATABASE_PATH ?? "./data/umbra.sqlite");
@@ -212,6 +212,31 @@ export function saveWorldProgress(ownerId: string, progress: WorldProgress): voi
       updated_at=CURRENT_TIMESTAMP
   `).run(ownerId, JSON.stringify(progress));
 }
+
+export const resolveChapterReturn = db.transaction((ownerId: string) => {
+  const progress = getWorldProgress(ownerId);
+  if (progress.currentNodeId !== START_NODE_ID) {
+    throw new Error("Vuelve a la Aldea Bruma antes de registrar el regreso del capítulo.");
+  }
+  const chapter = getChapterOneState(progress);
+  if (!chapter.completed) {
+    throw new Error("Derrota primero a la Guardiana del Miasma para cerrar el capítulo.");
+  }
+
+  const marker = "chapter-1-return";
+  const alreadyReturned = progress.completedEventIds.includes(marker);
+  const next = alreadyReturned ? progress : {
+    ...progress,
+    visitedNodeIds: [...progress.visitedNodeIds],
+    completedEventIds: [...progress.completedEventIds, marker]
+  };
+  if (!alreadyReturned) saveWorldProgress(ownerId, next);
+  return {
+    progress: next,
+    chapter: getChapterOneState(next),
+    alreadyReturned
+  };
+});
 
 export const resolveExplorationEvent = db.transaction((ownerId: string) => {
   const progress = getWorldProgress(ownerId);
