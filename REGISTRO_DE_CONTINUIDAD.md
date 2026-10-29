@@ -28,6 +28,7 @@ Actualizado: 2026-10-29
 - Ruta inicial del Bosque Oscuro, eventos de exploración con recompensas persistentes, objetivos del capítulo y bloqueo del jefe hasta cumplir requisitos.
 - Combate por turnos en servidor y pruebas de sincronización de Alma/Ánima y acciones obsoletas.
 - Sistema de manifiesto para retratos/fondos PNG y vista de espalda del protagonista (mujer/hombre), con reemplazos visuales si el arte falta y modo de efectos ligeros.
+- Movimiento respiratorio de 2 px para PNG del protagonista, Pivy y portadora activa; el control de efectos ligeros y `prefers-reduced-motion` lo desactivan. No se animan todas las cartas a la vez.
 - Taller permite respaldo separado de la galería y del arte enlazado; incluye `getProtagonistPortrait`, objetivos para vista trasera del protagonista y `getCharacterCardArt` para usar el PNG frontal de carta en la colección con reserva a retrato.
 - La pantalla inicial muestra un resumen del prólogo confirmado y una tarjeta ligera que identifica a Pivy como compañera desde el inicio, separada de la primera invocación aleatoria. No se le inventaron bonus de combate; todavía faltan los apoyos jugables y diálogos/decisiones interactivos del capítulo.
 - Elección del protagonista persistida en SQLite.
