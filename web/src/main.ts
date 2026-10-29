@@ -106,7 +106,7 @@ function eventLabel(event: string): string {
   return ({ safe: "Zona segura", encounter: "Posible encuentro", discovery: "Descubrimiento", rest: "Descanso", boss: "Amenaza mayor" } as Record<string, string>)[event] ?? "Exploración";
 }
 function renderWorld(): string {
-  if (!world) return `<section class="panel expedition"><p class="eyebrow">MAPA DE EXPEDICIÓN</p><h2>El Bosque Oscuro</h2><p class="muted">${escapeHtml(worldNote)}</p></section>`;
+  if (!world) return `<section id="expedicion" class="panel expedition"><p class="eyebrow">MAPA DE EXPEDICIÓN</p><h2>El Bosque Oscuro</h2><p class="muted">${escapeHtml(worldNote)}</p></section>`;
   const current = world.current;
   const visited = new Set(world.progress.visitedNodeIds);
   const completed = new Set(world.progress.completedEventIds);
@@ -116,7 +116,7 @@ function renderWorld(): string {
   const currentEventLabel = currentResolved
     ? (current.event === "boss" ? "Capítulo completado" : current.event === "encounter" ? "Encuentro despejado" : "Evento resuelto")
     : eventLabel(current.event);
-  return `<section class="panel expedition">
+  return `<section id="expedicion" class="panel expedition">
     <div class="section-title expedition-title"><div><p class="eyebrow">MAPA DE EXPEDICIÓN · REGIÓN 01</p><h2>El Bosque Oscuro</h2></div><span>${world.progress.visitedNodeIds.length} lugares descubiertos</span></div>
     <div class="current-location"><span class="node-icon">${nodeIcon(current.kind)}</span><div><small>UBICACIÓN ACTUAL · ${escapeHtml(current.levelRange)}</small><h3>${escapeHtml(current.name)}</h3><p>${escapeHtml(current.description)}</p><span class="event-tag">${escapeHtml(currentEventLabel)}</span></div></div>
     <div class="chapter-objectives">
@@ -152,7 +152,7 @@ function renderWorld(): string {
     <p class="muted expedition-note">${escapeHtml(worldNote)} El viaje se guarda en el servidor para que puedas retomarlo después.</p>
   </section>`;
 }function renderCollection(): string {
-  return `<section class="panel collection-panel">
+  return `<section id="coleccion" class="panel collection-panel">
     <div class="section-title collection-title"><div><p class="eyebrow">ARCHIVO PERSONAL</p><h2>Mi colección</h2></div><span>${collection.length} cartas</span></div>
     ${collection.length === 0
       ? `<p class="muted collection-empty">Todavía no tienes cartas vinculadas. Realiza la primera invocación para recibir una heroína y guardarla en tu colección.</p>`
@@ -190,12 +190,12 @@ function renderWorld(): string {
   </section>`;
 }
 function renderLoadout(): string {
-  if (equipment.length === 0) return `<section class="panel loadout"><p class="eyebrow">EQUIPAMIENTO</p><h2>Preparación de expedición</h2><p class="muted">${escapeHtml(loadoutNote)}</p></section>`;
+  if (equipment.length === 0) return `<section id="equipo" class="panel loadout"><p class="eyebrow">EQUIPAMIENTO</p><h2>Preparación de expedición</h2><p class="muted">${escapeHtml(loadoutNote)}</p></section>`;
   const labels: Record<EquipmentSlot, string> = { weapon: "Arma", armor: "Equipamiento", accessory: "Accesorio", support: "Apoyo" };
   const options = (slot: EquipmentSlot) => equipment.filter(item => item.slot === slot).map(item => `<option value="${item.id}" ${loadout[slot] === item.id ? "selected" : ""}>${escapeHtml(item.name)} · ${item.rarity}</option>`).join("");
   const attack = Object.values(loadout).map(id => equipment.find(item => item.id === id)?.attackBonus ?? 0).reduce((a, b) => a + b, 0);
   const hp = Object.values(loadout).map(id => equipment.find(item => item.id === id)?.hpBonus ?? 0).reduce((a, b) => a + b, 0);
-  return `<section class="panel loadout"><div class="section-title"><div><p class="eyebrow">PREPARACIÓN DE EXPEDICIÓN</p><h2>Equipo y accesorios</h2></div><span>4 espacios</span></div>
+  return `<section id="equipo" class="panel loadout"><div class="section-title"><div><p class="eyebrow">PREPARACIÓN DE EXPEDICIÓN</p><h2>Equipo y accesorios</h2></div><span>4 espacios</span></div>
     <div class="loadout-grid">${(["weapon", "armor", "accessory", "support"] as EquipmentSlot[]).map(slot => {
       const item = equipment.find(entry => entry.id === loadout[slot]);
       return `<label class="gear-slot"><span>${labels[slot]}</span><select data-equipment-slot="${slot}">${options(slot)}</select><small>${escapeHtml(item?.description ?? "")}</small></label>`;
@@ -207,7 +207,8 @@ function renderLoadout(): string {
 function render() {
   root.innerHTML = `<header class="top"><div class="brand"><span class="logo">✦</span><div><b>UMBRA</b><small>CARD FRONTIER</small></div></div><span class="resource">◈ Alma <b>${battle?.alma ?? resources.alma}</b> · Ánima <b>${battle?.player.anima ?? resources.anima}</b> · Nv. <b>${rewards.level}</b> · XP <b>${rewards.xp}</b></span><button type="button" class="visual-toggle" id="visual-toggle" aria-pressed="${visualMode === "reduced"}" title="Cambiar nivel de animaciones">${visualMode === "reduced" ? "⚡ Efectos ligeros" : "✦ Efectos completos"}</button></header>
   <main>
-    <section class="welcome panel ${summonReveal ? "gacha-reveal" : ""}">${summonReveal ? `<div class="summon-ceremony" aria-live="polite"><span class="summon-sigil">✦</span><strong>LA CARTA HA ELEGIDO</strong><small>VÍNCULO ESTABLECIDO</small></div>` : ""}<p class="eyebrow">CRÓNICAS · CAPÍTULO 01</p><h1>Las leyendas<br>despiertan.</h1><p class="muted">Explora ruinas, crea vínculos y rescata epopeyas de eras olvidadas.</p>
+    <nav class="quick-nav" aria-label="Navegación principal"><a href="#inicio">Inicio</a><a href="#coleccion">Cartas</a><a href="#expedicion">Expedición</a><a href="#equipo">Equipo</a><a href="#combate">Combate</a></nav>
+    <section id="inicio" class="welcome panel ${summonReveal ? "gacha-reveal" : ""}">${summonReveal ? `<div class="summon-ceremony" aria-live="polite"><span class="summon-sigil">✦</span><strong>LA CARTA HA ELEGIDO</strong><small>VÍNCULO ESTABLECIDO</small></div>` : ""}<p class="eyebrow">CRÓNICAS · CAPÍTULO 01</p><h1>Las leyendas<br>despiertan.</h1><p class="muted">Explora ruinas, crea vínculos y rescata epopeyas de eras olvidadas.</p>
       <details class="prologue">
         <summary>Leer prólogo y conocer a tu compañera</summary>
         <div class="prologue-lines">${PROLOGUE.map(line => `<section class="prologue-line"><strong>${escapeHtml(line.title)}</strong><p>${escapeHtml(line.text)}</p></section>`).join("")}</div>
@@ -222,12 +223,13 @@ function render() {
     </section>
     ${renderCollection()}
     ${renderWorld()}
-    <div class="section-title"><div><p class="eyebrow">CATÁLOGO DE REFERENCIA</p><h2>Heroínas conocidas</h2></div><span>R · S · SR</span></div>
+    ${renderLoadout()}
+    <div class="section-title" id="catalogo"><div><p class="eyebrow">CATÁLOGO DE REFERENCIA</p><h2>Heroínas conocidas</h2></div><span>R · S · SR</span></div>
     <section class="hero-grid">${heroes.map(h => {
       const portrait = getCharacterPortrait(h.id);
       return `<article class="hero-card ${h.color}"><div class="art ${portrait ? "has-art" : ""}">${portrait ? `<img class="hero-card-art" data-art-image src="${escapeHtml(portrait)}" alt="" loading="lazy" decoding="async">` : ""}<span class="rarity">${h.rarity}</span><span class="symbol">${h.icon}</span><span class="stage">${h.stage}</span></div><h3>${h.name}</h3><p class="muted">${h.role}</p><p>${h.desc}</p></article>`;
     }).join("")}</section>
-    <section class="panel battle"><p class="eyebrow">ENCUENTRO</p><h2>El camino aguarda</h2><p id="status" class="muted">${escapeHtml(note)}</p><div id="battle-view"></div></section>
+    <section id="combate" class="panel battle"><p class="eyebrow">ENCUENTRO</p><h2>El camino aguarda</h2><p id="status" class="muted">${escapeHtml(note)}</p><div id="battle-view"></div></section>
     <footer>UMBRA · prototipo jugable en desarrollo · el guardado de expedición y combate depende del servidor.</footer>
   </main>`;
   bindArtworkFallbacks(root);
@@ -243,7 +245,7 @@ function render() {
   studioButton.className = "primary studio-launch";
   studioButton.textContent = "✦ Abrir taller de cartas";
   studioButton.onclick = () => openCardStudio();
-  root.querySelector("main")?.insertBefore(studioButton, root.querySelector(".expedition"));
+  root.querySelector(".collection-panel")?.prepend(studioButton);
   root.querySelectorAll<HTMLButtonElement>("[data-gender]").forEach(button => button.onclick = () => void chooseGender(button.dataset.gender ?? "Mujer"));
   root.querySelector<HTMLButtonElement>("#summon")!.onclick = () => void summonFirst();
   root.querySelectorAll<HTMLButtonElement>("[data-card-flip]").forEach(button => button.onclick = () => {
