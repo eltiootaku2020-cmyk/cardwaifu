@@ -30,7 +30,7 @@ Actualizado: 2026-10-29
 - La pantalla inicial muestra un resumen del prólogo confirmado; todavía faltan diálogos y decisiones interactivos del capítulo.
 - Elección del protagonista persistida en SQLite.
 - Simulador estadístico reproducible recién añadido en `src/game/combat-sim.ts`, pruebas en `src/game/combat-sim.test.ts` y comando interno `npm run simulate:combat`.
-- Taller de cartas: galería migrada a IndexedDB, con migración desde localStorage, exportación/restauración de la galería, exportación/restauración independiente de arte enlazado, y destino para arte frontal de cartas (métodos en `web/src/art.ts`, botones en `web/src/card-studio.ts`). CI pasó en el commit `228c39f` (run [40865965609](https://github.com/eltiootaku2020-cmyk/cardwaifu/actions/runs/40865965609)); el render de arte frontal está añadido en `2381215`/`9b2a6c6` y requiere CI actual. Pendiente prueba manual en navegador. Cada copia se limita a 24 MB; conservar también los PNG originales fuera del navegador.
+- Taller de cartas: galería migrada a IndexedDB con migración desde localStorage, copia/restauración independiente de arte enlazado, y objetivos de arte frontal para la colección. El arte frontal y su reserva al retrato, así como la navegación simple y el panel de equipo visible, pasaron CI en `435cd87` (run [40866459053](https://github.com/eltiootaku2020-cmyk/cardwaifu/actions/runs/40866459053)). Pendiente prueba manual en navegador. Cada copia se limita a 24 MB; conservar también los PNG originales fuera del navegador.
 - Capítulo 1: se añadió marcador persistente `chapter-1-return`, endpoint `POST /api/chapter/return`, botón que aparece tras derrotar al jefe y regresar a Aldea Bruma, y prueba para exigir jefe/villa e impedir cierres duplicados; CI pasó en el commit `228c39f` (run [40865965609](https://github.com/eltiootaku2020-cmyk/cardwaifu/actions/runs/40865965609)); pendiente recorrido manual.
 - Nombre del catálogo corregido a **Pivy**; se conserva el ID técnico `tiny` para no romper colecciones ni assets ya guardados. Pivy sigue fuera del grupo de primera invocación (como se debe) pero su función como compañera de apoyo aún no es jugable; completar después el sistema de apoyos sin convertirla en la carta aleatoria inicial.
 
@@ -38,11 +38,11 @@ Actualizado: 2026-10-29
 
 - CI anterior a las últimas incorporaciones: [run 40063931214](https://github.com/eltiootaku2020-cmyk/cardwaifu/actions/runs/40063931214) pasó compilación y pruebas en el commit `efcf8d2`.
 - La ejecución del commit `a6001f9` con el nuevo simulador y pruebas terminó con éxito: [run 40863991681](https://github.com/eltiootaku2020-cmyk/cardwaifu/actions/runs/40863991681).
-- La última comprobación general del commit `228c39f` pasó build y pruebas: [run 40865965609](https://github.com/eltiootaku2020-cmyk/cardwaifu/actions/runs/40865965609). Los runs anteriores del simulador (`40864000854`) y el soporte de retrato/fallback (`40865883384`) también pasaron.
+- La última comprobación general del commit `435cd87` pasó build y pruebas: [run 40866459053](https://github.com/eltiootaku2020-cmyk/cardwaifu/actions/runs/40866459053). También pasaron la integración de PNG, las copias de arte y el cierre automatizado del capítulo.
 
 ## Pendiente o no verificable desde GitHub
 
-1. Confirmar CI actual del nuevo arte frontal de carta en `work/png-2d-lightweight-mvp`. Luego hacer pruebas manuales en navegador: vincular PNG frontal y retrato, comprobar el fallback, exportar/restaurar la galería y exportar/restaurar el arte enlazado. CI no sustituye estas comprobaciones.
+1. Hacer pruebas manuales en navegador: vincular PNG frontal, retrato y protagonista; comprobar los fallbacks; exportar/restaurar la galería y el arte enlazado. CI pasó, pero no sustituye estas comprobaciones.
 2. Hacer un recorrido end-to-end del capítulo 1, incluyendo regresar por rutas conectadas a Aldea Bruma y registrar el cierre. Después implementar diálogos/decisiones sin canonizar la trama pendiente de Medusa.
 3. Completar catálogo de cartas, duplicados, mejoras, botín, apoyos, Corazones Heroicos y Ruptura de Límite.
 4. Completar la función de Pivy como compañera de apoyo, luego ampliar patrones enemigos, medir la curva de dificultad y comparar protagonista S con SR.
