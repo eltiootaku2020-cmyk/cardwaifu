@@ -11,6 +11,7 @@ Actualizado: 2026-10-29
 - Análisis de combate: [docs/ANALISIS_DIFICULTAD_JUSTA.md](./docs/ANALISIS_DIFICULTAD_JUSTA.md)
 - Rama de trabajo: `work/png-2d-lightweight-mvp`
 - Lanzador local Windows: [`INICIAR_UMBRA.bat`](./INICIAR_UMBRA.bat); CI solo comprueba código TypeScript, por lo que falta probar el doble clic en Windows.
+- Copia de datos: [`RESPALDAR_UMBRA.bat`](./RESPALDAR_UMBRA.bat) llama a `npm run backup:db`; `src/backup-db.ts` usa la copia en línea SQLite y conserva diez copias generadas. La prueba automatizada está en `src/backup-db.test.ts`, pendiente CI actual y prueba manual en Windows.
 - Pull request: https://github.com/eltiootaku2020-cmyk/cardwaifu/pull/1 (sigue en borrador; no está integrado en `main`).
 
 ## Estado confirmado
@@ -48,6 +49,7 @@ El 2026-10-29, la acción `create_file` del conector escribió `INICIAR_UMBRA.ba
 ## Pendiente o no verificable desde GitHub
 
 0. Probar `INICIAR_UMBRA.bat` en Windows real; confirmar que verifica Node 20+, prepara `.env` sin secretos, instala dependencias solo si faltan, abre localhost y puede detenerse cerrando la ventana de servidor.
+1. Probar `RESPALDAR_UMBRA.bat` sobre una base real: crear copia, comprobar que se abre y conserva filas, verificar rotación de diez copias y confirmar que el archivo original no cambia.
 
 1. Hacer pruebas manuales en navegador: vincular PNG frontal, retrato y protagonista; comprobar los fallbacks; exportar/restaurar la galería y el arte enlazado. CI pasó, pero no sustituye estas comprobaciones.
 2. Hacer un recorrido end-to-end del capítulo 1, incluyendo regresar por rutas conectadas a Aldea Bruma y registrar el cierre. Después implementar diálogos/decisiones sin canonizar la trama pendiente de Medusa.
