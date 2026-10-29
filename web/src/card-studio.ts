@@ -29,6 +29,16 @@ export function openCardStudio(): void {
                 <option value="protagonist:mujer:portrait">Protagonista mujer · espalda</option>
                 <option value="protagonist:hombre:portrait">Protagonista hombre · espalda</option>
               </optgroup>
+              <optgroup label="Arte frontal de cartas">
+                <option value="character:tiny:card">Pivy · ilustración de carta</option>
+                <option value="character:elizabeth:card">Elizabeth · ilustración de carta</option>
+                <option value="character:artoria:card">Artoria · ilustración de carta</option>
+                <option value="character:juana:card">Juana de Arco · ilustración de carta</option>
+                <option value="character:cleopatra:card">Cleopatra · ilustración de carta</option>
+                <option value="character:musashi:card">Musashi · ilustración de carta</option>
+                <option value="character:heracles:card">Heracles · ilustración de carta</option>
+                <option value="character:robin-hood:card">Robin Hood · ilustración de carta</option>
+              </optgroup>
               <optgroup label="Retratos de portadoras">
                 <option value="character:tiny:portrait">Pivy · exploradora goblin</option>
                 <option value="character:elizabeth:portrait">Elizabeth</option>
@@ -59,7 +69,7 @@ export function openCardStudio(): void {
             </select>
           </label>
           <button type="button" class="secondary" id="studio-art-link">↗ Vincular PNG al juego</button>
-          <p class="muted studio-note">La vinculación se guarda solo en este navegador. Para el protagonista, usa una ilustración de espalda/silueta con el rostro oculto. El arte no se sube a internet; para incluirlo en una versión desplegada en otros dispositivos, usa assets públicos y el manifiesto.</p>
+          <p class="muted studio-note">La vinculación se guarda solo en este navegador. El arte frontal de carta aparece en tu colección, con el retrato como reserva si el PNG frontal falla. Para el protagonista, usa una ilustración de espalda/silueta con el rostro oculto. El arte no se sube a internet; para incluirlo en otros dispositivos, usa assets públicos y el manifiesto.</p>
           <label>Prompt para generar la imagen<textarea id="studio-art-prompt" rows="5" placeholder="1 girl, tall girl, brown hair, bronze clothes, Hercules"></textarea></label>
           <div class="studio-buttons"><button type="button" class="secondary" id="studio-art-prompt-refresh">↻ Generar prompt</button><button type="button" class="secondary" id="studio-art-prompt-copy">Copiar prompt</button></div>
           <p class="muted studio-note">Prompt corto en inglés, separado por comas. Todo lo que represente un ser será una waifu; las armas son la única excepción. Sin etiquetas de calidad ni relleno.</p>
