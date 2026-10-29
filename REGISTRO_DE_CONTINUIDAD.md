@@ -28,6 +28,7 @@ Actualizado: 2026-10-29
 - Sistema de manifiesto para retratos/fondos PNG, reemplazos visuales si el arte falta y modo de efectos ligeros.
 - Elección del protagonista persistida en SQLite.
 - Simulador estadístico reproducible recién añadido en `src/game/combat-sim.ts`, pruebas en `src/game/combat-sim.test.ts` y comando interno `npm run simulate:combat`.
+- Taller de cartas: galería migrada a IndexedDB con compatibilidad de migración desde localStorage y exportar/restaurar copia JSON; pendiente CI y prueba manual. La copia incluye galería/prompts, no arte enlazado.
 
 ## Evidencias
 
@@ -37,7 +38,7 @@ Actualizado: 2026-10-29
 
 ## Pendiente o no verificable desde GitHub
 
-1. Confirmar el resultado final de CI del commit actual; corregir cualquier fallo antes de marcar la tarea de simulación completada.
+1. Confirmar el resultado final de CI del commit actual; corregir cualquier fallo antes de marcar el simulador y el Taller de cartas completados.
 2. Terminar diálogos/decisiones narrativas del capítulo 1 y el ciclo formal de regreso a la ciudad.
 3. Completar catálogo de cartas, duplicados, mejoras, botín, apoyos, Corazones Heroicos y Ruptura de Límite.
 4. Ampliar patrones enemigos y medir la curva de dificultad; comparar protagonista S con SR.
