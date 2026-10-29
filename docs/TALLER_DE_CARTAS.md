@@ -61,3 +61,15 @@ La galería del Taller de cartas se conserva en el almacenamiento local del nave
 - Si IndexedDB no está disponible, el taller intenta utilizar el almacenamiento antiguo del navegador. Si el guardado falla, exporta una copia JSON y exporta también las cartas PNG importantes individualmente.
 
 La existencia de estas funciones no demuestra por sí sola que la copia sea recuperable en todos los navegadores; la revisión de CI confirma compilación, mientras que la prueba manual debe verificar exportar, cerrar, abrir y restaurar una copia en el navegador objetivo.
+
+
+## Copia de seguridad del arte enlazado al juego
+
+La galería de cartas compuestas y el arte que está vinculado a retratos/fondos se guardan en almacenes locales distintos. Para no perder las imágenes enlazadas al juego al borrar datos del navegador, el taller ofrece una segunda copia independiente:
+
+1. Pulsa **Copia de PNG enlazados** para exportar un JSON con los PNG/WEBP/JPG vinculados a portadoras, enemigas y fondos.
+2. Guarda el archivo junto a tus PNG originales en una carpeta del proyecto o una copia de seguridad externa.
+3. Para recuperarlos en este navegador, pulsa **Restaurar PNG enlazados**, selecciona la copia y confirma. Esta acción reemplaza todas las imágenes locales enlazadas que existan en ese navegador.
+4. La copia está limitada a 24 MB de contenido serializado y cada imagen enlazada se limita a 8 MB. Para imágenes grandes, conserva y respalda siempre los archivos PNG originales fuera del navegador.
+
+La copia no publica ni sincroniza las imágenes; el almacenamiento es local a ese navegador. Para que un arte forme parte de la versión alojada para otros dispositivos, aún debe añadirse como asset público optimizado y registrarse en el manifiesto. La exportación/restauración de IndexedDB necesita comprobación manual en los navegadores objetivo; pasar CI solo comprueba compilación y pruebas automatizadas.
