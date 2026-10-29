@@ -10,6 +10,7 @@ Actualizado: 2026-10-29
 - Diseño 2D ligero: [docs/ARTE_PNG_2D_LIGERO.md](./docs/ARTE_PNG_2D_LIGERO.md)
 - Análisis de combate: [docs/ANALISIS_DIFICULTAD_JUSTA.md](./docs/ANALISIS_DIFICULTAD_JUSTA.md)
 - Rama de trabajo: `work/png-2d-lightweight-mvp`
+- Lanzador local Windows: [`INICIAR_UMBRA.bat`](./INICIAR_UMBRA.bat); CI solo comprueba código TypeScript, por lo que falta probar el doble clic en Windows.
 - Pull request: https://github.com/eltiootaku2020-cmyk/cardwaifu/pull/1 (sigue en borrador; no está integrado en `main`).
 
 ## Estado confirmado
@@ -34,6 +35,10 @@ Actualizado: 2026-10-29
 - Capítulo 1: se añadió marcador persistente `chapter-1-return`, endpoint `POST /api/chapter/return`, botón que aparece tras derrotar al jefe y regresar a Aldea Bruma, y prueba para exigir jefe/villa e impedir cierres duplicados; CI pasó en el commit `228c39f` (run [40865965609](https://github.com/eltiootaku2020-cmyk/cardwaifu/actions/runs/40865965609)); pendiente recorrido manual.
 - Nombre del catálogo corregido a **Pivy**; se conserva el ID técnico `tiny` para no romper colecciones ni assets ya guardados. Pivy sigue fuera del grupo de primera invocación (como se debe) pero su función como compañera de apoyo aún no es jugable; completar después el sistema de apoyos sin convertirla en la carta aleatoria inicial.
 
+## Incidente y recuperación de alcance
+
+El 2026-10-29, la acción `create_file` del conector escribió `INICIAR_UMBRA.bat` en `main` pese a haberse solicitado `work/png-2d-lightweight-mvp`. Se detectó antes de cerrar la tarea, se retiró con revert `c9b27e555972182f96fc594309742f3987b85e3f`, y la ausencia se verificó en el árbol actual de `main`. Después se añadió el mismo archivo a la rama de trabajo con Git Data y avance de referencia condicionado al SHA esperado: commit `13723c30cf512b1d67476ca3f57b2e2dd7ce1da9`. No se debe confundir el incidente de historial con un cambio funcional persistente en `main`; la rama autorizada contiene la versión que debe revisarse.
+
 ## Evidencias
 
 - CI anterior a las últimas incorporaciones: [run 40063931214](https://github.com/eltiootaku2020-cmyk/cardwaifu/actions/runs/40063931214) pasó compilación y pruebas en el commit `efcf8d2`.
@@ -41,6 +46,8 @@ Actualizado: 2026-10-29
 - La última comprobación general del commit `435cd87` pasó build y pruebas: [run 40866459053](https://github.com/eltiootaku2020-cmyk/cardwaifu/actions/runs/40866459053). También pasaron la integración de PNG, las copias de arte y el cierre automatizado del capítulo.
 
 ## Pendiente o no verificable desde GitHub
+
+0. Probar `INICIAR_UMBRA.bat` en Windows real; confirmar que verifica Node 20+, prepara `.env` sin secretos, instala dependencias solo si faltan, abre localhost y puede detenerse cerrando la ventana de servidor.
 
 1. Hacer pruebas manuales en navegador: vincular PNG frontal, retrato y protagonista; comprobar los fallbacks; exportar/restaurar la galería y el arte enlazado. CI pasó, pero no sustituye estas comprobaciones.
 2. Hacer un recorrido end-to-end del capítulo 1, incluyendo regresar por rutas conectadas a Aldea Bruma y registrar el cierre. Después implementar diálogos/decisiones sin canonizar la trama pendiente de Medusa.
