@@ -87,8 +87,8 @@ El análisis de dificultad está documentado; las hipótesis numéricas y el bal
 
 ## Última verificación de código — 29-10-2026
 
-- Rama: `work/png-2d-lightweight-mvp`; commit `1d4b79a21e3a598a18425066a16fda149ddd9b83`.
-- Resultado: CI verde — build, typecheck y pruebas automáticas en [40868821188](https://github.com/eltiootaku2020-cmyk/cardwaifu/actions/runs/40868821188).
+- Rama: `work/png-2d-lightweight-mvp`; commit `2064bcd08a21c5c85a7106ea0cfd3e3a2cfdf78a`.
+- Resultado: CI verde — build, typecheck y pruebas automáticas en [40868966055](https://github.com/eltiootaku2020-cmyk/cardwaifu/actions/runs/40868966055).
 - El PR #1 sigue en borrador y sin merge. El árbol de `main` no contiene los archivos `.bat` de esta entrega.
 - Quedan pruebas manuales: ejecutar ambos `.bat` en Windows, verificar PNG/fallback y backup/restore en navegador, recorrer capítulo 1 entero, medir fluidez en el PC y probar Telegram real.
 - Esta CI no declara el programa completo; el resto de las tareas de MVP permanecen abiertas según el listado anterior.
