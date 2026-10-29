@@ -10,8 +10,8 @@ La dirección visual es 2D, usando ilustraciones PNG, fondos por bioma y efectos
 - [x] Añadir el modo «Efectos ligeros», respetar la preferencia de movimiento reducido del sistema y guardar el ajuste en el navegador.
 - [x] Guardar la elección de protagonista en SQLite mediante endpoint de perfil; el test de persistencia pasa en CI.
 - [x] Añadir al Taller de cartas vinculación de PNG a una portadora, enemiga o fondo, con optimización y guardado local en IndexedDB (no sincroniza ni publica automáticamente).
-- [ ] Verificar la galería del Taller en IndexedDB, migración desde `localStorage`, exportación/restauración de tarjetas+prompts, y exportación/restauración independiente de PNG enlazados al juego (ambas copias limitadas a 24 MB; pendientes CI final y prueba manual).
-- [ ] Verificar retratos PNG del protagonista (mujer/hombre) mediante el Taller, el reemplazo de la silueta CSS y el fallback cuando la imagen falta; el objetivo ya está conectado, pero requiere CI y prueba manual con PNG real.
+- [ ] Probar manualmente la galería del Taller en IndexedDB, migración desde `localStorage`, exportación/restauración de tarjetas+prompts y exportación/restauración independiente de PNG enlazados (CI pasó en el commit `228c39f`; ambas copias están limitadas a 24 MB).
+- [ ] Probar con PNG real los retratos de espalda del protagonista (mujer/hombre), el reemplazo de la silueta CSS y el fallback cuando la imagen falta; CI pasó en el commit `228c39f`, la prueba manual sigue pendiente.
 - [ ] Añadir las ilustraciones finales del usuario a las entradas públicas del manifiesto y revisar el encuadre.
 - [ ] Medir fluidez en el PC del usuario y dentro de Telegram; no declarar la optimización completa antes de medir.
 - [ ] Completar el MVP jugable y verificar el recorrido de principio a fin según los criterios inferiores.
@@ -40,7 +40,7 @@ La dirección visual es 2D, usando ilustraciones PNG, fondos por bioma y efectos
 - [x] Encuentros ligados a lugares peligrosos y arquetipos de enemigos definidos en servidor.
 - [x] Conectar eventos de descanso/descubrimiento/visita con resolución única y recompensas persistentes; guardar objetivos del capítulo y bloquear la entrada al jefe hasta completar los cuatro requisitos.
 - [ ] Completar misiones narrativas con diálogos y decisiones significativas (el contenido de historia del capítulo 1 sigue pendiente).
-- [ ] Verificar el cierre persistente del capítulo 1 al volver a Aldea Bruma: endpoint, botón y prueba de idempotencia ya añadidos en `src/server.ts`, `src/game/world.ts`, `src/db.ts` y `src/db.test.ts`; pendiente CI del commit actual y recorrido manual.
+- [ ] Recorrer manualmente el capítulo 1 completo: derrotar al jefe, volver por rutas conectadas a Aldea Bruma y registrar el cierre una sola vez; endpoint, botón y pruebas automatizadas ya añadidos, CI pasó en el commit `228c39f`.
 - [x] Recompensas básicas de victoria: XP, monedas y materiales guardados sin duplicación.
 
 ## Balance y dificultad justa
@@ -63,4 +63,4 @@ La dirección visual es 2D, usando ilustraciones PNG, fondos por bioma y efectos
 - [ ] Moderación, logs sin secretos, backups y límites de frecuencia.
 - [ ] Cooperación y PvP después de estabilizar PvE.
 
-El análisis de dificultad está documentado; las hipótesis numéricas y el balance todavía requieren simulación y playtests. Las maquetas no cuentan como integraciones completas; marcar tareas solo tras comprobar el flujo real. Estado verificado: `main` todavía parte del commit `34d780c`, cuya CI fallaba por TS2339. En la rama `work/png-2d-lightweight-mvp`, la última CI anterior a la incorporación del simulador pasó build y pruebas. El simulador reproducible y el modo PNG/efectos ligeros ya pasaron CI. Se añadió también cierre persistente del capítulo 1 tras volver a Aldea Bruma y un ajuste de carrera al guardar cartas en el taller; el commit actual está pendiente de CI. No declarar ese último conjunto cerrado antes de comprobarlo. La integración real con Telegram, el despliegue HTTPS, el token del bot, la persistencia en entorno alojado y el recorrido completo de usuario siguen sin validación en producción. El rendimiento real tampoco se considera validado hasta probarlo en el PC del usuario.
+El análisis de dificultad está documentado; las hipótesis numéricas y el balance todavía requieren simulación y playtests. Las maquetas no cuentan como integraciones completas; marcar tareas solo tras comprobar el flujo real. `main` no se ha modificado directamente y su referencia de partida sigue siendo `34d780c`. La CI del commit de trabajo `228c39f` pasó compilación y pruebas: [run 40865965609](https://github.com/eltiootaku2020-cmyk/cardwaifu/actions/runs/40865965609). Esto valida el build y los tests del código versionado, no el uso del taller en un navegador real, las ilustraciones del usuario, el rendimiento en su PC ni Telegram en producción. La integración real con Telegram, el despliegue HTTPS, el token del bot y la persistencia en entorno alojado siguen sin validación.
