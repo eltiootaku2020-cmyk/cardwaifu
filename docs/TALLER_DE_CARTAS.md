@@ -48,3 +48,16 @@ Crear cartas originales de monstruos/mobs, personajes, armas, equipamiento y Cor
 - Añadir generación por lotes desde JSON/CSV y exportación de paquetes PNG.
 - Probar imágenes con transparencia, imágenes grandes, nombres largos, tamaños móviles y exportación.
 - Auditar licencias de cada modelo y recurso antes de usarlo en una versión comercial.
+
+
+## Persistencia y copias de seguridad de la galería
+
+La galería del Taller de cartas se conserva en el almacenamiento local del navegador. Las versiones nuevas usan IndexedDB para evitar el límite pequeño de localStorage; las galerías de versiones anteriores se migran al abrir el taller cuando el navegador lo permite.
+
+- **Exportar copia de galería** descarga un JSON con las cartas PNG compuestas y sus prompts.
+- **Restaurar copia** carga una copia de UMBRA y reemplaza la galería local actual. Antes de restaurar, exporta la galería vigente si quieres conservarla.
+- La copia solo contiene las cartas compuestas de la galería; no incluye los retratos/fondos enlazados a la interfaz ni reemplaza los PNG originales del usuario.
+- El archivo de respaldo se procesa localmente. No se envía al servidor ni se publica en GitHub.
+- Si IndexedDB no está disponible, el taller intenta utilizar el almacenamiento antiguo del navegador. Si el guardado falla, exporta una copia JSON y exporta también las cartas PNG importantes individualmente.
+
+La existencia de estas funciones no demuestra por sí sola que la copia sea recuperable en todos los navegadores; la revisión de CI confirma compilación, mientras que la prueba manual debe verificar exportar, cerrar, abrir y restaurar una copia en el navegador objetivo.
