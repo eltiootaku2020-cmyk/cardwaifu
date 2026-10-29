@@ -10,7 +10,7 @@ test("SQLite online backup preserves schema and committed rows", async t => {
   const sourcePath = join(directory, "source.sqlite");
   const backupPath = join(directory, "backup.sqlite");
   const source = new Database(sourcePath);
-  let copy: Database | undefined;
+  let copy: InstanceType<typeof Database> | undefined;
 
   t.after(() => {
     copy?.close();
