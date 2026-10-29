@@ -29,7 +29,7 @@ Actualizado: 2026-10-29
 - Combate por turnos en servidor y pruebas de sincronización de Alma/Ánima y acciones obsoletas.
 - Sistema de manifiesto para retratos/fondos PNG y vista de espalda del protagonista (mujer/hombre), con reemplazos visuales si el arte falta y modo de efectos ligeros.
 - Taller permite respaldo separado de la galería y del arte enlazado; incluye `getProtagonistPortrait`, objetivos para vista trasera del protagonista y `getCharacterCardArt` para usar el PNG frontal de carta en la colección con reserva a retrato.
-- La pantalla inicial muestra un resumen del prólogo confirmado; todavía faltan diálogos y decisiones interactivos del capítulo.
+- La pantalla inicial muestra un resumen del prólogo confirmado y una tarjeta ligera que identifica a Pivy como compañera desde el inicio, separada de la primera invocación aleatoria. No se le inventaron bonus de combate; todavía faltan los apoyos jugables y diálogos/decisiones interactivos del capítulo.
 - Elección del protagonista persistida en SQLite.
 - Simulador estadístico reproducible recién añadido en `src/game/combat-sim.ts`, pruebas en `src/game/combat-sim.test.ts` y comando interno `npm run simulate:combat`.
 - Taller de cartas: galería migrada a IndexedDB con migración desde localStorage, copia/restauración independiente de arte enlazado, y objetivos de arte frontal para la colección. El arte frontal y su reserva al retrato, así como la navegación simple y el panel de equipo visible, pasaron CI en `435cd87` (run [40866459053](https://github.com/eltiootaku2020-cmyk/cardwaifu/actions/runs/40866459053)). Pendiente prueba manual en navegador. Cada copia se limita a 24 MB; conservar también los PNG originales fuera del navegador.
