@@ -205,6 +205,7 @@ function renderLoadout(): string {
   </section>`;
 }
 function render() {
+  const pivyPortrait = getCharacterPortrait("tiny");
   root.innerHTML = `<header class="top"><div class="brand"><span class="logo">✦</span><div><b>UMBRA</b><small>CARD FRONTIER</small></div></div><span class="resource">◈ Alma <b>${battle?.alma ?? resources.alma}</b> · Ánima <b>${battle?.player.anima ?? resources.anima}</b> · Nv. <b>${rewards.level}</b> · XP <b>${rewards.xp}</b></span><button type="button" class="visual-toggle" id="visual-toggle" aria-pressed="${visualMode === "reduced"}" title="Cambiar nivel de animaciones">${visualMode === "reduced" ? "⚡ Efectos ligeros" : "✦ Efectos completos"}</button></header>
   <main>
     <nav class="quick-nav" aria-label="Navegación principal"><a href="#inicio">Inicio</a><a href="#coleccion">Cartas</a><a href="#expedicion">Expedición</a><a href="#equipo">Equipo</a><a href="#combate">Combate</a></nav>
@@ -213,6 +214,10 @@ function render() {
         <summary>Leer prólogo y conocer a tu compañera</summary>
         <div class="prologue-lines">${PROLOGUE.map(line => `<section class="prologue-line"><strong>${escapeHtml(line.title)}</strong><p>${escapeHtml(line.text)}</p></section>`).join("")}</div>
       </details>
+      <section class="companion-strip" aria-label="Compañera de viaje">
+        <div class="companion-art ${pivyPortrait ? "has-art" : ""}">${pivyPortrait ? `<img data-art-image src="${escapeHtml(pivyPortrait)}" alt="" loading="lazy" decoding="async">` : `<span aria-hidden="true">⌁</span>`}</div>
+        <div class="companion-info"><small>COMPAÑERA DESDE EL INICIO</small><strong>Pivy · Goblin exploradora</strong><span>Portadora de Arturo Pendragon · Rango S</span><p>Pivy es tu compañera de ruta. La primera invocación elegirá a otra portadora para vincular su carta a tu colección.</p></div>
+      </section>
       <div class="gender"><button data-gender="Mujer" class="${gender === "Mujer" ? "selected" : ""}" aria-pressed="${gender === "Mujer"}">Protagonista mujer</button><button data-gender="Hombre" class="${gender === "Hombre" ? "selected" : ""}" aria-pressed="${gender === "Hombre"}">Protagonista hombre</button></div>
       <p class="muted profile-note" aria-live="polite">${escapeHtml(profileNote)}</p>
       <div class="backview ${getProtagonistPortrait(gender === "Hombre" ? "hombre" : "mujer") ? "has-art" : ""}" data-gender="${gender.toLowerCase()}">${getProtagonistPortrait(gender === "Hombre" ? "hombre" : "mujer") ? `<img class="protagonist-art" data-art-image src="${escapeHtml(getProtagonistPortrait(gender === "Hombre" ? "hombre" : "mujer")!)}" alt="" loading="lazy" decoding="async">` : ""}<div class="halo"></div><div class="figure"><div class="head"></div><div class="body"></div><div class="cape"></div></div><span>VISTA DESDE ATRÁS · ROSTRO OCULTO</span></div>
