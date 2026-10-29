@@ -181,3 +181,13 @@ html[data-umbra-effects="reduced"] .battle-scene { box-shadow: none; }
 @media (min-width:700px) { .owned-card-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } .owned-card-art { height:225px; } }
 @media (max-width:360px) { .owned-card-grid { grid-template-columns:1fr; } }
 html[data-umbra-effects="reduced"] .owned-card { animation:none !important; }
+
+
+/* Lightweight expandable lore: no images, canvas, polling, or animated background required. */
+.prologue{margin:16px 0;padding:12px 14px;border:1px solid #344765;border-radius:12px;background:#0c1221}
+.prologue summary{cursor:pointer;color:#cfe3ff;font-weight:800;font-size:12px;list-style-position:inside}
+.prologue[open] summary{margin-bottom:10px;color:var(--cyan)}
+.prologue-lines{display:grid;gap:8px}
+.prologue-line{padding:9px 10px;border-left:2px solid #53658b;background:#131d2c;border-radius:0 8px 8px 0}
+.prologue-line strong{display:block;font-size:11px;color:#f1f4ff}
+.prologue-line p{margin:5px 0 0;font-size:11px;line-height:1.55;color:var(--muted)}
