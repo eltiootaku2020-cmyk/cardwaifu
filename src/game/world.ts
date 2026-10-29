@@ -28,6 +28,7 @@ export interface ChapterOneState {
   objectives: ChapterObjective[];
   bossUnlocked: boolean;
   completed: boolean;
+  returnedToVillage: boolean;
 }
 export interface TravelResult {
   progress: WorldProgress;
@@ -79,7 +80,8 @@ export function getChapterOneState(progress: WorldProgress): ChapterOneState {
       { id: "entrada-abismo", label: "Derrota a la Guardiana del Miasma", completed: progress.completedEventIds.includes("entrada-abismo") }
     ],
     bossUnlocked,
-    completed: progress.completedEventIds.includes("entrada-abismo")
+    completed: progress.completedEventIds.includes("entrada-abismo"),
+    returnedToVillage: progress.completedEventIds.includes("chapter-1-return")
   };
 }
 
