@@ -25,12 +25,14 @@ Actualizado: 2026-10-29
 - Primera invocación persistente, colección de las cartas obtenidas, vista frontal/reverso y equipamiento inicial.
 - Ruta inicial del Bosque Oscuro, eventos de exploración con recompensas persistentes, objetivos del capítulo y bloqueo del jefe hasta cumplir requisitos.
 - Combate por turnos en servidor y pruebas de sincronización de Alma/Ánima y acciones obsoletas.
-- Sistema de manifiesto para retratos/fondos PNG, reemplazos visuales si el arte falta y modo de efectos ligeros.
+- Sistema de manifiesto para retratos/fondos PNG y vista de espalda del protagonista (mujer/hombre), con reemplazos visuales si el arte falta y modo de efectos ligeros.
+- Taller permite respaldo separado de la galería y del arte enlazado; se añadió `getProtagonistPortrait`, objetivos de vinculación y backup de arte local en `web/src/art.ts`.
+- La pantalla inicial muestra un resumen del prólogo confirmado; todavía faltan diálogos y decisiones interactivos del capítulo.
 - Elección del protagonista persistida en SQLite.
 - Simulador estadístico reproducible recién añadido en `src/game/combat-sim.ts`, pruebas en `src/game/combat-sim.test.ts` y comando interno `npm run simulate:combat`.
 - Taller de cartas: galería migrada a IndexedDB, con migración desde localStorage, exportación/restauración de la galería, y exportación/restauración independiente del arte enlazado (métodos en `web/src/art.ts`, botones en `web/src/card-studio.ts`). Pendiente CI del último commit y prueba manual en navegador. Cada copia se limita a 24 MB; conservar también los PNG originales fuera del navegador.
 - Capítulo 1: se añadió marcador persistente `chapter-1-return`, endpoint `POST /api/chapter/return`, botón que aparece tras derrotar al jefe y regresar a Aldea Bruma, y prueba para exigir jefe/villa e impedir cierres duplicados; pendiente CI actual y recorrido manual.
-- Inconsistencia a resolver antes de dar por completa la historia de compañera: el lore confirmado la llama **Pivy**, goblin portadora de Arturo S; el catálogo implementado usa el identificador/display `tiny` / **Tiny, la exploradora** y ese ID no forma parte de la primera invocación. No renombrar IDs persistidos ni cambiar la mecánica de compañeras sin definir una migración y revisar el flujo.
+- Nombre del catálogo corregido a **Pivy**; se conserva el ID técnico `tiny` para no romper colecciones ni assets ya guardados. Pivy sigue fuera del grupo de primera invocación (como se debe) pero su función como compañera de apoyo aún no es jugable; completar después el sistema de apoyos sin convertirla en la carta aleatoria inicial.
 
 ## Evidencias
 
@@ -43,15 +45,15 @@ Actualizado: 2026-10-29
 1. Confirmar CI del último commit, incluyendo los controles nuevos de copia de arte enlazado; corregir cualquier fallo antes de declarar el Taller verificado.
 2. Hacer un recorrido end-to-end del capítulo 1, incluyendo regresar por rutas conectadas a Aldea Bruma y registrar el cierre. Después implementar diálogos/decisiones sin canonizar la trama pendiente de Medusa.
 3. Completar catálogo de cartas, duplicados, mejoras, botín, apoyos, Corazones Heroicos y Ruptura de Límite.
-4. Ampliar patrones enemigos y medir la curva de dificultad; comparar protagonista S con SR.
-5. Añadir las ilustraciones PNG finales suministradas por el usuario y revisar tamaño, transparencia, encuadre y fallbacks.
+4. Completar la función de Pivy como compañera de apoyo, luego ampliar patrones enemigos, medir la curva de dificultad y comparar protagonista S con SR.
+5. Añadir las ilustraciones PNG finales suministradas por el usuario, incluido el retrato de espalda del protagonista, y revisar tamaño, transparencia, encuadre y fallbacks.
 6. Medir fluidez en el PC del usuario y dentro de Telegram; ningún agente de GitHub puede confirmar el rendimiento en el dispositivo sin una prueba real.
 7. Configurar `BOT_TOKEN` y una URL HTTPS real, desplegar el cliente/API y probar inicio, autenticación, guardado y reinicio en Telegram. No inventar credenciales ni afirmar que está desplegado.
 8. Añadir backups de la base de datos, rate limiting, moderación y los flujos sociales solo después de estabilizar el MVP.
 
 ## Siguiente acción permitida
 
-Consultar la ejecución [40865282018](https://github.com/eltiootaku2020-cmyk/cardwaifu/actions/runs/40865282018) y el resultado CI del último commit de `work/png-2d-lightweight-mvp`. Si pasa, registrar el cierre del capítulo como validado por CI, no como probado en navegador. Si falla, usar los logs para corregirlo en la misma rama. Después ejecutar un recorrido manual y abordar los diálogos/decisiones del capítulo; mantener la historia de Medusa como propuesta no aprobada.
+Consultar la ejecución [40865282018](https://github.com/eltiootaku2020-cmyk/cardwaifu/actions/runs/40865282018) y la CI del último commit después del soporte de PNG del protagonista. Si pasa, registrar como validada por CI (no como probado en navegador) la integración del objetivo. Después implementar la función de Pivy como apoyo y completar diálogos/decisiones del capítulo sin canonizar el arco de Medusa. Si pasa, registrar el cierre del capítulo como validado por CI, no como probado en navegador. Si falla, usar los logs para corregirlo en la misma rama. Después ejecutar un recorrido manual y abordar los diálogos/decisiones del capítulo; mantener la historia de Medusa como propuesta no aprobada.
 
 ## Regla de cierre
 
