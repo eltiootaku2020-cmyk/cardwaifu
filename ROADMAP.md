@@ -11,6 +11,7 @@ La dirección visual es 2D, usando ilustraciones PNG, fondos por bioma y efectos
 - [x] Guardar la elección de protagonista en SQLite mediante endpoint de perfil; el test de persistencia pasa en CI.
 - [x] Añadir lanzador `INICIAR_UMBRA.bat` y guía de inicio con doble clic para Windows (archivo integrado en la rama `work/png-2d-lightweight-mvp`, commit `13723c3`).
 - [ ] Probar el lanzador en Windows real; la CI TypeScript no ejecuta archivos `.bat` ni comprueba el arranque local.
+- [ ] Probar la herramienta de copia de SQLite en Windows con una base real, incluyendo existencia del archivo, datos recuperables y retención de diez copias; el script, acceso directo y prueba automatizada de la API ya están añadidos y la CI del commit actual está en curso.
 - [x] Añadir al Taller de cartas vinculación de PNG a una portadora, enemiga o fondo, con optimización y guardado local en IndexedDB (no sincroniza ni publica automáticamente).
 - [ ] Probar manualmente la galería del Taller en IndexedDB, migración desde `localStorage`, exportación/restauración de tarjetas+prompts y exportación/restauración independiente de PNG enlazados (CI pasó en el commit `228c39f`; ambas copias están limitadas a 24 MB).
 - [ ] Probar con PNG real los retratos de espalda del protagonista (mujer/hombre), el reemplazo de la silueta CSS y el fallback cuando la imagen falta; CI pasó en el commit `228c39f`, la prueba manual sigue pendiente.
