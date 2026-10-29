@@ -2,6 +2,7 @@ import { randomInt, randomUUID } from "node:crypto";
 import type { BattleState, EnemyIntent, FormBranch, FormStage } from "./types.js";
 
 export type BattleAction = "attack" | "skill" | "defend" | "evade" | "charge" | "evolve-light" | "evolve-dark";
+export type CombatRandom = (min: number, max: number) => number;
 
 function nextIntent(turn: number): EnemyIntent {
   return turn > 0 && turn % 3 === 0 ? "heavy-attack" : "quick-attack";
@@ -23,7 +24,7 @@ export function createBattle(heroName = "Heroína vinculada", alma = 100, stage:
   };
 }
 
-export function act(battle: BattleState, action: BattleAction): BattleState {
+export function act(battle: BattleState, action: BattleAction, random: CombatRandom = randomInt): BattleState {
   if (battle.status !== "active") return battle;
   const b: BattleState = structuredClone(battle);
   b.turn += 1;
@@ -33,7 +34,7 @@ export function act(battle: BattleState, action: BattleAction): BattleState {
 
   switch (action) {
     case "attack": {
-      const damage = b.player.attack + randomInt(0, 9);
+      const damage = b.player.attack + random(0, 9);
       b.enemy.hp = Math.max(0, b.enemy.hp - damage);
       b.player.anima = Math.min(100, b.player.anima + 12);
       b.log.push("Ataque: " + damage + " de daño; +12 Ánima.");
@@ -45,7 +46,7 @@ export function act(battle: BattleState, action: BattleAction): BattleState {
         break;
       }
       b.player.anima -= 20;
-      const damage = b.player.attack + 12 + randomInt(0, 7);
+      const damage = b.player.attack + 12 + random(0, 7);
       b.enemy.hp = Math.max(0, b.enemy.hp - damage);
       const healed = Math.min(5, b.player.maxHp - b.player.hp);
       b.player.hp += healed;
@@ -117,7 +118,7 @@ export function act(battle: BattleState, action: BattleAction): BattleState {
     b.log.push("La enemiga mantiene su guardia y reduce el daño recibido en su próximo turno.");
   } else {
     const heavy = b.enemy.intent === "heavy-attack";
-    const incoming = evading ? 0 : Math.max(1, b.enemy.attack + (heavy ? 12 : randomInt(0, 5)) - guard);
+    const incoming = evading ? 0 : Math.max(1, b.enemy.attack + (heavy ? 12 : random(0, 5)) - guard);
     b.player.hp = Math.max(0, b.player.hp - incoming);
     b.log.push(incoming === 0 ? "Evasión perfecta: evitaste el ataque anunciado." : (heavy ? "Golpe cargado" : "La criatura contraataca") + ": " + incoming + " de daño.");
   }
