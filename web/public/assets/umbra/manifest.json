@@ -1,23 +1,63 @@
 {
   "version": 1,
   "characters": {
-    "tiny": { "portrait": null, "card": null },
-    "elizabeth": { "portrait": null, "card": null },
-    "artoria": { "portrait": null, "card": null },
-    "juana": { "portrait": null, "card": null },
-    "cleopatra": { "portrait": null, "card": null },
-    "musashi": { "portrait": null, "card": null },
-    "heracles": { "portrait": null, "card": null },
-    "robin-hood": { "portrait": null, "card": null },
-    "guardiana-bretana": { "portrait": null, "card": null },
-    "cazadora-musgo": { "portrait": null, "card": null }
+    "tiny": {
+      "portrait": null,
+      "card": null
+    },
+    "elizabeth": {
+      "portrait": null,
+      "card": null
+    },
+    "artoria": {
+      "portrait": null,
+      "card": null
+    },
+    "juana": {
+      "portrait": null,
+      "card": null
+    },
+    "cleopatra": {
+      "portrait": null,
+      "card": null
+    },
+    "musashi": {
+      "portrait": null,
+      "card": null
+    },
+    "heracles": {
+      "portrait": null,
+      "card": null
+    },
+    "robin-hood": {
+      "portrait": null,
+      "card": null
+    },
+    "guardiana-bretana": {
+      "portrait": null,
+      "card": null
+    },
+    "cazadora-musgo": {
+      "portrait": null,
+      "card": null
+    }
   },
   "enemies": {
-    "goblin": { "portrait": null },
-    "miasma": { "portrait": null },
-    "beast": { "portrait": null },
-    "boss": { "portrait": null },
-    "forest": { "portrait": null }
+    "goblin": {
+      "portrait": null
+    },
+    "miasma": {
+      "portrait": null
+    },
+    "beast": {
+      "portrait": null
+    },
+    "boss": {
+      "portrait": null
+    },
+    "forest": {
+      "portrait": null
+    }
   },
   "scenes": {
     "village": null,
@@ -26,5 +66,9 @@
     "camp": null,
     "ruin": null,
     "dungeon": null
+  },
+  "protagonists": {
+    "mujer": null,
+    "hombre": null
   }
 }
