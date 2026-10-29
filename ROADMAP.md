@@ -42,7 +42,7 @@ La dirección visual es 2D, usando ilustraciones PNG, fondos por bioma y efectos
 
 ## Balance y dificultad justa
 - [x] Investigar fuentes de diseño y documentar criterios para dificultad entretenida sin castigo molesto ([análisis y plan](./docs/ANALISIS_DIFICULTAD_JUSTA.md)).
-- [ ] Preparar simulaciones reproducibles para comparar ataques, habilidades, defensa, evasión, carga y evolución. (siguiente tarea: añadir simulador estadístico automatizado).
+- [ ] Verificar en CI el simulador estadístico reproducible añadido en `src/game/combat-sim.ts`, sus pruebas y el comando interno `npm run simulate:combat`. No marcar como completado hasta que pase CI; sus métricas orientan el balance, pero no sustituyen playtests.
 - [ ] Probar la curva de dificultad del Bosque Oscuro con derrotas recuperables, indicaciones útiles y sin inflar HP como único ajuste.
 - [ ] Comparar protagonista S (sin duplicados y con hitos de resonancia) contra una carta SR con inversión y encuentros controlados.
 
@@ -60,4 +60,4 @@ La dirección visual es 2D, usando ilustraciones PNG, fondos por bioma y efectos
 - [ ] Moderación, logs sin secretos, backups y límites de frecuencia.
 - [ ] Cooperación y PvP después de estabilizar PvE.
 
-El análisis de dificultad está documentado; las hipótesis numéricas y el balance todavía requieren simulación y playtests. Las maquetas no cuentan como integraciones completas; marcar tareas solo tras comprobar el flujo real. Estado verificado: `main` todavía parte del commit `34d780c`, cuya CI fallaba por TS2339. En la rama `work/png-2d-lightweight-mvp`, el último CI de código ejecutado antes de los últimos ajustes de estilo/documentación pasó build y pruebas; se volverá a comprobar el commit final antes de cerrar esta entrega. La integración real con Telegram, el despliegue HTTPS, el token del bot, la persistencia en entorno alojado y el recorrido completo de usuario siguen sin validación en producción. El rendimiento real tampoco se considera validado hasta probarlo en el PC del usuario.
+El análisis de dificultad está documentado; las hipótesis numéricas y el balance todavía requieren simulación y playtests. Las maquetas no cuentan como integraciones completas; marcar tareas solo tras comprobar el flujo real. Estado verificado: `main` todavía parte del commit `34d780c`, cuya CI fallaba por TS2339. En la rama `work/png-2d-lightweight-mvp`, la última CI anterior a la incorporación del simulador pasó build y pruebas. El commit actual incluye una herramienta de simulación reproducible y está pendiente de verificación CI; no declarar la tarea cerrada hasta comprobar ese resultado. La integración real con Telegram, el despliegue HTTPS, el token del bot, la persistencia en entorno alojado y el recorrido completo de usuario siguen sin validación en producción. El rendimiento real tampoco se considera validado hasta probarlo en el PC del usuario.
