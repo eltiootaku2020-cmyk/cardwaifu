@@ -27,3 +27,7 @@ No copies o reemplaces la base de datos mientras el servidor la está usando. Ma
 - El archivo `.env` y el token del bot no forman parte de la copia SQLite.
 - El lanzador no crea un token ni despliega la Mini App.
 - La prueba de CI compila el código, pero aún se debe probar manualmente la copia con una base de datos real en Windows.
+
+## Protección del repositorio
+
+El `.gitignore` excluye la carpeta `/data/`, la carpeta `/backups/`, archivos `*.sqlite` y `*.db` junto con sus archivos auxiliares. Esto ayuda a evitar subidas accidentales de progreso local y copias privadas. Aun así, antes de crear un commit revisa siempre la lista de archivos pendientes: `.gitignore` no retira archivos que ya estuvieran versionados previamente.
