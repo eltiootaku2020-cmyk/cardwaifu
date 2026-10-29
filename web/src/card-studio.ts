@@ -1,4 +1,4 @@
-import { saveLocalArt } from "./art.js";
+import { saveLocalArt, exportLocalArtBackup, importLocalArtBackup } from "./art.js";
 
 export function openCardStudio(): void {
   if (document.querySelector("#umbra-card-studio")) return;
@@ -60,9 +60,11 @@ export function openCardStudio(): void {
           <div class="studio-buttons"><button type="button" class="secondary" id="studio-art-prompt-refresh">↻ Generar prompt</button><button type="button" class="secondary" id="studio-art-prompt-copy">Copiar prompt</button></div>
           <p class="muted studio-note">Prompt corto en inglés, separado por comas. Todo lo que represente un ser será una waifu; las armas son la única excepción. Sin etiquetas de calidad ni relleno.</p>
           <div class="studio-buttons"><button type="button" class="primary" id="studio-art-save">＋ Guardar carta</button><button type="button" class="secondary" id="studio-art-export">↓ Exportar PNG</button></div>
-          <div class="studio-buttons"><button type="button" class="secondary" id="studio-art-backup">↓ Exportar copia de galería</button><button type="button" class="secondary" id="studio-art-import-trigger">↑ Restaurar copia</button></div>
+          <div class="studio-buttons"><button type="button" class="secondary" id="studio-art-backup">↓ Exportar copia de galería</button><button type="button" class="secondary" id="studio-art-import-trigger">↑ Restaurar galería</button></div>
           <input id="studio-art-import-file" type="file" accept=".json,application/json" hidden>
-          <p class="muted studio-note">La galería se guarda en almacenamiento local del navegador y también puedes exportarla como copia JSON. La copia incluye las cartas del taller y sus prompts, pero no incluye el arte enlazado al juego ni sustituye tus PNG originales. No se sube nada a internet.</p>
+          <div class="studio-buttons"><button type="button" class="secondary" id="studio-linked-art-backup">↓ Copia de PNG enlazados</button><button type="button" class="secondary" id="studio-linked-art-import-trigger">↑ Restaurar PNG enlazados</button></div>
+          <input id="studio-linked-art-import-file" type="file" accept=".json,application/json" hidden>
+          <p class="muted studio-note">La galería y el arte enlazado al juego usan copias independientes. La galería incluye las cartas compuestas y sus prompts; la copia de arte enlazado incluye los retratos y fondos guardados en este navegador. Ninguna copia sustituye tus PNG originales y nada se sube a internet.</p>
           <p class="muted studio-note">El editor crea marcos propios por código. Para que el personaje quede bien integrado, usa PNG con canal alfa y ajusta la escala.</p>
         </div>
         <div class="studio-result"><canvas id="studio-art-canvas" width="600" height="900" aria-label="Vista previa de carta"></canvas><div class="studio-gallery-head"><strong>Galería local</strong><span id="studio-art-count">0 cartas</span></div><div id="studio-art-gallery" class="studio-gallery"></div></div>
@@ -435,6 +437,47 @@ export function openCardStudio(): void {
       window.setTimeout(() => URL.revokeObjectURL(url), 1500);
     } catch (error) {
       window.alert(error instanceof Error ? error.message : "No se pudo exportar la copia.");
+    }
+  };
+
+  get<HTMLButtonElement>("studio-linked-art-backup").onclick = async () => {
+    try {
+      const backup = await exportLocalArtBackup();
+      if (backup.items.length === 0) throw new Error("Todavía no hay PNG enlazados al juego para respaldar.");
+      const json = JSON.stringify(backup);
+      if (json.length > maxBackupBytes) {
+        throw new Error("La copia de arte enlazado supera los 24 MB. Vincula/exporta menos imágenes por copia para no sobrecargar el navegador.");
+      }
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.download = "umbra-arte-enlazado-" + new Date().toISOString().slice(0, 10) + ".json";
+      link.href = url;
+      link.click();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1500);
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : "No se pudo exportar el arte enlazado.");
+    }
+  };
+
+  get<HTMLButtonElement>("studio-linked-art-import-trigger").onclick = () => get<HTMLInputElement>("studio-linked-art-import-file").click();
+  get<HTMLInputElement>("studio-linked-art-import-file").onchange = async event => {
+    const file = (event.currentTarget as HTMLInputElement).files?.[0];
+    if (!file) return;
+    try {
+      if (file.size > maxBackupBytes) throw new Error("La copia de arte enlazado supera el límite de 24 MB.");
+      const parsed: unknown = JSON.parse(await file.text());
+      if (!parsed || typeof parsed !== "object" || !("items" in parsed) || !Array.isArray(parsed.items)) {
+        throw new Error("El archivo no contiene una copia de arte enlazado de UMBRA.");
+      }
+      if (parsed.items.length === 0) throw new Error("La copia no contiene imágenes enlazadas.");
+      if (!window.confirm("Se restaurarán " + parsed.items.length + " imágenes y se reemplazará todo el arte enlazado local actual. Exporta una copia antes de continuar si deseas conservarlo.")) return;
+      const count = await importLocalArtBackup(parsed);
+      window.alert("Arte enlazado restaurado: " + count + " imágenes.");
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : "No se pudo restaurar el arte enlazado.");
+    } finally {
+      get<HTMLInputElement>("studio-linked-art-import-file").value = "";
     }
   };
 
