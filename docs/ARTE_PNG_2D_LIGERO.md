@@ -42,3 +42,10 @@ La interfaz lee `web/public/assets/umbra/manifest.json` y también permite vincu
 ## Qué no está incluido todavía
 
 No se incluyen ilustraciones originales en este cambio porque el usuario quiere crear el arte. Tampoco se declara completada la integración de toda la colección, las animaciones por piezas, el despliegue de Telegram o la campaña inicial. Esas tareas requieren recursos y pruebas propias.
+
+
+## Arte del protagonista en vista de espalda
+
+El Taller de cartas puede vincular dos objetivos nuevos: `protagonist:mujer:portrait` y `protagonist:hombre:portrait`. El retrato reemplaza la silueta CSS de la pantalla inicial cuando está disponible. Para respetar la regla de cámara, la ilustración debe mostrar la espalda o una silueta, sin rostro visible. El taller no crea esa imagen ni necesita generarla: el usuario la aporta como PNG/WEBP/JPG.
+
+Si no hay imagen, la ruta falla o el navegador no permite el almacenamiento local, la silueta CSS permanece como reserva. El retrato enlazado se guarda en IndexedDB de ese navegador y puede incluirse en la copia JSON de arte enlazado. No se publica automáticamente; para otros dispositivos debe incorporarse como asset público optimizado en el manifiesto.
