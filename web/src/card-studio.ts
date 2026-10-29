@@ -108,7 +108,7 @@ export function openCardStudio(): void {
   }
 
   function dataUrlToBlob(value: string): Blob {
-    const match = value.match(/^data:(image\\/png);base64,([A-Za-z0-9+/=]+)$/);
+    const match = value.match(/^data:(image\/png);base64,([A-Za-z0-9+/=]+)$/);
     if (!match) throw new Error("Una carta de la galería no contiene un PNG válido.");
     const binary = atob(match[2]!);
     const bytes = new Uint8Array(binary.length);
@@ -161,7 +161,7 @@ export function openCardStudio(): void {
         stored.slice(0, galleryLimit).forEach((item: unknown) => {
           if (item && typeof item === "object" && "name" in item && "data" in item && "prompt" in item &&
             typeof item.name === "string" && typeof item.data === "string" &&
-            /^data:image\\/png;base64,[A-Za-z0-9+/=]+$/.test(item.data) && typeof item.prompt === "string") {
+            /^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(item.data) && typeof item.prompt === "string") {
             gallery.push({ name: item.name.slice(0, 100), data: item.data, prompt: item.prompt.slice(0, 4000) });
           }
         });
@@ -458,7 +458,7 @@ export function openCardStudio(): void {
         if (restored.length >= galleryLimit) break;
         if (!item || typeof item !== "object" || !("name" in item) || !("data" in item) || !("prompt" in item)) continue;
         if (typeof item.name !== "string" || typeof item.data !== "string" || typeof item.prompt !== "string") continue;
-        if (!/^data:image\\/png;base64,[A-Za-z0-9+/=]+$/.test(item.data)) continue;
+        if (!/^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(item.data)) continue;
         contentBytes += item.data.length;
         if (contentBytes > maxBackupBytes) throw new Error("Los datos de la copia superan el límite permitido.");
         restored.push({ name: item.name.slice(0, 100), data: item.data, prompt: item.prompt.slice(0, 4000) });
