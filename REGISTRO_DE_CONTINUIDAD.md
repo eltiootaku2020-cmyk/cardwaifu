@@ -77,7 +77,7 @@ No integrar el PR ni declarar el programa completo por la existencia de código.
 - La ilustración activa del protagonista, Pivy y la portadora usa una animación CSS vertical de solo 2 px con ciclo lento. `Efectos ligeros` y `prefers-reduced-motion` la desactivan; no se anima todo el catálogo.
 - El panel de navegación facilita saltar a Inicio, Cartas, Expedición, Equipo y Combate. El taller muestra PNG frontal de carta con fallback al retrato.
 - Se añadieron los accesos directos `INICIAR_UMBRA.bat` y `RESPALDAR_UMBRA.bat`. El segundo hace una copia consistente por SQLite, conserva 10 copias, y el test de la API SQLite pasó CI en [40867781026](https://github.com/eltiootaku2020-cmyk/cardwaifu/actions/runs/40867781026). `.gitignore` excluye `/data/`, `/backups/`, `*.sqlite` y `*.db`.
-- La última evidencia de CI de la implementación visual anterior a la animación PNG y su documentación es [40868412632](https://github.com/eltiootaku2020-cmyk/cardwaifu/actions/runs/40868412632), y la CI de animación/documentación fue lanzada en [40868522785](https://github.com/eltiootaku2020-cmyk/cardwaifu/actions/runs/40868522785). Consultar la ejecución más reciente de la rama antes de aceptar el siguiente cambio.
+- La última evidencia de CI de la implementación visual anterior a la animación PNG y su documentación es [40868412632](https://github.com/eltiootaku2020-cmyk/cardwaifu/actions/runs/40868412632), y la CI de animación/documentación pasó en [40868522785](https://github.com/eltiootaku2020-cmyk/cardwaifu/actions/runs/40868522785). La CI del estado consolidado con el README y el lanzador robusto pasó build, typecheck y tests en [40868821188](https://github.com/eltiootaku2020-cmyk/cardwaifu/actions/runs/40868821188) para el commit `1d4b79a21e3a598a18425066a16fda149ddd9b83`.
 
 ### Límites explícitos
 - Esta tanda no pone arte final del usuario: el manifiesto tiene sus targets en null hasta que el usuario aporte los PNG.
@@ -91,3 +91,13 @@ No integrar el PR ni declarar el programa completo por la existencia de código.
 - El README incluye un enlace al ZIP de `work/png-2d-lightweight-mvp` para evitar descargar `main` por error.
 - El lanzador espera hasta 30 segundos a que `http://localhost:5173` responda antes de abrir el navegador; si no responde, dirige al usuario a la ventana de servidor para ver el error.
 - Esto está pendiente de prueba manual en Windows real; CI no ejecuta el `.bat`.
+
+
+## Estado aceptado por CI — 29-10-2026
+
+- Head de trabajo comprobado: `1d4b79a21e3a598a18425066a16fda149ddd9b83`.
+- Build, typecheck y suite automatizada pasan en [run 40868821188](https://github.com/eltiootaku2020-cmyk/cardwaifu/actions/runs/40868821188).
+- El README enlaza al ZIP de la rama de trabajo; el lanzador verifica Node 20+, prepara dependencias solo cuando faltan y espera hasta 30 segundos al servidor local antes de abrir el navegador.
+- Pivy se muestra como compañera desde el inicio. La animación PNG de baja intensidad se desactiva con la preferencia de efectos ligeros o movimiento reducido.
+- Aún no hay PNG finales en el manifiesto; su integración se acepta después de que el usuario aporte ilustraciones y se revisen los fallbacks.
+- Windows real, navegador con arte real, rendimiento del PC y Telegram desplegado continúan como bloqueos de aceptación manual. No declarar UMBRA completo ni fusionar el PR solo por CI verde.
