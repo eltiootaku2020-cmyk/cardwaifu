@@ -205,3 +205,16 @@ html[data-umbra-effects="reduced"] .owned-card { animation:none !important; }
 #inicio,#coleccion,#expedicion,#equipo,#combate,#catalogo{scroll-margin-top:124px}
 .studio-launch{margin:0 0 18px}
 @media(max-width:520px){.quick-nav{top:58px;gap:5px;padding-top:7px}.quick-nav a{padding:8px 10px;font-size:10px;min-height:34px}#inicio,#coleccion,#expedicion,#equipo,#combate,#catalogo{scroll-margin-top:112px}}
+
+
+/* Pivy is an authored starting companion, separate from the random first summon. */
+.companion-strip{display:grid;grid-template-columns:76px minmax(0,1fr);gap:13px;align-items:center;margin:16px 0;padding:12px;border:1px solid #425777;border-radius:14px;background:linear-gradient(110deg,#15283a,#101626)}
+.companion-art{display:grid;place-items:center;position:relative;width:76px;height:94px;overflow:hidden;border-radius:10px;border:1px solid #78d9c366;background:radial-gradient(ellipse at 50% 25%,#8be0d34a,transparent 62%),linear-gradient(155deg,#253f4b,#101522)}
+.companion-art>span{font-size:35px;color:#9ce9d8;text-shadow:0 0 18px #68e5ff55}
+.companion-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center bottom}
+.companion-info{min-width:0;display:grid;gap:5px}
+.companion-info small{font-size:8px;letter-spacing:.15em;color:var(--cyan);font-weight:900}
+.companion-info strong{font-size:14px;color:#f1f4ff}
+.companion-info>span{font-size:10px;color:#ffdf9d;font-weight:800}
+.companion-info p{margin:2px 0 0;color:var(--muted);font-size:11px;line-height:1.5}
+@media(max-width:380px){.companion-strip{grid-template-columns:62px minmax(0,1fr);gap:10px;padding:10px}.companion-art{width:62px;height:82px}.companion-info strong{font-size:13px}}
