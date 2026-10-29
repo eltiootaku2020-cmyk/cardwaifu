@@ -12,7 +12,7 @@ La herramienta usa la API de copia en línea de SQLite y no reemplaza ni edita l
 
 ## Restaurar una copia
 
-La restauración es manual y debe hacerse con el servidor y el bot cerrados:
+La restauración es manual y debe hacerse con el servidor y el bot cerrados. No es necesario cerrar la aplicación para crear una copia; sí es necesario cerrarla antes de reemplazar la base de datos durante una restauración:
 
 1. Haz una copia adicional del archivo actual `data/umbra.sqlite`, si existe.
 2. Selecciona el archivo deseado dentro de `backups/`.
