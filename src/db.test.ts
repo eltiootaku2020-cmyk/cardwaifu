@@ -7,7 +7,7 @@ import { createBattle, act } from "./game/combat.js";
 
 const testDir = mkdtempSync(join(tmpdir(), "umbra-db-test-"));
 process.env.DATABASE_PATH = join(testDir, "test.sqlite");
-const { db, getOrCreatePlayer, saveBattleProgress, getBattle, getLatestActiveBattle, saveProtagonistGender, saveWorldProgress, getWorldProgress, resolveExplorationEvent, getPlayerRewards } = await import("./db.js");
+const { db, getOrCreatePlayer, saveBattleProgress, getBattle, getLatestActiveBattle, saveProtagonistGender, saveWorldProgress, getWorldProgress, resolveExplorationEvent, getPlayerRewards, resolveChapterReturn } = await import("./db.js");
 const { travelTo } = await import("./game/world.js");
 
 test.after(() => {
@@ -174,3 +174,29 @@ test("stale simultaneous battle actions cannot overwrite a newer turn", () => {
   );
   assert.equal(getBattle(battle.id)?.battle.turn, 1);
 });
+
+test("chapter return requires the boss, happens in the village, and is registered only once", () => {
+  const player = getOrCreatePlayer("player-chapter-return", "Regreso de capítulo");
+  assert.throws(() => resolveChapterReturn(player.telegramId), /Derrota primero a la Guardiana/);
+
+  const initial = getWorldProgress(player.telegramId);
+  const completeProgress = {
+    ...initial,
+    visitedNodeIds: ["aldea-bruma", "sendero-musgo", "puesto-vigilia", "manantial-luna", "ruinas-viejas", "nido-goblin", "entrada-abismo"],
+    completedEventIds: ["sendero-musgo", "puesto-vigilia", "ruinas-viejas", "nido-goblin", "entrada-abismo"]
+  };
+  saveWorldProgress(player.telegramId, { ...completeProgress, currentNodeId: "sendero-musgo" });
+  assert.throws(() => resolveChapterReturn(player.telegramId), /Vuelve a la Aldea Bruma/);
+
+  saveWorldProgress(player.telegramId, { ...completeProgress, currentNodeId: "aldea-bruma" });
+  const first = resolveChapterReturn(player.telegramId);
+  assert.equal(first.alreadyReturned, false);
+  assert.equal(first.chapter.completed, true);
+  assert.equal(first.chapter.returnedToVillage, true);
+  assert.equal(first.progress.completedEventIds.filter(id => id === "chapter-1-return").length, 1);
+
+  const second = resolveChapterReturn(player.telegramId);
+  assert.equal(second.alreadyReturned, true);
+  assert.equal(second.progress.completedEventIds.filter(id => id === "chapter-1-return").length, 1);
+});
+
