@@ -26,5 +26,6 @@ test("SQLite online backup preserves schema and committed rows", async t => {
   const restored = copy.prepare("SELECT player, chapter FROM progress").get() as { player: string; chapter: number };
 
   assert.deepEqual(restored, { player: "local-test-player", chapter: 1 });
-  assert.equal(source.prepare("SELECT COUNT(*) AS count FROM progress").get() && (source.prepare("SELECT COUNT(*) AS count FROM progress").get() as { count: number }).count, 1);
+  const sourceCount = source.prepare("SELECT COUNT(*) AS count FROM progress").get() as { count: number };
+  assert.equal(sourceCount.count, 1);
 });
