@@ -83,3 +83,12 @@ El análisis de dificultad está documentado; las hipótesis numéricas y el bal
 - **No hay arte final en el repositorio:** las entradas del manifiesto siguen vacías de forma intencional hasta que el usuario aporte sus PNG originales. No generar ni declarar terminado ese arte.
 - **Reglas de juego aún pendientes:** gacha y pity con probabilidades aprobadas; duplicados y mejoras; apoyos jugables y Corazones Heroicos; progresión/rupturas; diálogos y decisiones de capítulo; más patrones y balance por playtests; despliegue y seguridad de producción.
 - El PR se mantiene como borrador y no se integra hasta revisar el resultado de CI del último commit y completar las pruebas manuales que requieren los entornos reales.
+
+
+## Última verificación de código — 29-10-2026
+
+- Rama: `work/png-2d-lightweight-mvp`; commit `1d4b79a21e3a598a18425066a16fda149ddd9b83`.
+- Resultado: CI verde — build, typecheck y pruebas automáticas en [40868821188](https://github.com/eltiootaku2020-cmyk/cardwaifu/actions/runs/40868821188).
+- El PR #1 sigue en borrador y sin merge. El árbol de `main` no contiene los archivos `.bat` de esta entrega.
+- Quedan pruebas manuales: ejecutar ambos `.bat` en Windows, verificar PNG/fallback y backup/restore en navegador, recorrer capítulo 1 entero, medir fluidez en el PC y probar Telegram real.
+- Esta CI no declara el programa completo; el resto de las tareas de MVP permanecen abiertas según el listado anterior.
