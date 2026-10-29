@@ -191,3 +191,8 @@ html[data-umbra-effects="reduced"] .owned-card { animation:none !important; }
 .prologue-line{padding:9px 10px;border-left:2px solid #53658b;background:#131d2c;border-radius:0 8px 8px 0}
 .prologue-line strong{display:block;font-size:11px;color:#f1f4ff}
 .prologue-line p{margin:5px 0 0;font-size:11px;line-height:1.55;color:var(--muted)}
+
+
+/* A back-view PNG replaces the CSS figure when available; missing art restores the low-cost fallback. */
+.backview.has-art .protagonist-art{position:absolute;z-index:1;left:50%;bottom:0;transform:translateX(-50%);max-width:100%;max-height:100%;width:auto;height:100%;object-fit:contain;object-position:center bottom}
+.backview.has-art .halo,.backview.has-art .figure{display:none}
