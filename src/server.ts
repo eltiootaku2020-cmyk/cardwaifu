@@ -3,7 +3,7 @@ import { randomInt } from "node:crypto";
 import express from "express";
 import { resolve } from "node:path";
 import { createBattle, act, type BattleAction } from "./game/combat.js";
-import { getOrCreatePlayer, getBattle, getLatestActiveBattle, saveBattleProgress, getWorldProgress, saveWorldProgress, getInventory, grantFirstHeroine, savePlayerFormStage, getPlayerRewards, getPlayerLoadout, savePlayerLoadout, saveProtagonistGender, resolveExplorationEvent } from "./db.js";
+import { getOrCreatePlayer, getBattle, getLatestActiveBattle, saveBattleProgress, getWorldProgress, saveWorldProgress, getInventory, grantFirstHeroine, savePlayerFormStage, getPlayerRewards, getPlayerLoadout, savePlayerLoadout, saveProtagonistGender, resolveExplorationEvent, resolveChapterReturn } from "./db.js";
 import { getAvailableDestinations, getChapterOneState, getWorldNode, travelTo } from "./game/world.js";
 import { getFirstSummonPool, getHeroine } from "./game/catalog.js";
 import { EQUIPMENT, getEquipmentBonuses, isValidLoadout } from "./game/equipment.js";
@@ -144,6 +144,28 @@ app.post("/api/world/resolve", (req, res) => {
     });
   } catch (error) {
     res.status(400).json({ error: error instanceof Error ? error.message : "No se pudo resolver el evento." });
+  }
+});
+
+app.post("/api/chapter/return", (req, res) => {
+  let currentPlayer: ReturnType<typeof player>;
+  try {
+    currentPlayer = player(req);
+  } catch (error) {
+    return res.status(401).json({ error: error instanceof Error ? error.message : "No autorizado." });
+  }
+  try {
+    const result = resolveChapterReturn(currentPlayer.telegramId);
+    const current = getWorldNode(result.progress.currentNodeId);
+    res.json({
+      progress: result.progress,
+      current,
+      destinations: getAvailableDestinations(result.progress),
+      chapter: result.chapter,
+      alreadyReturned: result.alreadyReturned
+    });
+  } catch (error) {
+    res.status(400).json({ error: error instanceof Error ? error.message : "No se pudo registrar el regreso." });
   }
 });
 
