@@ -2,7 +2,7 @@ import "./style.css";
 import "./battle-vfx.css";
 import { installBattleVfx } from "./battle-vfx.js";
 import { openCardStudio } from "./card-studio.js";
-import { getCharacterPortrait, getEnemyPortrait, getSceneBackground, loadArtManifest } from "./art.js";
+import { getCharacterPortrait, getEnemyPortrait, getProtagonistPortrait, getSceneBackground, loadArtManifest } from "./art.js";
 import { PROLOGUE } from "./story.js";
 
 declare global {
@@ -205,7 +205,7 @@ function render() {
       </details>
       <div class="gender"><button data-gender="Mujer" class="${gender === "Mujer" ? "selected" : ""}" aria-pressed="${gender === "Mujer"}">Protagonista mujer</button><button data-gender="Hombre" class="${gender === "Hombre" ? "selected" : ""}" aria-pressed="${gender === "Hombre"}">Protagonista hombre</button></div>
       <p class="muted profile-note" aria-live="polite">${escapeHtml(profileNote)}</p>
-      <div class="backview" data-gender="${gender.toLowerCase()}"><div class="halo"></div><div class="figure"><div class="head"></div><div class="body"></div><div class="cape"></div></div><span>VISTA DESDE ATRÁS · ROSTRO OCULTO</span></div>
+      <div class="backview ${getProtagonistPortrait(gender === "Hombre" ? "hombre" : "mujer") ? "has-art" : ""}" data-gender="${gender.toLowerCase()}">${getProtagonistPortrait(gender === "Hombre" ? "hombre" : "mujer") ? `<img class="protagonist-art" data-art-image src="${escapeHtml(getProtagonistPortrait(gender === "Hombre" ? "hombre" : "mujer")!)}" alt="" loading="lazy" decoding="async">` : ""}<div class="halo"></div><div class="figure"><div class="head"></div><div class="body"></div><div class="cape"></div></div><span>VISTA DESDE ATRÁS · ROSTRO OCULTO</span></div>
       <button class="primary full" id="summon" ${linkedHeroine ? "disabled" : ""}>${linkedHeroine ? "✦ Primera invocación completada" : "✦ Realizar primera invocación"}</button>
       <p class="muted summon-note">${escapeHtml(linkedHeroine ? "Vínculo establecido: " + linkedHeroine.name + " · " + linkedHeroine.rarity : summonNote)}</p>
       ${linkedHeroine ? `<div class="linked-heroine ${summonReveal ? "reveal-card" : ""}" data-rarity="${escapeHtml(linkedHeroine.rarity)}"><span class="rarity-pill">${escapeHtml(linkedHeroine.rarity)}</span><div><b>${escapeHtml(linkedHeroine.name)}</b><small>${escapeHtml(linkedHeroine.heroClass)} · Forma inicial ${escapeHtml(linkedHeroine.stage)}</small><p>${escapeHtml(linkedHeroine.description)}</p></div></div>` : ""}
