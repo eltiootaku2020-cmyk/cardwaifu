@@ -49,3 +49,10 @@ No se incluyen ilustraciones originales en este cambio porque el usuario quiere 
 El Taller de cartas puede vincular dos objetivos nuevos: `protagonist:mujer:portrait` y `protagonist:hombre:portrait`. El retrato reemplaza la silueta CSS de la pantalla inicial cuando está disponible. Para respetar la regla de cámara, la ilustración debe mostrar la espalda o una silueta, sin rostro visible. El taller no crea esa imagen ni necesita generarla: el usuario la aporta como PNG/WEBP/JPG.
 
 Si no hay imagen, la ruta falla o el navegador no permite el almacenamiento local, la silueta CSS permanece como reserva. El retrato enlazado se guarda en IndexedDB de ese navegador y puede incluirse en la copia JSON de arte enlazado. No se publica automáticamente; para otros dispositivos debe incorporarse como asset público optimizado en el manifiesto.
+
+
+## Arte frontal de carta en la colección
+
+El selector **Arte frontal de cartas** ofrece los objetivos `character:<id>:card` para Pivy y las primeras portadoras de referencia. Cuando vincules una imagen a uno de esos destinos, la colección prioriza ese PNG en el frente de la carta. Si ese archivo no carga y existe un retrato de la misma portadora, la interfaz intenta usar el retrato antes de mostrar el espacio de reserva.
+
+Esto mantiene un solo sistema de dibujo y evita duplicar imágenes innecesarias. El arte vinculado se conserva localmente; para compartirlo con otras instalaciones debe añadirse de forma deliberada a `web/public/assets/umbra/` y declararse en `manifest.json`, revisando su tamaño.
