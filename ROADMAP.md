@@ -12,7 +12,7 @@ La dirección visual es 2D, usando ilustraciones PNG, fondos por bioma y efectos
 - [x] Añadir al Taller de cartas vinculación de PNG a una portadora, enemiga o fondo, con optimización y guardado local en IndexedDB (no sincroniza ni publica automáticamente).
 - [ ] Probar manualmente la galería del Taller en IndexedDB, migración desde `localStorage`, exportación/restauración de tarjetas+prompts y exportación/restauración independiente de PNG enlazados (CI pasó en el commit `228c39f`; ambas copias están limitadas a 24 MB).
 - [ ] Probar con PNG real los retratos de espalda del protagonista (mujer/hombre), el reemplazo de la silueta CSS y el fallback cuando la imagen falta; CI pasó en el commit `228c39f`, la prueba manual sigue pendiente.
-- [ ] Probar arte frontal de carta (`character:<id>:card`) en la colección, fallback al retrato si el PNG de carta falla y copia/restauración del arte vinculado; el control del taller y el render se añadieron, queda pendiente CI del commit actual y prueba de navegador.
+- [ ] Probar arte frontal de carta (`character:<id>:card`) en la colección, fallback al retrato si el PNG de carta falla y copia/restauración del arte vinculado; control y render ya pasan CI en el run [40866459053](https://github.com/eltiootaku2020-cmyk/cardwaifu/actions/runs/40866459053), queda pendiente prueba de navegador.
 - [ ] Añadir las ilustraciones finales del usuario a las entradas públicas del manifiesto y revisar el encuadre.
 - [ ] Medir fluidez en el PC del usuario y dentro de Telegram; no declarar la optimización completa antes de medir.
 - [ ] Completar el MVP jugable y verificar el recorrido de principio a fin según los criterios inferiores.
@@ -32,7 +32,9 @@ La dirección visual es 2D, usando ilustraciones PNG, fondos por bioma y efectos
 - [ ] Protagonista S con duplicados y coste de ascensión progresivo; comparar en pruebas de juego una ruta S frente a una carta SR con condiciones equivalentes.
 - [ ] Colección persistente y rarezas R/S/SR/SSR/UR.
 - [ ] Combate por turnos resuelto en servidor con enemigos/patrones, estados y recompensas.
-- [x] Primera pasada de balance: habilidad requiere Ánima, reduce su daño/curación y deja de ser gratuita; defensa mitiga mejor el golpe cargado anunciado.\n- [x] Añadir intención enemiga autoritativa en servidor (ataque rápido/golpe cargado) y mostrarla en la interfaz antes de la respuesta del jugador.\n- [ ] Ampliar patrones por arquetipo, interrupciones, guardias y encuentros con varios enemigos.
+- [x] Primera pasada de balance: habilidad requiere Ánima, reduce su daño/curación y deja de ser gratuita; defensa mitiga mejor el golpe cargado anunciado.
+- [x] Añadir intención enemiga autoritativa en servidor (ataque rápido/golpe cargado) y mostrarla en la interfaz antes de la respuesta del jugador.
+- [ ] Ampliar patrones por arquetipo, interrupciones, guardias y encuentros con varios enemigos.
 - [x] Sincronizar Alma y Ánima entre combates y rechazar acciones obsoletas de una batalla si otra acción ya avanzó el turno; quedan pruebas de carga/concurrencia en el flujo de usuario.
 - [ ] Completar simulaciones concurrentes y pruebas de múltiples acciones simultáneas en entorno de despliegue.
 - [x] Formas Lily → Hero → Epic, ramas Light/Dark, elección explícita y persistencia entre combates; una evolución por batalla.
@@ -40,13 +42,14 @@ La dirección visual es 2D, usando ilustraciones PNG, fondos por bioma y efectos
 - [x] Región inicial con rutas conectadas y progreso de viaje guardado en SQLite.
 - [x] Encuentros ligados a lugares peligrosos y arquetipos de enemigos definidos en servidor.
 - [x] Conectar eventos de descanso/descubrimiento/visita con resolución única y recompensas persistentes; guardar objetivos del capítulo y bloquear la entrada al jefe hasta completar los cuatro requisitos.
+- [x] Añadir navegación sencilla por secciones y mostrar el panel de equipamiento en la aplicación (CI pasó en [40866459053](https://github.com/eltiootaku2020-cmyk/cardwaifu/actions/runs/40866459053)); recorrido manual de usuario pendiente.
 - [ ] Completar misiones narrativas con diálogos y decisiones significativas (el contenido de historia del capítulo 1 sigue pendiente).
 - [ ] Recorrer manualmente el capítulo 1 completo: derrotar al jefe, volver por rutas conectadas a Aldea Bruma y registrar el cierre una sola vez; endpoint, botón y pruebas automatizadas ya añadidos, CI pasó en el commit `228c39f`.
 - [x] Recompensas básicas de victoria: XP, monedas y materiales guardados sin duplicación.
 
 ## Balance y dificultad justa
 - [x] Investigar fuentes de diseño y documentar criterios para dificultad entretenida sin castigo molesto ([análisis y plan](./docs/ANALISIS_DIFICULTAD_JUSTA.md)).
-- [ ] Verificar en CI el simulador estadístico reproducible añadido en `src/game/combat-sim.ts`, sus pruebas y el comando interno `npm run simulate:combat`. No marcar como completado hasta que pase CI; sus métricas orientan el balance, pero no sustituyen playtests.
+- [x] Verificar en CI el simulador estadístico reproducible en `src/game/combat-sim.ts`, sus pruebas y el comando interno `npm run simulate:combat` (CI pasó en [40865965609](https://github.com/eltiootaku2020-cmyk/cardwaifu/actions/runs/40865965609)); sus métricas orientan el balance, pero no sustituyen playtests.
 - [ ] Probar la curva de dificultad del Bosque Oscuro con derrotas recuperables, indicaciones útiles y sin inflar HP como único ajuste.
 - [ ] Comparar protagonista S (sin duplicados y con hitos de resonancia) contra una carta SR con inversión y encuentros controlados.
 
@@ -64,4 +67,4 @@ La dirección visual es 2D, usando ilustraciones PNG, fondos por bioma y efectos
 - [ ] Moderación, logs sin secretos, backups y límites de frecuencia.
 - [ ] Cooperación y PvP después de estabilizar PvE.
 
-El análisis de dificultad está documentado; las hipótesis numéricas y el balance todavía requieren simulación y playtests. Las maquetas no cuentan como integraciones completas; marcar tareas solo tras comprobar el flujo real. `main` no se ha modificado directamente y su referencia de partida sigue siendo `34d780c`. La CI del commit de trabajo `228c39f` pasó compilación y pruebas: [run 40865965609](https://github.com/eltiootaku2020-cmyk/cardwaifu/actions/runs/40865965609). Esto valida el build y los tests del código versionado, no el uso del taller en un navegador real, las ilustraciones del usuario, el rendimiento en su PC ni Telegram en producción. La integración real con Telegram, el despliegue HTTPS, el token del bot y la persistencia en entorno alojado siguen sin validación.
+El análisis de dificultad está documentado; las hipótesis numéricas y el balance todavía requieren simulación y playtests. Las maquetas no cuentan como integraciones completas; marcar tareas solo tras comprobar el flujo real. `main` no se ha modificado directamente. La CI del último commit de la rama de trabajo `435cd87` pasó compilación y pruebas: [run 40866459053](https://github.com/eltiootaku2020-cmyk/cardwaifu/actions/runs/40866459053). Esto valida el build y los tests del código versionado, no las copias de arte en un navegador, la carga de imágenes del usuario, el rendimiento en su PC ni Telegram en producción. La integración real con Telegram, el despliegue HTTPS, el token del bot y la persistencia en entorno alojado siguen sin validación.
