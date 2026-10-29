@@ -12,6 +12,7 @@ La dirección visual es 2D, usando ilustraciones PNG, fondos por bioma y efectos
 - [x] Añadir al Taller de cartas vinculación de PNG a una portadora, enemiga o fondo, con optimización y guardado local en IndexedDB (no sincroniza ni publica automáticamente).
 - [ ] Probar manualmente la galería del Taller en IndexedDB, migración desde `localStorage`, exportación/restauración de tarjetas+prompts y exportación/restauración independiente de PNG enlazados (CI pasó en el commit `228c39f`; ambas copias están limitadas a 24 MB).
 - [ ] Probar con PNG real los retratos de espalda del protagonista (mujer/hombre), el reemplazo de la silueta CSS y el fallback cuando la imagen falta; CI pasó en el commit `228c39f`, la prueba manual sigue pendiente.
+- [ ] Probar arte frontal de carta (`character:<id>:card`) en la colección, fallback al retrato si el PNG de carta falla y copia/restauración del arte vinculado; el control del taller y el render se añadieron, queda pendiente CI del commit actual y prueba de navegador.
 - [ ] Añadir las ilustraciones finales del usuario a las entradas públicas del manifiesto y revisar el encuadre.
 - [ ] Medir fluidez en el PC del usuario y dentro de Telegram; no declarar la optimización completa antes de medir.
 - [ ] Completar el MVP jugable y verificar el recorrido de principio a fin según los criterios inferiores.
