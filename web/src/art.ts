@@ -4,14 +4,15 @@ type ArtManifest = {
   characters?: Record<string, ArtEntry>;
   enemies?: Record<string, ArtEntry>;
   scenes?: Record<string, string | null>;
+  protagonists?: Record<string, string | null>;
 };
 type StoredArt = { target: string; blob: Blob; updatedAt: number };
 
 const ART_DB_NAME = "umbra-art-assets-v1";
 const ART_STORE = "artworks";
 const MAX_ART_BYTES = 8 * 1024 * 1024;
-const validTarget = /^(character|enemy|scene):[a-z0-9-]+:(portrait|card|background)$/;
-let manifest: ArtManifest = { version: 1, characters: {}, enemies: {}, scenes: {} };
+const validTarget = /^((character|enemy|scene):[a-z0-9-]+:(portrait|card|background)|protagonist:(mujer|hombre):portrait)$/;
+let manifest: ArtManifest = { version: 1, characters: {}, enemies: {}, scenes: {}, protagonists: {} };
 const uploadedArtUrls = new Map<string, string>();
 
 function safeAssetPath(value: unknown): string | undefined {
@@ -214,6 +215,13 @@ export async function importLocalArtBackup(value: unknown): Promise<number> {
 }
 
 
+export function getProtagonistPortrait(gender: string | undefined): string | undefined {
+  const key = gender?.trim().toLowerCase();
+  if (key !== "mujer" && key !== "hombre") return undefined;
+  return uploadedArtUrls.get(`protagonist:${key}:portrait`)
+    ?? safeAssetPath(manifest.protagonists?.[key]);
+}
+
 export function getCharacterPortrait(id: string | undefined): string | undefined {
   if (!id) return undefined;
   return uploadedArtUrls.get(`character:${id.trim().toLowerCase()}:portrait`)
@@ -252,6 +260,7 @@ export async function loadArtManifest(): Promise<void> {
             characters: parsed.characters && typeof parsed.characters === "object" ? parsed.characters : {},
             enemies: parsed.enemies && typeof parsed.enemies === "object" ? parsed.enemies : {},
             scenes: parsed.scenes && typeof parsed.scenes === "object" ? parsed.scenes : {},
+            protagonists: parsed.protagonists && typeof parsed.protagonists === "object" ? parsed.protagonists : {},
           };
         }
       }
