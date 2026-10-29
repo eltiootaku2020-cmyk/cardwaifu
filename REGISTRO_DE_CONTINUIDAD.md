@@ -28,7 +28,7 @@ Actualizado: 2026-10-29
 - Sistema de manifiesto para retratos/fondos PNG, reemplazos visuales si el arte falta y modo de efectos ligeros.
 - Elección del protagonista persistida en SQLite.
 - Simulador estadístico reproducible recién añadido en `src/game/combat-sim.ts`, pruebas en `src/game/combat-sim.test.ts` y comando interno `npm run simulate:combat`.
-- Taller de cartas: galería migrada a IndexedDB con compatibilidad de migración desde localStorage y exportar/restaurar copia JSON; pendiente CI actual y prueba manual. La copia incluye galería/prompts, no arte enlazado.
+- Taller de cartas: galería migrada a IndexedDB, con migración desde localStorage, exportación/restauración de la galería, y exportación/restauración independiente del arte enlazado (métodos en `web/src/art.ts`, botones en `web/src/card-studio.ts`). Pendiente CI del último commit y prueba manual en navegador. Cada copia se limita a 24 MB; conservar también los PNG originales fuera del navegador.
 - Capítulo 1: se añadió marcador persistente `chapter-1-return`, endpoint `POST /api/chapter/return`, botón que aparece tras derrotar al jefe y regresar a Aldea Bruma, y prueba para exigir jefe/villa e impedir cierres duplicados; pendiente CI actual y recorrido manual.
 - Inconsistencia a resolver antes de dar por completa la historia de compañera: el lore confirmado la llama **Pivy**, goblin portadora de Arturo S; el catálogo implementado usa el identificador/display `tiny` / **Tiny, la exploradora** y ese ID no forma parte de la primera invocación. No renombrar IDs persistidos ni cambiar la mecánica de compañeras sin definir una migración y revisar el flujo.
 
@@ -40,7 +40,7 @@ Actualizado: 2026-10-29
 
 ## Pendiente o no verificable desde GitHub
 
-1. Confirmar el resultado final de CI del último commit; corregir cualquier fallo antes de marcar el Taller de cartas o el cierre del capítulo como verificados.
+1. Confirmar CI del último commit, incluyendo los controles nuevos de copia de arte enlazado; corregir cualquier fallo antes de declarar el Taller verificado.
 2. Hacer un recorrido end-to-end del capítulo 1, incluyendo regresar por rutas conectadas a Aldea Bruma y registrar el cierre. Después implementar diálogos/decisiones sin canonizar la trama pendiente de Medusa.
 3. Completar catálogo de cartas, duplicados, mejoras, botín, apoyos, Corazones Heroicos y Ruptura de Límite.
 4. Ampliar patrones enemigos y medir la curva de dificultad; comparar protagonista S con SR.
@@ -51,7 +51,7 @@ Actualizado: 2026-10-29
 
 ## Siguiente acción permitida
 
-Consultar la ejecución CI del último commit de `work/png-2d-lightweight-mvp`. Si pasa, registrar el cierre del capítulo como validado por CI, no como probado en navegador. Si falla, usar los logs para corregirlo en la misma rama. Después ejecutar un recorrido manual y abordar los diálogos/decisiones del capítulo; mantener la historia de Medusa como propuesta no aprobada.
+Consultar la ejecución [40865282018](https://github.com/eltiootaku2020-cmyk/cardwaifu/actions/runs/40865282018) y el resultado CI del último commit de `work/png-2d-lightweight-mvp`. Si pasa, registrar el cierre del capítulo como validado por CI, no como probado en navegador. Si falla, usar los logs para corregirlo en la misma rama. Después ejecutar un recorrido manual y abordar los diálogos/decisiones del capítulo; mantener la historia de Medusa como propuesta no aprobada.
 
 ## Regla de cierre
 
