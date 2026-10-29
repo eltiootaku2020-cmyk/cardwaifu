@@ -3,6 +3,7 @@ import "./battle-vfx.css";
 import { installBattleVfx } from "./battle-vfx.js";
 import { openCardStudio } from "./card-studio.js";
 import { getCharacterPortrait, getEnemyPortrait, getSceneBackground, loadArtManifest } from "./art.js";
+import { PROLOGUE } from "./story.js";
 
 declare global {
   interface Window {
@@ -198,6 +199,10 @@ function render() {
   root.innerHTML = `<header class="top"><div class="brand"><span class="logo">✦</span><div><b>UMBRA</b><small>CARD FRONTIER</small></div></div><span class="resource">◈ Alma <b>${battle?.alma ?? resources.alma}</b> · Ánima <b>${battle?.player.anima ?? resources.anima}</b> · Nv. <b>${rewards.level}</b> · XP <b>${rewards.xp}</b></span><button type="button" class="visual-toggle" id="visual-toggle" aria-pressed="${visualMode === "reduced"}" title="Cambiar nivel de animaciones">${visualMode === "reduced" ? "⚡ Efectos ligeros" : "✦ Efectos completos"}</button></header>
   <main>
     <section class="welcome panel ${summonReveal ? "gacha-reveal" : ""}">${summonReveal ? `<div class="summon-ceremony" aria-live="polite"><span class="summon-sigil">✦</span><strong>LA CARTA HA ELEGIDO</strong><small>VÍNCULO ESTABLECIDO</small></div>` : ""}<p class="eyebrow">CRÓNICAS · CAPÍTULO 01</p><h1>Las leyendas<br>despiertan.</h1><p class="muted">Explora ruinas, crea vínculos y rescata epopeyas de eras olvidadas.</p>
+      <details class="prologue">
+        <summary>Leer prólogo y conocer a tu compañera</summary>
+        <div class="prologue-lines">${PROLOGUE.map(line => `<section class="prologue-line"><strong>${escapeHtml(line.title)}</strong><p>${escapeHtml(line.text)}</p></section>`).join("")}</div>
+      </details>
       <div class="gender"><button data-gender="Mujer" class="${gender === "Mujer" ? "selected" : ""}" aria-pressed="${gender === "Mujer"}">Protagonista mujer</button><button data-gender="Hombre" class="${gender === "Hombre" ? "selected" : ""}" aria-pressed="${gender === "Hombre"}">Protagonista hombre</button></div>
       <p class="muted profile-note" aria-live="polite">${escapeHtml(profileNote)}</p>
       <div class="backview" data-gender="${gender.toLowerCase()}"><div class="halo"></div><div class="figure"><div class="head"></div><div class="body"></div><div class="cape"></div></div><span>VISTA DESDE ATRÁS · ROSTRO OCULTO</span></div>
