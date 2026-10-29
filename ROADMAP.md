@@ -11,6 +11,7 @@ La dirección visual es 2D, usando ilustraciones PNG, fondos por bioma y efectos
 - [x] Guardar la elección de protagonista en SQLite mediante endpoint de perfil; el test de persistencia pasa en CI.
 - [x] Añadir al Taller de cartas vinculación de PNG a una portadora, enemiga o fondo, con optimización y guardado local en IndexedDB (no sincroniza ni publica automáticamente).
 - [ ] Verificar la galería del Taller en IndexedDB, migración desde `localStorage`, exportación/restauración de tarjetas+prompts, y exportación/restauración independiente de PNG enlazados al juego (ambas copias limitadas a 24 MB; pendientes CI final y prueba manual).
+- [ ] Verificar retratos PNG del protagonista (mujer/hombre) mediante el Taller, el reemplazo de la silueta CSS y el fallback cuando la imagen falta; el objetivo ya está conectado, pero requiere CI y prueba manual con PNG real.
 - [ ] Añadir las ilustraciones finales del usuario a las entradas públicas del manifiesto y revisar el encuadre.
 - [ ] Medir fluidez en el PC del usuario y dentro de Telegram; no declarar la optimización completa antes de medir.
 - [ ] Completar el MVP jugable y verificar el recorrido de principio a fin según los criterios inferiores.
@@ -51,7 +52,7 @@ La dirección visual es 2D, usando ilustraciones PNG, fondos por bioma y efectos
 ## Progresión
 - [x] Equipamiento inicial: arma, equipo defensivo, accesorio y apoyo objeto, persistidos y con bonificaciones aplicadas al combate.
 - [ ] Inventario de botín, desbloqueo de equipo y ranuras avanzadas.
-- [ ] Heroínas de apoyo y Corazones Heroicos.
+- [ ] Heroínas de apoyo y Corazones Heroicos; Pivy está identificada en el catálogo, pero aún falta integrarla como compañera de apoyo funcional sin convertirla en la invocación aleatoria inicial.
 - [ ] Nivel 100, Ruptura de Límite y materiales.
 - [ ] Dark, redención, cacerías, eventos y duplicados.
 - [ ] Vestiduras fusionadas con epopeyas, cosméticos y variantes jugables diferenciadas.
