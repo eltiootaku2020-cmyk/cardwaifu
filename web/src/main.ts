@@ -82,7 +82,7 @@ applyVisualMode();
 let note = "Elige tu vínculo y entra en el primer encuentro.";
 let worldNote = "Cargando rutas de la expedición…";
 const heroes = [
-  { id: "tiny", name: "Tiny, la exploradora", rarity: "S", stage: "Lily", icon: "⌁", role: "Exploradora · Arturo", desc: "Una goblin que protege a su pueblo y conoce cada sendero.", color: "teal" },
+  { id: "tiny", name: "Pivy, la exploradora", rarity: "S", stage: "Lily", icon: "⌁", role: "Exploradora · Arturo", desc: "Pivy, una goblin que protege a su pueblo y conoce cada sendero.", color: "teal" },
   { id: "elizabeth", name: "Elizabeth", rarity: "SR", stage: "Hero", icon: "♛", role: "Portadora de Arturo", desc: "Una noble que carga con el peso de mantener unida su ciudad.", color: "blue" },
   { id: "guardiana-bretana", name: "Guardiana de Bretaña", rarity: "SR", stage: "Hero", icon: "✧", role: "Protectora", desc: "Canaliza la epopeya mediante defensa y contraataques.", color: "gold" },
   { id: "cazadora-musgo", name: "Cazadora del Musgo", rarity: "R", stage: "Lily", icon: "➶", role: "Arquera", desc: "Rastrea amenazas y encuentra rutas ocultas.", color: "red" }
