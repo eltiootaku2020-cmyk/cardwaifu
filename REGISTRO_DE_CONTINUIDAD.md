@@ -95,9 +95,9 @@ No integrar el PR ni declarar el programa completo por la existencia de código.
 
 ## Estado aceptado por CI — 29-10-2026
 
-- Head de trabajo comprobado: `1d4b79a21e3a598a18425066a16fda149ddd9b83`.
-- Build, typecheck y suite automatizada pasan en [run 40868821188](https://github.com/eltiootaku2020-cmyk/cardwaifu/actions/runs/40868821188).
-- El README enlaza al ZIP de la rama de trabajo; el lanzador verifica Node 20+, prepara dependencias solo cuando faltan y espera hasta 30 segundos al servidor local antes de abrir el navegador.
+- Head de trabajo comprobado antes de esta actualización documental: `2064bcd08a21c5c85a7106ea0cfd3e3a2cfdf78a`.
+- Build, typecheck y suite automatizada pasan en [run 40868966055](https://github.com/eltiootaku2020-cmyk/cardwaifu/actions/runs/40868966055).
+- El README enlaza al ZIP de la rama de trabajo; el lanzador verifica Node 20+, prepara dependencias solo cuando faltan y espera hasta 30 segundos al servidor local antes de abrir el navegador. Debe probarse manualmente en Windows real.
 - Pivy se muestra como compañera desde el inicio. La animación PNG de baja intensidad se desactiva con la preferencia de efectos ligeros o movimiento reducido.
 - Aún no hay PNG finales en el manifiesto; su integración se acepta después de que el usuario aporte ilustraciones y se revisen los fallbacks.
 - Windows real, navegador con arte real, rendimiento del PC y Telegram desplegado continúan como bloqueos de aceptación manual. No declarar UMBRA completo ni fusionar el PR solo por CI verde.
