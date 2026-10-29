@@ -218,3 +218,14 @@ html[data-umbra-effects="reduced"] .owned-card { animation:none !important; }
 .companion-info>span{font-size:10px;color:#ffdf9d;font-weight:800}
 .companion-info p{margin:2px 0 0;color:var(--muted);font-size:11px;line-height:1.5}
 @media(max-width:380px){.companion-strip{grid-template-columns:62px minmax(0,1fr);gap:10px;padding:10px}.companion-art{width:62px;height:82px}.companion-info strong{font-size:13px}}
+
+
+/* Restrained PNG idle motion: only current/companion art moves, never the entire collection. */
+@keyframes umbra-png-breathe{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(0,-2px,0)}}
+.unit-portrait .portrait-art,.companion-art img,.backview .protagonist-art{animation:umbra-png-breathe 4.8s ease-in-out infinite;will-change:transform}
+html[data-umbra-effects="reduced"] .unit-portrait .portrait-art,
+html[data-umbra-effects="reduced"] .companion-art img,
+html[data-umbra-effects="reduced"] .backview .protagonist-art{animation:none!important;will-change:auto}
+@media(prefers-reduced-motion:reduce){
+  .unit-portrait .portrait-art,.companion-art img,.backview .protagonist-art{animation:none!important;will-change:auto}
+}
