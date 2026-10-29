@@ -2,7 +2,7 @@ import "./style.css";
 import "./battle-vfx.css";
 import { installBattleVfx } from "./battle-vfx.js";
 import { openCardStudio } from "./card-studio.js";
-import { getCharacterPortrait, getEnemyPortrait, getProtagonistPortrait, getSceneBackground, loadArtManifest } from "./art.js";
+import { getCharacterPortrait, getCharacterCardArt, getEnemyPortrait, getProtagonistPortrait, getSceneBackground, loadArtManifest } from "./art.js";
 import { PROLOGUE } from "./story.js";
 
 declare global {
@@ -72,10 +72,17 @@ function applyVisualMode(): void {
 function bindArtworkFallbacks(container: ParentNode): void {
   container.querySelectorAll<HTMLImageElement>("img[data-art-image]").forEach(image => {
     const fallback = () => {
+      const fallbackUrl = image.dataset.artFallback;
+      if (fallbackUrl && image.dataset.artFallbackTried !== "true") {
+        image.dataset.artFallbackTried = "true";
+        image.removeAttribute("data-art-fallback");
+        image.src = fallbackUrl;
+        return;
+      }
       image.closest<HTMLElement>(".has-art")?.classList.remove("has-art");
       image.remove();
     };
-    image.addEventListener("error", fallback, { once: true });
+    image.addEventListener("error", fallback);
     if (image.complete && image.naturalWidth === 0) fallback();
   });
 }
@@ -156,6 +163,8 @@ function renderWorld(): string {
         const rarity = hero?.rarity ?? "—";
         const stage = hero?.stage ?? "Lily";
         const portrait = getCharacterPortrait(id);
+        const cardArt = getCharacterCardArt(id);
+        const collectionArt = cardArt ?? portrait;
         const flipped = flippedCards.has(id);
         if (flipped) {
           return `<article class="owned-card owned-card-back" data-rarity="${escapeHtml(rarity)}">
@@ -171,7 +180,7 @@ function renderWorld(): string {
           </article>`;
         }
         return `<article class="owned-card" data-rarity="${escapeHtml(rarity)}">
-          <div class="owned-card-art ${portrait ? "has-art" : ""}">${portrait ? `<img data-art-image src="${escapeHtml(portrait)}" alt="${escapeHtml("Ilustración de " + name)}" loading="lazy" decoding="async">` : `<span aria-hidden="true">✦</span>`}
+          <div class="owned-card-art ${collectionArt ? "has-art" : ""}">${collectionArt ? `<img data-art-image ${cardArt && portrait && cardArt !== portrait ? `data-art-fallback="${escapeHtml(portrait)}"` : ""} src="${escapeHtml(collectionArt)}" alt="${escapeHtml("Ilustración de " + name)}" loading="lazy" decoding="async">` : `<span aria-hidden="true">✦</span>`}
             <span class="rarity-pill">${escapeHtml(rarity)}</span><span class="copy-count">×${entry.copies}</span>
           </div>
           <div class="owned-card-body"><h3>${escapeHtml(name)}</h3><p class="owned-class">${escapeHtml(hero?.heroClass ?? "Clase pendiente")} · ${escapeHtml(stage)}</p><p class="owned-description">${escapeHtml(hero?.description ?? "No hay una ficha disponible para esta carta.")}</p>
